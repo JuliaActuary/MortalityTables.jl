@@ -1,0 +1,10 @@
+name = "MortalityTables"
+uuid = "0dc2de20-ade9-11e8-3ede-5793edc5b811"
+authors = ["Alec Loudenback <alecloudenback@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
+HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+XMLDict = "228000da-037f-5747-90a9-8195ccbf91a5"
