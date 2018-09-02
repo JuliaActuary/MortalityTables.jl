@@ -1,4 +1,26 @@
 import DataStructures
+
+include("XTbMl.jl")
+
+# Load Available Tables
+table_dir = joinpath(dirname(pathof(MortalityTables)), "tables", "SOA")
+
+function Tables()
+    tables = Dict()
+    for (root, dirs, files) in walkdir(table_dir)
+        for file in files
+
+            if basename(file)[end-3:end] == ".xml"
+                tbl, name = loadXTbMLTable(joinpath(root,file))
+                tables[name] = tbl
+            end
+        end
+    end
+    return tables
+end
+
+### PARSE TABLES NAMES
+
 cso_vbt_2001 = DataStructures.OrderedDict(
     "set" => r"^(\d*\s\w{0,3})",
     "structure" => r"((Select|Ulitmate).*)(?=-)",

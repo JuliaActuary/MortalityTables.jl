@@ -1,9 +1,8 @@
 import Test
 import MortalityTables
 
-cso_path = joinpath(raw"C:\Users\alecl\AppData\Local\Julia-1.0.0\MortalityTables\tables\t1076.xml")
-cso = MortalityTables.loadXTbMLTable(cso_path)
-
+tables = MortalityTables.Tables()
+cso = tables["2001 CSO Super Preferred Select and Ultimate - Male Nonsmoker, ANB"]
 
 
 Test.@test MortalityTables.qx(cso,35,1) == .00037
