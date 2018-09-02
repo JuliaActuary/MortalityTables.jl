@@ -8,16 +8,16 @@ Currently Available: `2001 CSO` and `2001 VBT`
 ### Usage Example
 
 ```julia
-import MortalityTables
+import MortalityTables as mt
 
-tables = MortalityTables.Tables()
+tables = mt.Tables()
 cso = tables["2001 CSO Super Preferred Select and Ultimate - Male Nonsmoker, ANB"]
 
 
-MortalityTables.qx(cso,35,1) # == .00037
-MortalityTables.qx(cso,35,61) # == .26719
-MortalityTables.qx(cso,95) # == .26719
-MortalityTables.qx(cso,35,95) # == missing (table doesn't extend that far)
+mt.qx(cso,35,1) # == .00037
+mt.qx(cso,35,61) # == .26719
+mt.qx(cso,95) # == .26719
+mt.qx(cso,35,95) # == missing (table doesn't extend that far)
 ```
 
 
