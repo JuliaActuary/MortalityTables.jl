@@ -3,8 +3,8 @@ import DataStructures
 include("XTbMl.jl")
 
 # Load Available Tables
-# table_dir = joinpath(dirname(pathof(MortalityTables)), "tables", "SOA")
-table_dir = joinpath(raw"C:\Users\alecl\AppData\Local\Julia-1.0.0\MortalityTables\src\tables\SOA")
+table_dir = joinpath(dirname(pathof(MortalityTables)), "tables", "SOA")
+
 function Tables()
     tables = Dict()
     for (root, dirs, files) in walkdir(table_dir)
