@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<XTbML>
+  <ContentClassification>
+    <TableIdentity>43</TableIdentity>
+    <ProviderDomain>soa.org</ProviderDomain>
+    <ProviderName>Robert J. Johansen, FSA</ProviderName>
+    <TableReference>“Report of the Task Force on Smoker/Nonsmoker Mortality”, Transactions Society of Actuaries - 1982 Reports, Society of Actuaries (1982) p. 382. Accessed: February, 2013 from http://www.soa.org/library/research/transactions-reports-of-mortality-moribidity-and-experience/1980-89/1982/january/tsr8210.pdf, p. 40</TableReference>
+    <ContentType tc="85">CSO / CET</ContentType>
+    <TableName>1980 CSO - Male Nonsmoker, ALB</TableName>
+    <TableDescription>1980 Commissioners Standard Ordinary (CSO) - Male Nonsmoker. Basis: Age Last Birthday. Minimum Age: 15.  Maximum Age: 99</TableDescription>
+    <Comments>Study Data: The exposure period for the underlying data is from Society of Actuary (SOA) data submissions for 1970 through 1975 policy anniversaries. All war deaths were excluded. Unlike the 1958 Commissioners Standard Ordinary (CSO) table, policies issued on a nonmedical basis were included due to the trend in writing larger proportions of nonmedical business and to provide adequate data for a separate female table. Methodology: Derived from Smoker/Nonsmoker 1980 CSO Tables on age nearest birthday basis (See SOA Table Identities 44 and 46) in the same way that the 1980 CSO age nearest birthday basis tables were converted to and age last birthday basis: [q(x) + (1-q(x))*q(x+1)]/[2-q(x)] . A uniform distribution of deaths is assumed. Data Transcription Errors Detected: 2007. Data Corrected and Certified: 02/2013. As specified in The Actuary of January 1987, page 3, there is a discrepancy between Appendix E and Appendix F rates for ANB Male Nonsmoker age 71 in the TSA 1982 Reports. This Table 43 shows the ALB rates as derived from the Appendix E rates. Differences are small: Appendix E rates are 36.44 and 40.39 while Appendix F rates are 36.73 and 40.70. NAIC has agreed that either values are acceptable.</Comments>
+    <KeyWord>Aggregate</KeyWord>
+    <KeyWord>CSO/CET</KeyWord>
+    <KeyWord>United States of America</KeyWord>
+  </ContentClassification>
+  <Table>
+    <MetaData>
+      <ScalingFactor>0</ScalingFactor>
+      <DataType tc="2">Floating Point</DataType>
+      <Nation tc="1">United States of America</Nation>
+      <TableDescription>1980 Commissioners Standard Ordinary (CSO) - Male Nonsmoker. Basis: Age Last Birthday. Minimum Age: 15.  Maximum Age: 99</TableDescription>
+      <AxisDef id="Age">
+        <ScaleType tc="3">Age</ScaleType>
+        <AxisName>Age</AxisName>
+        <MinScaleValue>15</MinScaleValue>
+        <MaxScaleValue>99</MaxScaleValue>
+        <Increment>1</Increment>
+      </AxisDef>
+    </MetaData>
+    <Values>
+      <Axis>
+        <Y t="15">0.00136</Y>
+        <Y t="16">0.00148</Y>
+        <Y t="17">0.00157</Y>
+        <Y t="18">0.00163</Y>
+        <Y t="19">0.00167</Y>
+        <Y t="20">0.00168</Y>
+        <Y t="21">0.00166</Y>
+        <Y t="22">0.00163</Y>
+        <Y t="23">0.00159</Y>
+        <Y t="24">0.00155</Y>
+        <Y t="25">0.00150</Y>
+        <Y t="26">0.00147</Y>
+        <Y t="27">0.00145</Y>
+        <Y t="28">0.00144</Y>
+        <Y t="29">0.00144</Y>
+        <Y t="30">0.00145</Y>
+        <Y t="31">0.00148</Y>
+        <Y t="32">0.00152</Y>
+        <Y t="33">0.00158</Y>
+        <Y t="34">0.00165</Y>
+        <Y t="35">0.00173</Y>
+        <Y t="36">0.00182</Y>
+        <Y t="37">0.00194</Y>
+        <Y t="38">0.00207</Y>
+        <Y t="39">0.00221</Y>
+        <Y t="40">0.00238</Y>
+        <Y t="41">0.00256</Y>
+        <Y t="42">0.00275</Y>
+        <Y t="43">0.00296</Y>
+        <Y t="44">0.00319</Y>
+        <Y t="45">0.00345</Y>
+        <Y t="46">0.00373</Y>
+        <Y t="47">0.00403</Y>
+        <Y t="48">0.00436</Y>
+        <Y t="49">0.00472</Y>
+        <Y t="50">0.00513</Y>
+        <Y t="51">0.00560</Y>
+        <Y t="52">0.00614</Y>
+        <Y t="53">0.00676</Y>
+        <Y t="54">0.00745</Y>
+        <Y t="55">0.00822</Y>
+        <Y t="56">0.00906</Y>
+        <Y t="57">0.00995</Y>
+        <Y t="58">0.01094</Y>
+        <Y t="59">0.01205</Y>
+        <Y t="60">0.01329</Y>
+        <Y t="61">0.01467</Y>
+        <Y t="62">0.01626</Y>
+        <Y t="63">0.01806</Y>
+        <Y t="64">0.02006</Y>
+        <Y t="65">0.02225</Y>
+        <Y t="66">0.02462</Y>
+        <Y t="67">0.02716</Y>
+        <Y t="68">0.02992</Y>
+        <Y t="69">0.03298</Y>
+        <Y t="70">0.03644</Y>
+        <Y t="71">0.04039</Y>
+        <Y t="72">0.04495</Y>
+        <Y t="73">0.05011</Y>
+        <Y t="74">0.05578</Y>
+        <Y t="75">0.06184</Y>
+        <Y t="76">0.06824</Y>
+        <Y t="77">0.07493</Y>
+        <Y t="78">0.08195</Y>
+        <Y t="79">0.08952</Y>
+        <Y t="80">0.09788</Y>
+        <Y t="81">0.10725</Y>
+        <Y t="82">0.11782</Y>
+        <Y t="83">0.12954</Y>
+        <Y t="84">0.14218</Y>
+        <Y t="85">0.15545</Y>
+        <Y t="86">0.16918</Y>
+        <Y t="87">0.18316</Y>
+        <Y t="88">0.19733</Y>
+        <Y t="89">0.21189</Y>
+        <Y t="90">0.22705</Y>
+        <Y t="91">0.24316</Y>
+        <Y t="92">0.26082</Y>
+        <Y t="93">0.28175</Y>
+        <Y t="94">0.30983</Y>
+        <Y t="95">0.35186</Y>
+        <Y t="96">0.42099</Y>
+        <Y t="97">0.54100</Y>
+        <Y t="98">0.74515</Y>
+        <Y t="99">1.00000</Y>
+      </Axis>
+    </Values>
+  </Table>
+</XTbML>

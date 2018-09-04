@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<XTbML>
+  <ContentClassification>
+    <TableIdentity>41</TableIdentity>
+    <ProviderDomain>soa.org</ProviderDomain>
+    <ProviderName>Robert J. Johansen</ProviderName>
+    <TableReference>Committee to Recommend New Mortality Tables for Valuation, “1980 CSO and 1980 CET Mortality Tables on an Age Last Birthday Basis”, Transactions Society of Actuaries Vol.  XXXIII, Society of Actuaries (1981) p. 673. Accessed: February, 2013 from http://www.soa.org/Library/Research/Transactions-Of-Society-Of-Actuaries/1981/January/tsa81v3324.pdf, p. 3.</TableReference>
+    <ContentType tc="85">CSO/CET</ContentType>
+    <TableName>1980 CSO – Male, ALB</TableName>
+    <TableDescription>1980 Commissioners Standard Ordinary (CSO) – Male. Basis: Age Last Birthday. Minimum Age: 0. Maximum Age: 99</TableDescription>
+    <Comments>Study Data: Derived from corresponding age nearest birthday tables (See SOA Table Identities 36 and 42). Methodology: The following formula was employed to convert the age nearest birthday rates to an age last birthday basis:  [q(x) + (1-q(x))*q(x+1)]/[2-q(x)] . A uniform distribution of deaths is assumed. Data Transcription Errors: None. Data Certified: 02/2013</Comments>
+    <KeyWord>Aggregate</KeyWord>
+    <KeyWord>CSO/CET</KeyWord>
+    <KeyWord>United States of America</KeyWord>
+  </ContentClassification>
+  <Table>
+    <MetaData>
+      <ScalingFactor>0</ScalingFactor>
+      <DataType tc="2">Floating Point</DataType>
+      <Nation tc="1">United States of America</Nation>
+      <TableDescription>1980 Commissioners Standard Ordinary (CSO) – Male. Basis: Age Last Birthday. Minimum Age: 0. Maximum Age: 99</TableDescription>
+      <AxisDef id="Age">
+        <ScaleType tc="3">Age</ScaleType>
+        <AxisName>Age</AxisName>
+        <MinScaleValue>0</MinScaleValue>
+        <MaxScaleValue>99</MaxScaleValue>
+        <Increment>1</Increment>
+      </AxisDef>
+    </MetaData>
+    <Values>
+      <Axis>
+        <Y t="0">0.00263</Y>
+        <Y t="1">0.00103</Y>
+        <Y t="2">0.00099</Y>
+        <Y t="3">0.00097</Y>
+        <Y t="4">0.00093</Y>
+        <Y t="5">0.00088</Y>
+        <Y t="6">0.00083</Y>
+        <Y t="7">0.00078</Y>
+        <Y t="8">0.00075</Y>
+        <Y t="9">0.00074</Y>
+        <Y t="10">0.00075</Y>
+        <Y t="11">0.00081</Y>
+        <Y t="12">0.00092</Y>
+        <Y t="13">0.00107</Y>
+        <Y t="14">0.00124</Y>
+        <Y t="15">0.00142</Y>
+        <Y t="16">0.00159</Y>
+        <Y t="17">0.00172</Y>
+        <Y t="18">0.00182</Y>
+        <Y t="19">0.00188</Y>
+        <Y t="20">0.00190</Y>
+        <Y t="21">0.00190</Y>
+        <Y t="22">0.00188</Y>
+        <Y t="23">0.00184</Y>
+        <Y t="24">0.00180</Y>
+        <Y t="25">0.00175</Y>
+        <Y t="26">0.00172</Y>
+        <Y t="27">0.00171</Y>
+        <Y t="28">0.00170</Y>
+        <Y t="29">0.00172</Y>
+        <Y t="30">0.00175</Y>
+        <Y t="31">0.00180</Y>
+        <Y t="32">0.00187</Y>
+        <Y t="33">0.00195</Y>
+        <Y t="34">0.00205</Y>
+        <Y t="35">0.00217</Y>
+        <Y t="36">0.00232</Y>
+        <Y t="37">0.00249</Y>
+        <Y t="38">0.00268</Y>
+        <Y t="39">0.00290</Y>
+        <Y t="40">0.00315</Y>
+        <Y t="41">0.00342</Y>
+        <Y t="42">0.00371</Y>
+        <Y t="43">0.00403</Y>
+        <Y t="44">0.00437</Y>
+        <Y t="45">0.00473</Y>
+        <Y t="46">0.00512</Y>
+        <Y t="47">0.00553</Y>
+        <Y t="48">0.00597</Y>
+        <Y t="49">0.00646</Y>
+        <Y t="50">0.00700</Y>
+        <Y t="51">0.00763</Y>
+        <Y t="52">0.00833</Y>
+        <Y t="53">0.00913</Y>
+        <Y t="54">0.01001</Y>
+        <Y t="55">0.01096</Y>
+        <Y t="56">0.01197</Y>
+        <Y t="57">0.01304</Y>
+        <Y t="58">0.01418</Y>
+        <Y t="59">0.01542</Y>
+        <Y t="60">0.01680</Y>
+        <Y t="61">0.01836</Y>
+        <Y t="62">0.02012</Y>
+        <Y t="63">0.02209</Y>
+        <Y t="64">0.02427</Y>
+        <Y t="65">0.02662</Y>
+        <Y t="66">0.02913</Y>
+        <Y t="67">0.03179</Y>
+        <Y t="68">0.03465</Y>
+        <Y t="69">0.03781</Y>
+        <Y t="70">0.04137</Y>
+        <Y t="71">0.04543</Y>
+        <Y t="72">0.05008</Y>
+        <Y t="73">0.05534</Y>
+        <Y t="74">0.06110</Y>
+        <Y t="75">0.06725</Y>
+        <Y t="76">0.07370</Y>
+        <Y t="77">0.08037</Y>
+        <Y t="78">0.08732</Y>
+        <Y t="79">0.09476</Y>
+        <Y t="80">0.10294</Y>
+        <Y t="81">0.11209</Y>
+        <Y t="82">0.12241</Y>
+        <Y t="83">0.13384</Y>
+        <Y t="84">0.14612</Y>
+        <Y t="85">0.15898</Y>
+        <Y t="86">0.17221</Y>
+        <Y t="87">0.18573</Y>
+        <Y t="88">0.19953</Y>
+        <Y t="89">0.21369</Y>
+        <Y t="90">0.22843</Y>
+        <Y t="91">0.24411</Y>
+        <Y t="92">0.26143</Y>
+        <Y t="93">0.28213</Y>
+        <Y t="94">0.30997</Y>
+        <Y t="95">0.35186</Y>
+        <Y t="96">0.42099</Y>
+        <Y t="97">0.54100</Y>
+        <Y t="98">0.74515</Y>
+        <Y t="99">1.00000</Y>
+      </Axis>
+    </Values>
+  </Table>
+</XTbML>

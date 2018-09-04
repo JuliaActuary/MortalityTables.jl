@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<XTbML>
+  <ContentClassification>
+    <TableIdentity>44</TableIdentity>
+    <ProviderDomain>soa.org</ProviderDomain>
+    <ProviderName>Robert J. Johansen</ProviderName>
+    <TableReference>“Report of the Task Force on Smoker/Nonsmoker Mortality”, Transactions Society of Actuaries - 1982 Reports, Society of Actuaries (1982) p. 376-377. Accessed: February, 2013 from http://www.soa.org/library/research/transactions-reports-of-mortality-moribidity-and-experience/1980-89/1982/january/tsr8210.pdf, p. 34-35</TableReference>
+    <ContentType tc="85">CSO / CET</ContentType>
+    <TableName>1980 CSO - Male Nonsmoker, ANB</TableName>
+    <TableDescription>1980 Commissioners Standard Ordinary (CSO) - Male Nonsmoker. Basis: Age Nearest Birthday. Minimum Age: 15. Maximum Age: 99</TableDescription>
+    <Comments>Study Data: Information regarding the mortality experience of smoker and nonsmoker insured lives consists primarily of mortality experience of five companies (State Mutual, Mutual Security Life. Phoenix Mutual, Home Life, and Sun Life of Canada) who published their nonsmoker mortality experience from 1973 thru 1978 either in The Record of the Society of Actuaries or the Transactions of the Society of Actuaries (TSA). This experience was supplemented by data from the 1979 Report of the Surgeon General, which is based on general population studies. The Task Force also received some unpublished data developed by the American Cancer Society for ages 65 and above. Methodology: The same loading margins developed to create the 1980 CSO tables (See SOA Table Identities 36 and 42) from the 1980 CSO Basic Tables (See SOA Table Identities 17 and 20) were used on the Smoker/Nonsmoker split tables. The final margin formula is:  [(.035 - .00025x + .000009x^2) / e(x)] where e(x) is the curtate expectation of life calculated from the Basic Table. The loaded qx values for age 92 and age 93 were retained while the tables were shortened by setting age 99 equal to unity. Shortening the loaded tables by one year is consistent with the methodology used on the 1941 CSO and the 1958 CSO Tables. Data Transcription Errors Detected: 02/2013. Data Corrected and Certified: 02/2013. As specified in The Actuary of January 1987, page 3, there is a discrepancy between Appendix E and Appendix F rates for ANB Male Nonsmoker age 71 in the TSA 1982 Reports. This Table 44 shows the ANB rate as derived from the Appendix E rates. Differences are small: Appendix E rate is 38.31 while Appendix F rate is 38.91. NAIC has agreed that either values are acceptable.</Comments>
+    <KeyWord>Aggregate</KeyWord>
+    <KeyWord>CSO/CET</KeyWord>
+    <KeyWord>United States of America</KeyWord>
+  </ContentClassification>
+  <Table>
+    <MetaData>
+      <ScalingFactor>0</ScalingFactor>
+      <DataType tc="2">Floating Point</DataType>
+      <Nation tc="1">United States of America</Nation>
+      <TableDescription>1980 Commissioners Standard Ordinary (CSO) - Male Nonsmoker. Basis: Age Nearest Birthday. Minimum Age: 15. Maximum Age: 99</TableDescription>
+      <AxisDef id="Age">
+        <ScaleType tc="3">Age</ScaleType>
+        <AxisName>Age</AxisName>
+        <MinScaleValue>15</MinScaleValue>
+        <MaxScaleValue>99</MaxScaleValue>
+        <Increment>1</Increment>
+      </AxisDef>
+    </MetaData>
+    <Values>
+      <Axis>
+        <Y t="15">0.00129</Y>
+        <Y t="16">0.00143</Y>
+        <Y t="17">0.00154</Y>
+        <Y t="18">0.00160</Y>
+        <Y t="19">0.00166</Y>
+        <Y t="20">0.00168</Y>
+        <Y t="21">0.00167</Y>
+        <Y t="22">0.00164</Y>
+        <Y t="23">0.00161</Y>
+        <Y t="24">0.00157</Y>
+        <Y t="25">0.00152</Y>
+        <Y t="26">0.00148</Y>
+        <Y t="27">0.00146</Y>
+        <Y t="28">0.00144</Y>
+        <Y t="29">0.00144</Y>
+        <Y t="30">0.00144</Y>
+        <Y t="31">0.00147</Y>
+        <Y t="32">0.00150</Y>
+        <Y t="33">0.00155</Y>
+        <Y t="34">0.00161</Y>
+        <Y t="35">0.00169</Y>
+        <Y t="36">0.00177</Y>
+        <Y t="37">0.00188</Y>
+        <Y t="38">0.00200</Y>
+        <Y t="39">0.00214</Y>
+        <Y t="40">0.00229</Y>
+        <Y t="41">0.00247</Y>
+        <Y t="42">0.00265</Y>
+        <Y t="43">0.00286</Y>
+        <Y t="44">0.00307</Y>
+        <Y t="45">0.00332</Y>
+        <Y t="46">0.00359</Y>
+        <Y t="47">0.00388</Y>
+        <Y t="48">0.00419</Y>
+        <Y t="49">0.00454</Y>
+        <Y t="50">0.00491</Y>
+        <Y t="51">0.00535</Y>
+        <Y t="52">0.00586</Y>
+        <Y t="53">0.00643</Y>
+        <Y t="54">0.00709</Y>
+        <Y t="55">0.00782</Y>
+        <Y t="56">0.00863</Y>
+        <Y t="57">0.00949</Y>
+        <Y t="58">0.01042</Y>
+        <Y t="59">0.01147</Y>
+        <Y t="60">0.01264</Y>
+        <Y t="61">0.01394</Y>
+        <Y t="62">0.01542</Y>
+        <Y t="63">0.01711</Y>
+        <Y t="64">0.01902</Y>
+        <Y t="65">0.02113</Y>
+        <Y t="66">0.02340</Y>
+        <Y t="67">0.02586</Y>
+        <Y t="68">0.02850</Y>
+        <Y t="69">0.03138</Y>
+        <Y t="70">0.03463</Y>
+        <Y t="71">0.03831</Y>
+        <Y t="72">0.04256</Y>
+        <Y t="73">0.04744</Y>
+        <Y t="74">0.05292</Y>
+        <Y t="75">0.05880</Y>
+        <Y t="76">0.06506</Y>
+        <Y t="77">0.07164</Y>
+        <Y t="78">0.07847</Y>
+        <Y t="79">0.08572</Y>
+        <Y t="80">0.09367</Y>
+        <Y t="81">0.10252</Y>
+        <Y t="82">0.11252</Y>
+        <Y t="83">0.12379</Y>
+        <Y t="84">0.13611</Y>
+        <Y t="85">0.14920</Y>
+        <Y t="86">0.16280</Y>
+        <Y t="87">0.17679</Y>
+        <Y t="88">0.19089</Y>
+        <Y t="89">0.20529</Y>
+        <Y t="90">0.22019</Y>
+        <Y t="91">0.23584</Y>
+        <Y t="92">0.25275</Y>
+        <Y t="93">0.27163</Y>
+        <Y t="94">0.29565</Y>
+        <Y t="95">0.32996</Y>
+        <Y t="96">0.38455</Y>
+        <Y t="97">0.48020</Y>
+        <Y t="98">0.65798</Y>
+        <Y t="99">1.00000</Y>
+      </Axis>
+    </Values>
+  </Table>
+</XTbML>

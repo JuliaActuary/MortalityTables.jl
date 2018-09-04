@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<XTbML>
+  <ContentClassification>
+    <TableIdentity>20</TableIdentity>
+    <ProviderDomain>soa.org</ProviderDomain>
+    <ProviderName>Roger Scott Lumsden</ProviderName>
+    <TableReference>“Report of the Special Committee to Recommend New Mortality Tables For Valuation”, Transactions of the Society of Actuaries, Vol. XXXIII, Society of Actuaries. (1981) p. 632. Accessed: February, 2013 from http://www.soa.org/Library/Research/Transactions-Of-Society-Of-Actuaries/1981/January/tsa81v3323.pdf, p. 20</TableReference>
+    <ContentType tc="85">CSO/CET</ContentType>
+    <TableName>1980 CSO Basic Table – Male, ANB</TableName>
+    <TableDescription>1980 Commissioners Standard Ordinary (CSO) Basic Table – Male (also referred to as Table K(M)). Basis: Age Nearest Birthday. Minimum Age: 0. Maximum Age: 100</TableDescription>
+    <Comments>Study Data: Prior to this table, an age setback approach was commonly used for female mortality for valuation purposes. However, a comparison of graduated mortality rates from the 1965-70 Ultimate Basic Tables showed that a single age setback produces rates that differ substantially by age. Adequate female mortality experience was felt available, giving greater credibility to the creation of separate female tables. The exposure period for the data is from Society of Actuary (SOA) data submissions for 1970 through 1975 policy anniversaries. All war deaths were excluded. Unlike the 1958 Commissioners Standard Ordinary (CSO) table, policies issued on a nonmedical basis were included due to the trend in writing larger proportions of nonmedical business and to provide adequate data for a separate female table. Methodology: As was done for the 1958 CSO Table, the first five policy years of experience were eliminated from the data (except for ages 0-4). This was done to reduce the effect on the mortality rates of differences in intercompany underwriting rules, nonmedical limits and suicide and incontestability provisions and, more importantly, to reflect conservatism by eliminating the favorable select experience of the early policy years. Quinquennial pivotal values were developed by summing deaths and exposures. Individual age rates were then developed by a Jenkins fifth-difference modified osculatory interpolation formula with fourth differences at the endpoints set equal to zero. The rates at ages 85 and over for the Male Table and ages 84 and over for the Female Table, were adjusted to grade smoothly into a rate of 1.000 at age 100. Data for age 0 was relatively scant thus rates for that age were developed by relating them to the age 1 rates. Ratios were determined from the 1958 CSO Table of the age 0 rates to the age 1 rates. After these adjustments, rates were further modified to produce actual-to-expected ratios of 1.000 for the entire table; the corresponding adjustment factors used were 1.0077 for the Male Table and 0.9993 for the Female Table. Data Transcription Errors: None. Data Certified: 02/2013</Comments>
+    <KeyWord>Aggregate</KeyWord>
+    <KeyWord>CSO/CET</KeyWord>
+    <KeyWord>United States of America</KeyWord>
+  </ContentClassification>
+  <Table>
+    <MetaData>
+      <ScalingFactor>0</ScalingFactor>
+      <DataType tc="2">Floating Point</DataType>
+      <Nation tc="1">United States of America</Nation>
+      <TableDescription>1980 Commissioners Standard Ordinary (CSO) Basic Table – Male. Basis: Age Nearest Birthday. Minimum Age: 0. Maximum Age: 100</TableDescription>
+      <AxisDef id="Age">
+        <ScaleType tc="3">Age</ScaleType>
+        <AxisName>Age</AxisName>
+        <MinScaleValue>0</MinScaleValue>
+        <MaxScaleValue>100</MaxScaleValue>
+        <Increment>1</Increment>
+      </AxisDef>
+    </MetaData>
+    <Values>
+      <Axis>
+        <Y t="0">0.00370</Y>
+        <Y t="1">0.00059</Y>
+        <Y t="2">0.00051</Y>
+        <Y t="3">0.00050</Y>
+        <Y t="4">0.00046</Y>
+        <Y t="5">0.00041</Y>
+        <Y t="6">0.00036</Y>
+        <Y t="7">0.00030</Y>
+        <Y t="8">0.00025</Y>
+        <Y t="9">0.00022</Y>
+        <Y t="10">0.00021</Y>
+        <Y t="11">0.00024</Y>
+        <Y t="12">0.00031</Y>
+        <Y t="13">0.00044</Y>
+        <Y t="14">0.00060</Y>
+        <Y t="15">0.00077</Y>
+        <Y t="16">0.00094</Y>
+        <Y t="17">0.00109</Y>
+        <Y t="18">0.00119</Y>
+        <Y t="19">0.00125</Y>
+        <Y t="20">0.00128</Y>
+        <Y t="21">0.00128</Y>
+        <Y t="22">0.00125</Y>
+        <Y t="23">0.00120</Y>
+        <Y t="24">0.00115</Y>
+        <Y t="25">0.00108</Y>
+        <Y t="26">0.00102</Y>
+        <Y t="27">0.00098</Y>
+        <Y t="28">0.00095</Y>
+        <Y t="29">0.00094</Y>
+        <Y t="30">0.00094</Y>
+        <Y t="31">0.00096</Y>
+        <Y t="32">0.00099</Y>
+        <Y t="33">0.00104</Y>
+        <Y t="34">0.00110</Y>
+        <Y t="35">0.00118</Y>
+        <Y t="36">0.00128</Y>
+        <Y t="37">0.00141</Y>
+        <Y t="38">0.00155</Y>
+        <Y t="39">0.00172</Y>
+        <Y t="40">0.00191</Y>
+        <Y t="41">0.00213</Y>
+        <Y t="42">0.00236</Y>
+        <Y t="43">0.00262</Y>
+        <Y t="44">0.00289</Y>
+        <Y t="45">0.00319</Y>
+        <Y t="46">0.00350</Y>
+        <Y t="47">0.00384</Y>
+        <Y t="48">0.00419</Y>
+        <Y t="49">0.00458</Y>
+        <Y t="50">0.00501</Y>
+        <Y t="51">0.00551</Y>
+        <Y t="52">0.00608</Y>
+        <Y t="53">0.00674</Y>
+        <Y t="54">0.00748</Y>
+        <Y t="55">0.00828</Y>
+        <Y t="56">0.00915</Y>
+        <Y t="57">0.01006</Y>
+        <Y t="58">0.01102</Y>
+        <Y t="59">0.01205</Y>
+        <Y t="60">0.01320</Y>
+        <Y t="61">0.01449</Y>
+        <Y t="62">0.01595</Y>
+        <Y t="63">0.01762</Y>
+        <Y t="64">0.01948</Y>
+        <Y t="65">0.02152</Y>
+        <Y t="66">0.02370</Y>
+        <Y t="67">0.02601</Y>
+        <Y t="68">0.02845</Y>
+        <Y t="69">0.03110</Y>
+        <Y t="70">0.03407</Y>
+        <Y t="71">0.03746</Y>
+        <Y t="72">0.04138</Y>
+        <Y t="73">0.04589</Y>
+        <Y t="74">0.05092</Y>
+        <Y t="75">0.05635</Y>
+        <Y t="76">0.06208</Y>
+        <Y t="77">0.06800</Y>
+        <Y t="78">0.07404</Y>
+        <Y t="79">0.08039</Y>
+        <Y t="80">0.08728</Y>
+        <Y t="81">0.09494</Y>
+        <Y t="82">0.10361</Y>
+        <Y t="83">0.11341</Y>
+        <Y t="84">0.12408</Y>
+        <Y t="85">0.13533</Y>
+        <Y t="86">0.14690</Y>
+        <Y t="87">0.15863</Y>
+        <Y t="88">0.17044</Y>
+        <Y t="89">0.18233</Y>
+        <Y t="90">0.19438</Y>
+        <Y t="91">0.20675</Y>
+        <Y t="92">0.21977</Y>
+        <Y t="93">0.23408</Y>
+        <Y t="94">0.25097</Y>
+        <Y t="95">0.27302</Y>
+        <Y t="96">0.30992</Y>
+        <Y t="97">0.36746</Y>
+        <Y t="98">0.47080</Y>
+        <Y t="99">0.65670</Y>
+        <Y t="100">1.00000</Y>
+      </Axis>
+    </Values>
+  </Table>
+</XTbML>

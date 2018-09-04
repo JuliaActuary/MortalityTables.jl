@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<XTbML>
+  <ContentClassification>
+    <TableIdentity>21</TableIdentity>
+    <ProviderDomain>soa.org</ProviderDomain>
+    <ProviderName>Roger Scott Lumsden</ProviderName>
+    <TableReference>“Report of the Task Force on Smoker/Nonsmoker Mortality”, Transactions Society of Actuaries - 1982 Reports, Society of Actuaries (1982) p. 372-373. Accessed: February, 2013 from http://www.soa.org/library/research/transactions-reports-of-mortality-moribidity-and-experience/1980-89/1982/january/tsr8210.pdf, p. 30-31</TableReference>
+    <ContentType tc="85">CSO/CET</ContentType>
+    <TableName>1980 CSO Basic Table - Male Nonsmoker, ANB</TableName>
+    <TableDescription>1980 Commissioners Standard Ordinary (CSO) Basic Table - Male Nonsmoker. Basis: Age Nearest Birthday. Minimum Age: 15. Maximum Age: 99</TableDescription>
+    <Comments>Study Data: Information regarding the mortality experience of smoker and nonsmoker insured lives consists primarily of mortality experience of five companies (State Mutual, Mutual Security Life. Phoenix Mutual, Home Life, and Sun Life of Canada) who published their nonsmoker mortality experience from 1973 thru 1978 either in The Record of the Society of Actuaries or the Transactions of the Society of Actuaries (TSA). There are significant differences from company to company in the characteristics of the lives included in the "smoker" group. Data is limited by none of the companies having published experience beyond the fifteenth policy year. This experience was supplemented by data from the 1979 Report of the Surgeon General, which is based on general population studies. The Task Force also received some unpublished data developed by the American Cancer Society for ages 65 and above. Methodology: The procedure used by the Task Force to divide each of the 1980 CSO Basic Male and Female Tables (SOA Table Identities 17 and 20) into its smoker and nonsmoker component tables is the same as that used in the paper by Michael J. Cowell and Brian L. Hirst (“Mortality Differences Between Smokers and Nonsmokers”, TSA Vol. XXXII, 1980). The distinction between smokers and nonsmokers at ages 14 and under was considered negligible for insurance purposes. As the definition of smoker varied considerably by company, the ratio of smoker mortality to aggregate mortality was calculated for each company. An assumed proportion of smokers in each company's experience was used to combine the data and remove the effect of different definitions of “smoker”. There was inadequate data to develop ratios for females, thus an analysis of 1979 Surgeon Generals Report was relied upon. Accordingly, the excess mortality among female smokers was set equal to 0.60 times the excess mortality among male smokers at all ages. The proportions of smokers and the ratios of the level of smoker mortality to nonsmoker mortality were then applied to produce the division of the 1980 CSO Basic Tables into smoker and nonsmoker components. Data Transcription Errors: None. Data Certified: 02/2013</Comments>
+    <KeyWord>Aggregate</KeyWord>
+    <KeyWord>CSO/CET</KeyWord>
+    <KeyWord>United States of America</KeyWord>
+  </ContentClassification>
+  <Table>
+    <MetaData>
+      <ScalingFactor>0</ScalingFactor>
+      <DataType tc="2">Floating Point</DataType>
+      <Nation tc="1">United States of America</Nation>
+      <TableDescription>1980 Commissioners Standard Ordinary (CSO) Basic Table - Male Nonsmoker. Basis: Age Nearest Birthday. Minimum Age: 15. Maximum Age: 99</TableDescription>
+      <AxisDef id="Age">
+        <ScaleType tc="3">Age</ScaleType>
+        <AxisName>Age</AxisName>
+        <MinScaleValue>15</MinScaleValue>
+        <MaxScaleValue>99</MaxScaleValue>
+        <Increment>1</Increment>
+      </AxisDef>
+    </MetaData>
+    <Values>
+      <Axis>
+        <Y t="15">0.00073</Y>
+        <Y t="16">0.00086</Y>
+        <Y t="17">0.00096</Y>
+        <Y t="18">0.00101</Y>
+        <Y t="19">0.00105</Y>
+        <Y t="20">0.00106</Y>
+        <Y t="21">0.00104</Y>
+        <Y t="22">0.00100</Y>
+        <Y t="23">0.00095</Y>
+        <Y t="24">0.00090</Y>
+        <Y t="25">0.00083</Y>
+        <Y t="26">0.00077</Y>
+        <Y t="27">0.00073</Y>
+        <Y t="28">0.00069</Y>
+        <Y t="29">0.00067</Y>
+        <Y t="30">0.00065</Y>
+        <Y t="31">0.00065</Y>
+        <Y t="32">0.00066</Y>
+        <Y t="33">0.00068</Y>
+        <Y t="34">0.00071</Y>
+        <Y t="35">0.00076</Y>
+        <Y t="36">0.00081</Y>
+        <Y t="37">0.00089</Y>
+        <Y t="38">0.00097</Y>
+        <Y t="39">0.00107</Y>
+        <Y t="40">0.00118</Y>
+        <Y t="41">0.00131</Y>
+        <Y t="42">0.00145</Y>
+        <Y t="43">0.00161</Y>
+        <Y t="44">0.00177</Y>
+        <Y t="45">0.00196</Y>
+        <Y t="46">0.00217</Y>
+        <Y t="47">0.00240</Y>
+        <Y t="48">0.00264</Y>
+        <Y t="49">0.00291</Y>
+        <Y t="50">0.00321</Y>
+        <Y t="51">0.00356</Y>
+        <Y t="52">0.00398</Y>
+        <Y t="53">0.00446</Y>
+        <Y t="54">0.00501</Y>
+        <Y t="55">0.00563</Y>
+        <Y t="56">0.00632</Y>
+        <Y t="57">0.00706</Y>
+        <Y t="58">0.00785</Y>
+        <Y t="59">0.00875</Y>
+        <Y t="60">0.00976</Y>
+        <Y t="61">0.01089</Y>
+        <Y t="62">0.01218</Y>
+        <Y t="63">0.01367</Y>
+        <Y t="64">0.01536</Y>
+        <Y t="65">0.01723</Y>
+        <Y t="66">0.01925</Y>
+        <Y t="67">0.02143</Y>
+        <Y t="68">0.02376</Y>
+        <Y t="69">0.02631</Y>
+        <Y t="70">0.02919</Y>
+        <Y t="71">0.03247</Y>
+        <Y t="72">0.03629</Y>
+        <Y t="73">0.04069</Y>
+        <Y t="74">0.04565</Y>
+        <Y t="75">0.05096</Y>
+        <Y t="76">0.05661</Y>
+        <Y t="77">0.06252</Y>
+        <Y t="78">0.06861</Y>
+        <Y t="79">0.07506</Y>
+        <Y t="80">0.08211</Y>
+        <Y t="81">0.08998</Y>
+        <Y t="82">0.09888</Y>
+        <Y t="83">0.10894</Y>
+        <Y t="84">0.11994</Y>
+        <Y t="85">0.13158</Y>
+        <Y t="86">0.14361</Y>
+        <Y t="87">0.15587</Y>
+        <Y t="88">0.16806</Y>
+        <Y t="89">0.18033</Y>
+        <Y t="90">0.19280</Y>
+        <Y t="91">0.20561</Y>
+        <Y t="92">0.21907</Y>
+        <Y t="93">0.23360</Y>
+        <Y t="94">0.25072</Y>
+        <Y t="95">0.27302</Y>
+        <Y t="96">0.30992</Y>
+        <Y t="97">0.36746</Y>
+        <Y t="98">0.47080</Y>
+        <Y t="99">0.65670</Y>
+      </Axis>
+    </Values>
+  </Table>
+</XTbML>

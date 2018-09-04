@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<XTbML>
+  <ContentClassification>
+    <TableIdentity>26</TableIdentity>
+    <ProviderDomain>soa.org</ProviderDomain>
+    <ProviderName>Robert J. Johansen</ProviderName>
+    <TableReference>“Report of the Task Force on Smoker/Nonsmoker Mortality”, Transactions Society of Actuaries - 1982 Reports, Society of Actuaries (1982) p. 385. Accessed: February, 2013 from http://www.soa.org/library/research/transactions-reports-of-mortality-moribidity-and-experience/1980-89/1982/january/tsr8210.pdf, p. 43</TableReference>
+    <ContentType tc="85">CSO/CET</ContentType>
+    <TableName>1980 CET - Female Nonsmoker, ANB</TableName>
+    <TableDescription>1980 Commissioners Extended Term (CET) Table - Female Nonsmoker. Basis: Age Nearest Birthday. Minimum Age: 15 Maximum Age: 99</TableDescription>
+    <Comments>Study Data: The exposure period for the underlying data is from Society of Actuary (SOA) data submissions for 1970 through 1975 policy anniversaries. All war deaths were excluded. Unlike the 1958 Commissioners Standard Ordinary (CSO) table, policies issued on a nonmedical basis were included due to the trend in writing larger proportions of nonmedical business and to provide adequate data for a separate female table. Methodology: Derived from Smoker/Nonsmoker 1980 CSO Basic Tables (See SOA Table Identities 18 and 19) in the same way that the 1980 CET Basic Tables (See SOA Table Identities 24 and 30) were derived from the 1980 CSO Basic Tables (See SOA Table Identities 17 and 20). A loading of 0.75 deaths per 1,000 or 30 percent of the table mortality rates, whichever is greater, was added to the Smoker/Nonsmoker 1980 CSO Basic Tables. Data Transcription Errors: None. Data Certified: 02/2013</Comments>
+    <KeyWord>Aggregate</KeyWord>
+    <KeyWord>CSO/CET</KeyWord>
+    <KeyWord>United States of America</KeyWord>
+  </ContentClassification>
+  <Table>
+    <MetaData>
+      <ScalingFactor>0</ScalingFactor>
+      <DataType tc="2">Floating Point</DataType>
+      <Nation tc="1">United States of America</Nation>
+      <TableDescription>1980 Commissioners Extended Term (CET) Table - Female Nonsmoker. Basis: Age Nearest Birthday. Minimum Age: 15 Maximum Age: 99</TableDescription>
+      <AxisDef id="Age">
+        <ScaleType tc="3">Age</ScaleType>
+        <AxisName>Age</AxisName>
+        <MinScaleValue>15</MinScaleValue>
+        <MaxScaleValue>99</MaxScaleValue>
+        <Increment>1</Increment>
+      </AxisDef>
+    </MetaData>
+    <Values>
+      <Axis>
+        <Y t="15">0.00159</Y>
+        <Y t="16">0.00163</Y>
+        <Y t="17">0.00167</Y>
+        <Y t="18">0.00170</Y>
+        <Y t="19">0.00173</Y>
+        <Y t="20">0.00176</Y>
+        <Y t="21">0.00177</Y>
+        <Y t="22">0.00179</Y>
+        <Y t="23">0.00180</Y>
+        <Y t="24">0.00183</Y>
+        <Y t="25">0.00184</Y>
+        <Y t="26">0.00187</Y>
+        <Y t="27">0.00189</Y>
+        <Y t="28">0.00192</Y>
+        <Y t="29">0.00195</Y>
+        <Y t="30">0.00199</Y>
+        <Y t="31">0.00202</Y>
+        <Y t="32">0.00206</Y>
+        <Y t="33">0.00210</Y>
+        <Y t="34">0.00217</Y>
+        <Y t="35">0.00222</Y>
+        <Y t="36">0.00231</Y>
+        <Y t="37">0.00242</Y>
+        <Y t="38">0.00254</Y>
+        <Y t="39">0.00268</Y>
+        <Y t="40">0.00283</Y>
+        <Y t="41">0.00301</Y>
+        <Y t="42">0.00319</Y>
+        <Y t="43">0.00341</Y>
+        <Y t="44">0.00364</Y>
+        <Y t="45">0.00389</Y>
+        <Y t="46">0.00415</Y>
+        <Y t="47">0.00443</Y>
+        <Y t="48">0.00475</Y>
+        <Y t="49">0.00507</Y>
+        <Y t="50">0.00545</Y>
+        <Y t="51">0.00585</Y>
+        <Y t="52">0.00631</Y>
+        <Y t="53">0.00684</Y>
+        <Y t="54">0.00738</Y>
+        <Y t="55">0.00797</Y>
+        <Y t="56">0.00857</Y>
+        <Y t="57">0.00917</Y>
+        <Y t="58">0.00974</Y>
+        <Y t="59">0.01035</Y>
+        <Y t="60">0.01106</Y>
+        <Y t="61">0.01191</Y>
+        <Y t="62">0.01297</Y>
+        <Y t="63">0.01431</Y>
+        <Y t="64">0.01590</Y>
+        <Y t="65">0.01762</Y>
+        <Y t="66">0.01946</Y>
+        <Y t="67">0.02133</Y>
+        <Y t="68">0.02322</Y>
+        <Y t="69">0.02523</Y>
+        <Y t="70">0.02756</Y>
+        <Y t="71">0.03034</Y>
+        <Y t="72">0.03379</Y>
+        <Y t="73">0.03799</Y>
+        <Y t="74">0.04293</Y>
+        <Y t="75">0.04852</Y>
+        <Y t="76">0.05465</Y>
+        <Y t="77">0.06124</Y>
+        <Y t="78">0.06829</Y>
+        <Y t="79">0.07599</Y>
+        <Y t="80">0.08466</Y>
+        <Y t="81">0.09459</Y>
+        <Y t="82">0.10607</Y>
+        <Y t="83">0.11929</Y>
+        <Y t="84">0.13394</Y>
+        <Y t="85">0.14999</Y>
+        <Y t="86">0.16715</Y>
+        <Y t="87">0.18552</Y>
+        <Y t="88">0.20489</Y>
+        <Y t="89">0.22556</Y>
+        <Y t="90">0.24751</Y>
+        <Y t="91">0.27115</Y>
+        <Y t="92">0.29718</Y>
+        <Y t="93">0.32682</Y>
+        <Y t="94">0.36310</Y>
+        <Y t="95">0.41252</Y>
+        <Y t="96">0.48846</Y>
+        <Y t="97">0.61746</Y>
+        <Y t="98">0.85261</Y>
+        <Y t="99">1.00000</Y>
+      </Axis>
+    </Values>
+  </Table>
+</XTbML>

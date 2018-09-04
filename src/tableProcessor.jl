@@ -3,8 +3,8 @@ import DataStructures
 include("XTbMl.jl")
 
 # Load Available Tables
-table_dir = joinpath(dirname(pathof(MortalityTables)), "tables", "SOA")
-
+# table_dir = joinpath(dirname(pathof(MortalityTables)), "tables", "SOA")
+table_dir = joinpath(raw"C:\Users\alecl\AppData\Local\Julia-1.0.0\MortalityTables\src\tables\SOA")
 function Tables()
     tables = Dict()
     for (root, dirs, files) in walkdir(table_dir)
@@ -50,3 +50,10 @@ function nameProcessor(name,rules)
     end
     return ident_set, parsed
 end
+
+
+# tbls = Tables()
+#
+# cso = tbls["1980 CSO Basic Table – Male, ANB"]
+# cso.select
+# tbl = XTbMLTable(DataStructures.DefaultOrderedDict(missing),DataStructures.DefaultOrderedDict(missing))

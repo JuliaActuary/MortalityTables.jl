@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<XTbML>
+  <ContentClassification>
+    <TableIdentity>46</TableIdentity>
+    <ProviderDomain>soa.org</ProviderDomain>
+    <ProviderName>Robert J. Johansen</ProviderName>
+    <TableReference>“Report of the Task Force on Smoker/Nonsmoker Mortality”, Transactions Society of Actuaries - 1982 Reports, Society of Actuaries (1982) p. 376-377. Accessed: February, 2013 from http://www.soa.org/library/research/transactions-reports-of-mortality-moribidity-and-experience/1980-89/1982/january/tsr8210.pdf, p. 34-35</TableReference>
+    <ContentType tc="85">CSO/CET</ContentType>
+    <TableName>1980 CSO - Male Smoker, ANB</TableName>
+    <TableDescription>1980 Commissioners Standard Ordinary (CSO) - Male Smoker. Basis: Age Nearest Birthday. Minimum Age: 15. Maximum Age: 99</TableDescription>
+    <Comments>Study Data: Information regarding the mortality experience of smoker and nonsmoker insured lives consists primarily of mortality experience of five companies (State Mutual, Mutual Security Life. Phoenix Mutual, Home Life, and Sun Life of Canada) who published their nonsmoker mortality experience from 1973 thru 1978 either in The Record of the Society of Actuaries or the Transactions of the Society of Actuaries (TSA). This experience was supplemented by data from the 1979 Report of the Surgeon General, which is based on general population studies. The Task Force also received some unpublished data developed by the American Cancer Society for ages 65 and above. Methodology: The same loading margins developed to create the 1980 CSO tables (See SOA Table Identities 36 and 42) from the 1980 CSO Basic Tables (See SOA Table Identities 17 and 20) were used on the Smoker/Nonsmoker split tables. The final margin formula is:  [(.035 - .00025x + .000009x^2) / e(x)] where e(x) is the curtate expectation of life calculated from the Basic Table. The loaded qx values for age 92 and age 93 were retained while the tables were shortened by setting age 99 equal to unity. Shortening the loaded tables by one year is consistent with the methodology used on the 1941 CSO and the 1958 CSO Tables. Data Transcription Errors: None. Data Certified: 02/2013</Comments>
+    <KeyWord>Aggregate</KeyWord>
+    <KeyWord>CSO/CET</KeyWord>
+    <KeyWord>United States of America</KeyWord>
+  </ContentClassification>
+  <Table>
+    <MetaData>
+      <ScalingFactor>0</ScalingFactor>
+      <DataType tc="2">Floating Point</DataType>
+      <Nation tc="1">United States of America</Nation>
+      <TableDescription>1980 Commissioners Standard Ordinary (CSO) - Male Smoker. Basis: Age Nearest Birthday. Minimum Age: 15. Maximum Age: 99</TableDescription>
+      <AxisDef id="Age">
+        <ScaleType tc="3">Age</ScaleType>
+        <AxisName>Age</AxisName>
+        <MinScaleValue>15</MinScaleValue>
+        <MaxScaleValue>99</MaxScaleValue>
+        <Increment>1</Increment>
+      </AxisDef>
+    </MetaData>
+    <Values>
+      <Axis>
+        <Y t="15">0.00165</Y>
+        <Y t="16">0.00187</Y>
+        <Y t="17">0.00205</Y>
+        <Y t="18">0.00216</Y>
+        <Y t="19">0.00226</Y>
+        <Y t="20">0.00231</Y>
+        <Y t="21">0.00233</Y>
+        <Y t="22">0.00230</Y>
+        <Y t="23">0.00226</Y>
+        <Y t="24">0.00221</Y>
+        <Y t="25">0.00214</Y>
+        <Y t="26">0.00208</Y>
+        <Y t="27">0.00206</Y>
+        <Y t="28">0.00204</Y>
+        <Y t="29">0.00206</Y>
+        <Y t="30">0.00210</Y>
+        <Y t="31">0.00217</Y>
+        <Y t="32">0.00224</Y>
+        <Y t="33">0.00235</Y>
+        <Y t="34">0.00248</Y>
+        <Y t="35">0.00263</Y>
+        <Y t="36">0.00281</Y>
+        <Y t="37">0.00304</Y>
+        <Y t="38">0.00330</Y>
+        <Y t="39">0.00360</Y>
+        <Y t="40">0.00394</Y>
+        <Y t="41">0.00434</Y>
+        <Y t="42">0.00475</Y>
+        <Y t="43">0.00522</Y>
+        <Y t="44">0.00571</Y>
+        <Y t="45">0.00627</Y>
+        <Y t="46">0.00683</Y>
+        <Y t="47">0.00744</Y>
+        <Y t="48">0.00808</Y>
+        <Y t="49">0.00880</Y>
+        <Y t="50">0.00956</Y>
+        <Y t="51">0.01044</Y>
+        <Y t="52">0.01142</Y>
+        <Y t="53">0.01254</Y>
+        <Y t="54">0.01380</Y>
+        <Y t="55">0.01514</Y>
+        <Y t="56">0.01659</Y>
+        <Y t="57">0.01809</Y>
+        <Y t="58">0.01969</Y>
+        <Y t="59">0.02135</Y>
+        <Y t="60">0.02319</Y>
+        <Y t="61">0.02526</Y>
+        <Y t="62">0.02759</Y>
+        <Y t="63">0.03023</Y>
+        <Y t="64">0.03314</Y>
+        <Y t="65">0.03629</Y>
+        <Y t="66">0.03957</Y>
+        <Y t="67">0.04301</Y>
+        <Y t="68">0.04655</Y>
+        <Y t="69">0.05032</Y>
+        <Y t="70">0.05448</Y>
+        <Y t="71">0.05909</Y>
+        <Y t="72">0.06433</Y>
+        <Y t="73">0.07023</Y>
+        <Y t="74">0.07666</Y>
+        <Y t="75">0.08377</Y>
+        <Y t="76">0.09110</Y>
+        <Y t="77">0.09852</Y>
+        <Y t="78">0.10591</Y>
+        <Y t="79">0.11349</Y>
+        <Y t="80">0.12159</Y>
+        <Y t="81">0.13041</Y>
+        <Y t="82">0.14020</Y>
+        <Y t="83">0.15103</Y>
+        <Y t="84">0.16249</Y>
+        <Y t="85">0.17420</Y>
+        <Y t="86">0.18578</Y>
+        <Y t="87">0.19706</Y>
+        <Y t="88">0.20937</Y>
+        <Y t="89">0.22152</Y>
+        <Y t="90">0.23369</Y>
+        <Y t="91">0.24612</Y>
+        <Y t="92">0.25933</Y>
+        <Y t="93">0.27630</Y>
+        <Y t="94">0.29815</Y>
+        <Y t="95">0.32996</Y>
+        <Y t="96">0.38455</Y>
+        <Y t="97">0.48020</Y>
+        <Y t="98">0.65798</Y>
+        <Y t="99">1.00000</Y>
+      </Axis>
+    </Values>
+  </Table>
+</XTbML>
