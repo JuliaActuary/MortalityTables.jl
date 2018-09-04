@@ -1,7 +1,7 @@
 name = "MortalityTables"
 uuid = "0dc2de20-ade9-11e8-3ede-5793edc5b811"
 authors = ["Alec Loudenback <alecloudenback@gmail.com>"]
-version = "0.0.6"
+version = "0.0.7"
 
 [deps]
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
