@@ -12,7 +12,7 @@ function Tables()
 
             if basename(file)[end-3:end] == ".xml"
                 tbl, name = loadXTbMLTable(joinpath(root,file))
-                tables[name] = tbl
+                tables[strip(name)] = tbl #strip removes leading/trailing whitespace from the name
             end
         end
     end
