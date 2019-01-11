@@ -8,6 +8,7 @@ function getXML(path)
     return xml = XMLDict.xml_dict(s)
 
 end
+
 # get potentially missing value out of dict
 function getVal(dict,key)
     try
@@ -71,13 +72,3 @@ function loadXTbMLTable(path)
 
     return (tbl, name)
 end
-
-# tb = XTbMLTable(DataStructures.DefaultOrderedDict(missing),DataStructures.DefaultOrderedDict(missing))
-# vbt = loadXTbMLTable(raw"C:\Users\alecl\AppData\Local\Julia-1.0.0\MortalityTables\src\tables\SOA\t17.xml")
-# cso80 = getXML(raw"C:\Users\alecl\AppData\Local\Julia-1.0.0\MortalityTables\src\tables\SOA\t17.xml")
-# cso01 = getXML(raw"C:\Users\alecl\AppData\Local\Julia-1.0.0\MortalityTables\src\tables\SOA\t1076.xml")
-# cso80["XTbML"]["Table"]["Values"]["Axis"]["Y"]
-# cso01["XTbML"]["Table"]
-#
-# typeof(cso80["XTbML"]["Table"])
-# cso80
