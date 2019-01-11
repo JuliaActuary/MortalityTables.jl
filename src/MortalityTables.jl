@@ -4,6 +4,11 @@ import DataStructures
 
 include("tableProcessor.jl")
 
+"""
+    qx(table::XTbMLTable, issueAge, duration)
+
+Given a mortality table, an issue age, and a duration, returns the appropriate select or ultimate qx.
+"""
 function qx(table::XTbMLTable, issueAge, duration)
 
     if length(table.select) > 0
@@ -18,6 +23,12 @@ function qx(table::XTbMLTable, issueAge, duration)
     return q
 end
 
+
+"""
+    qx(table::XTbMLTable, age)
+
+Given a mortality table and an age returns the appropriate ultimate qx.
+"""
 function qx(table::XTbMLTable, age)
     return table.ultimate[age]
 end

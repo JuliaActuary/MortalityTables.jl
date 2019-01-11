@@ -19,7 +19,10 @@ function Tables()
     return tables
 end
 
-### PARSE TABLES NAMES
+
+
+### TABLE STRUCUTRE PARSING ###
+# extract table varies-by characteristics using a regex rule
 
 cso_vbt_2001 = DataStructures.OrderedDict(
     "set" => r"^(\d*\s\w{0,3})",
