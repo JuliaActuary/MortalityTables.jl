@@ -3,8 +3,6 @@
 #### Code Review: [![Build Status](https://travis-ci.org/alecloudenback/MortalityTables.jl.svg?branch=master)](https://travis-ci.org/alecloudenback/MortalityTables.jl) [![Coverage Status](https://coveralls.io/repos/github/alecloudenback/MortalityTables.jl/badge.svg?branch=master)](https://coveralls.io/github/alecloudenback/MortalityTables.jl?branch=master) [![codecov.io](http://codecov.io/github/alecloudenback/MortalityTables.jl/coverage.svg?branch=master)](http://codecov.io/github/alecloudenback/MortalityTables.jl?branch=master)
 A Julia package for working with MortalityTables. Has first-class support for missing values.
 
-Currently Available: `2001 CSO` and `2001 VBT`
-
 ### Simple Usage Example
 
 ```julia
@@ -38,93 +36,20 @@ plot([λ -> mt.qx(cso_2001,age,λ),λ -> mt.qx(cso_1980,age,λ)], 1:1:(100-age),
 ![plot of q's](https://i.imgur.com/BvsplkB.png)
 
 
-Comes with some tables built in. Currently these are included:
 
-```
+### Some Batteries Included
 
-2001 CSO Super Preferred Select and Ultimate - Male Nonsmoker, ANB
-2001 CSO Preferred Select and Ultimate - Male Nonsmoker, ANB
-2001 CSO Residual Standard Select and Ultimate  - Male Nonsmoker, ANB
-2001 CSO Preferred Select and Ultimate - Male Smoker, ANB
-2001 CSO Residual Standard Select and Ultimate - Male Smoker, ANB
-2001 CSO Super Preferred Select and Ultimate - Female Nonsmoker, ANB
-2001 CSO Preferred Select and Ultimate - Female Nonsmoker, ANB
-2001 CSO Residual Standard Select and Ultimate - Female Nonsmoker, ANB
-2001 CSO Preferred Select and Ultimate - Female Smoker, ANB
-2001 CSO Residual Standard Select and Ultimate - Female Smoker, ANB
-2001 CSO Super Preferred Select and Ultimate - Male Nonsmoker, ALB
-2001 CSO Preferred Select and Ultimate - Male Nonsmoker, ALB
-2001 CSO Residual Standard Select and Ultimate - Male Nonsmoker, ALB
-2001 CSO Preferred Select and Ultimate - Male Smoker, ALB
-2001 CSO Residual Standard Select and Ultimate - Male Smoker, ALB
-2001 CSO Super Preferred Select and Ultimate - Female Nonsmoker, ALB
-2001 CSO Preferred Select and Ultimate - Female Nonsmoker, ALB
-2001 CSO Residual Standard Select and Ultimate - Female Nonsmoker, ALB
-2001 CSO Preferred Select and Ultimate - Female Smoker, ALB
-2001 CSO Residual Standard Select and Ultimate - Female Smoker, ALB
-2001 VBT Super Preferred Select and Ultimate - Male Nonsmoker, ANB
-2001 VBT Preferred Select and Ultimate - Male Nonsmoker, ANB
-2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB
-2001 VBT Preferred Select and Ultimate - Male Smoker, ANB
-2001 VBT Residual Standard Select and Ultimate - Male Smoker, ANB
-2001 VBT Super Preferred Select and Ultimate - Female Nonsmoker, ANB
-2001 VBT Preferred Select and Ultimate - Female Nonsmoker, ANB
-2001 VBT Residual Standard Select and Ultimate - Female Nonsmoker, ANB
-2001 VBT Preferred Select and Ultimate - Female Smoker, ANB
-2001 VBT Residual Standard Select and Ultimate - Female Smoker, ANB
-2001 VBT Super Preferred Select and Ultimate - Male Nonsmoker, ALB
-2001 VBT Preferred Select and Ultimate - Male Nonsmoker, ALB
-2001 VBT Preferred Select and Ultimate - Male Smoker, ALB
-2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ALB
-2001 VBT Residual Standard Select and Ultimate - Male Smoker, ALB
-2001 VBT Super Preferred Select and Ultimate - Female Nonsmoker, ALB
-2001 VBT Preferred Select and Ultimate - Female Nonsmoker, ALB
-2001 VBT Residual Standard Select and Ultimate - Female Nonsmoker, ALB
-2001 VBT Preferred Select and Ultimate - Female Smoker, ALB
-2001 VBT Residual Standard Select and Ultimate - Female Smoker, ALB
-2001 CSO Select and Ultimate – Male Composite, ANB
-2001 CSO Select and Ultimate - Male Nonsmoker, ANB
-2001 CSO Select and Ultimate  - Male Smoker, ANB
-2001 CSO Select and Ultimate - Female Composite, ANB
-2001 CSO Select and Ultimate - Female Nonsmoker, ANB
-2001 CSO Select and Ultimate - Female Smoker, ANB
-2001 CSO Composite Select and Ultimate - Male, ALB
-2001 CSO Composite Select and Ultimate - Female, ALB
-2001 CSO Select and Ultimate - Male Nonsmoker, ALB
-2001 CSO Select and Ultimate - Female Nonsmoker, ALB
-2001 CSO Select and Ultimate  - Male Smoker, ALB
-2001 CSO Select and Ultimate - Female Smoker, ALB
-1980 CSO Basic Table – Female, ANB
-1980 CSO Basic Table - Female Nonsmoker, ANB
-1980 CSO Basic Table - Female Smoker, ANB
-1980 CSO Basic Table – Male, ANB
-1980 CSO Basic Table - Male Nonsmoker, ANB
-1980 CSO Basic Table - Male Smoker, ANB
-1980 CET – Female, ALB
-1980 CET - Female Nonsmoker, ALB
-1980 CET - Female Nonsmoker, ANB
-1980 CET - Female Smoker, ALB
-1980 CET - Female Smoker, ANB
-1980 CET – Male, ALB
-1980 CET - Male Nonsmoker, ALB
-1980 CET - Male Nonsmoker, ANB
-1980 CET - Male Smoker, ALB
-1980 CET  - Male Smoker, ANB
-1980 CSO – Female, ALB
-1980 CSO - Female, ANB
-1980 CSO - Female Nonsmoker, ALB
-1980 CSO - Female Nonsmoker, ANB
-1980 CSO - Female Smoker, ALB
-1980 CSO - Female Smoker, ANB
-1980 CSO – Male, ALB
-1980 CSO  - Male, ANB
-1980 CSO - Male Nonsmoker, ALB
-1980 CSO - Male Nonsmoker, ANB
-1980 CSO - Male Smoker, ALB
-1980 CSO - Male Smoker, ANB
-```
+Comes with some tables built in via [mort.SOA.org](https://mort.soa.org) and by using [you agree to their terms](https://mort.soa.org/TermsOfUse.aspx). 
 
-Todo:
+Not all tables have been tested that they work by default, though I have not encountered issues with any of the the VBT/CSO/other usual tables.
+
+
+[Click here to see which tables are included.](BundledTables.md)
+
+
+
+### Todos
+
 - Docs
 - Automatically parse built-in tables
 - Add more built-in tables
