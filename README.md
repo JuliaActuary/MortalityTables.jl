@@ -48,6 +48,12 @@ Not all tables have been tested that they work by default, though I have not enc
 
 
 
+### Adding more tables
+
+To add more tables for your use, download the `.xml` (aka the (`Xtbml` format)[https://mort.soa.org/About.aspx]) version of the table from [mort.SOA.org](https://mort.soa.org) and place it in the directory the package is installed in. This is usually `~user/.julia/packages/MortalityTables/[changing hash value]/src/tables/`. *Note: updating the package may remove your existing tables. Make a backup before updating your packages*
+
+After placing packages in the folder above, restart Julia and the should be discoverable when you run `mt.Tables()`
+
 ### Todos
 
 - Docs
