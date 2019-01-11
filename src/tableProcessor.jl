@@ -50,10 +50,3 @@ function nameProcessor(name,rules)
     end
     return ident_set, parsed
 end
-
-
-# tbls = Tables()
-#
-# cso = tbls["1980 CSO Basic Table – Male, ANB"]
-# cso.select
-# tbl = XTbMLTable(DataStructures.DefaultOrderedDict(missing),DataStructures.DefaultOrderedDict(missing))
