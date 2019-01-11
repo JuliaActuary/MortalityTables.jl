@@ -6,6 +6,7 @@ cso2001 = tables["2001 CSO Super Preferred Select and Ultimate - Male Nonsmoker,
 vbt2001 = tables["2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB"]
 cso1980 = tables["1980 CSO Basic Table – Male, ANB"]
 
+
 Test.@test MortalityTables.qx(cso1980,35,1) == .00118
 Test.@test MortalityTables.qx(cso1980,35,61) == .27302
 Test.@test MortalityTables.qx(cso1980,95) == .27302
@@ -21,3 +22,7 @@ Test.@test MortalityTables.qx(vbt2001,35,1) == .00036
 Test.@test MortalityTables.qx(vbt2001,35,61) == .24298
 Test.@test MortalityTables.qx(vbt2001,95) == .24298
 Test.@test ismissing(MortalityTables.qx(vbt2001,35,95))
+
+#this is to check trailing whitespace, as the source file has trailing whitespace in it
+vbt2001su = tables["2001 VBT Select and Ultimate - Male Nonsmoker, ANB"]
+vbt2001su == tables["2001 VBT Select and Ultimate - Male Nonsmoker, ANB"]
