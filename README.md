@@ -43,8 +43,15 @@ Comes with some tables built in via [mort.SOA.org](https://mort.soa.org) and by 
 
 Not all tables have been tested that they work by default, though I have not encountered issues with any of the the VBT/CSO/other usual tables.
 
+Included:
+```
+2001 VBT
+2001 CSO
+1980 CSO
+1980 CET
+```
 
-[Click here to see which tables are included.](BundledTables.md)
+[Click here to see the full list of tables included.](BundledTables.md)
 
 
 
