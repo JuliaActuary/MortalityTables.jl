@@ -26,6 +26,7 @@ cso1980 = tables["1980 CSO Basic Table – Male, ANB"]
 @test mt.qx(vbt2001,35,61) == .24298
 @test mt.qx(vbt2001,95) == .24298
 @test ismissing(mt.qx(vbt2001,35,95))
+@test ismissing(mt.qx(vbt2001,150))
 
 #this is to check trailing whitespace, as the source file has trailing whitespace in it
 vbt2001su = tables["2001 VBT Select and Ultimate - Male Nonsmoker, ANB"]
