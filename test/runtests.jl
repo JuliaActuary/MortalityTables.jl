@@ -1,27 +1,36 @@
-import Test
-import MortalityTables
+using Test
+using MortalityTables
+using Logging
+io = open("C:\\Users\\alecl\\.julia\\dev\\MortalityTables\\log.txt", "w+")
+logger = SimpleLogger(io)
+global_logger(logger)
 
-tables = MortalityTables.Tables()
+const mt = MortalityTables
+
+tables = mt.Tables()
 cso2001 = tables["2001 CSO Super Preferred Select and Ultimate - Male Nonsmoker, ANB"]
 vbt2001 = tables["2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB"]
 cso1980 = tables["1980 CSO Basic Table – Male, ANB"]
+# @info(cso1980)
+close(io)
 
+@test mt.qx(cso1980,35,1) == .00118
+@test mt.qx(cso1980,35,61) == .27302
+@test mt.qx(cso1980,95) == .27302
+@test ismissing(mt.qx(cso1980,35,95))
+@test ismissing(mt.qx(cso1980,101))
 
-Test.@test MortalityTables.qx(cso1980,35,1) == .00118
-Test.@test MortalityTables.qx(cso1980,35,61) == .27302
-Test.@test MortalityTables.qx(cso1980,95) == .27302
-Test.@test ismissing(MortalityTables.qx(cso1980,35,95))
-Test.@test ismissing(MortalityTables.qx(cso1980,101))
+@test mt.qx(cso2001,35,1) == .00037
+@test mt.qx(cso2001,35,61) == .26719
+@test mt.qx(cso2001,16) == .00041
+@test mt.qx(cso2001,95) == .26719
+@test ismissing(mt.qx(cso2001,15))
+@test ismissing(mt.qx(cso2001,35,95))
 
-Test.@test MortalityTables.qx(cso2001,35,1) == .00037
-Test.@test MortalityTables.qx(cso2001,35,61) == .26719
-Test.@test MortalityTables.qx(cso2001,95) == .26719
-Test.@test ismissing(MortalityTables.qx(cso2001,35,95))
-
-Test.@test MortalityTables.qx(vbt2001,35,1) == .00036
-Test.@test MortalityTables.qx(vbt2001,35,61) == .24298
-Test.@test MortalityTables.qx(vbt2001,95) == .24298
-Test.@test ismissing(MortalityTables.qx(vbt2001,35,95))
+@test mt.qx(vbt2001,35,1) == .00036
+@test mt.qx(vbt2001,35,61) == .24298
+@test mt.qx(vbt2001,95) == .24298
+@test ismissing(mt.qx(vbt2001,35,95))
 
 #this is to check trailing whitespace, as the source file has trailing whitespace in it
 vbt2001su = tables["2001 VBT Select and Ultimate - Male Nonsmoker, ANB"]

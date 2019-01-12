@@ -2,6 +2,37 @@ import DataStructures
 
 include("XTbMl.jl")
 
+if Int === Int64
+    struct MortalityTable
+        select::Array{Union{Missing, Float64},2}
+        ultimate::Array{Union{Missing, Float64},1}
+    end
+else
+    struct MortalityTable
+        select::Array{Union{Missing, Float32},2}
+        ultimate::Array{Union{Missing, Float32},1}
+    end
+end
+
+"""
+    qx(table::XTbMLTable, issueAge, duration)
+
+Given a mortality table, an issue age, and a duration, returns the appropriate select or ultimate qx.
+"""
+function qx(table::XTbMLTable, issueAge::Int, duration::Int)
+
+    if length(table.select) > 0
+        q = table.select[issueAge][duration]
+    else
+        q = missing
+    end
+
+    if ismissing(q)
+        q = table.ultimate[issueAge + duration - 1]
+    end
+    return q
+end
+
 # Load Available Tables
 table_dir = joinpath(dirname(pathof(MortalityTables)), "tables", "SOA")
 
@@ -12,7 +43,7 @@ function Tables()
 
             if basename(file)[end-3:end] == ".xml"
                 tbl, name = loadXTbMLTable(joinpath(root,file))
-                tables[strip(name)] = tbl #strip removes leading/trailing whitespace from the name
+                tables[strip(name)] = XtbML_Table_To_Matrix(tbl) #strip removes leading/trailing whitespace from the name
             end
         end
     end
@@ -20,6 +51,11 @@ function Tables()
 end
 
 
+
+function XtbML_Table_To_Matrix(tbl::XTbMLTable)
+    return MortalityTable(ones(2,2),[qx(tbl,age) for age=0:120])
+    # return MortalityTable([qx(tbl,issue_age,dur) for issue_age=0:120,dur=1:121],[qx(tbl,age) for age=0:120])
+end
 
 ### TABLE STRUCUTRE PARSING ###
 # extract table varies-by characteristics using a regex rule
