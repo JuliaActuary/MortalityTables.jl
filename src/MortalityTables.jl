@@ -20,7 +20,7 @@ function qx(table::MortalityTable, issueAge::Int, duration::Int)
         if isa(err,BoundsError)
             missing
         else
-            table.select[issueAge+1,duration]
+            throw(err)
         end
     end
 end
@@ -37,7 +37,15 @@ If the table does not have select rates, will just return the rate for the given
 
 """
 function qx(table::MortalityTable, age)
-    return table.ultimate[age+1] # +1 because julia index starts with 1
+    try
+        table.ultimate[age+1] # +1 because julia index starts with 1
+    catch err
+        if isa(err,BoundsError)
+            missing
+        else
+            throw(err)
+        end
+    end
 end
 
 end # module

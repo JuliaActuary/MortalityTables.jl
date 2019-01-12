@@ -20,9 +20,13 @@ end
 Given a mortality table, an issue age, and a duration, returns the appropriate select or ultimate qx.
 """
 function qx(table::XTbMLTable, issueAge::Int, duration::Int)
-
     if length(table.select) > 0
-        q = table.select[issueAge][duration]
+        s = table.select[issueAge]
+        if ismissing(s)
+            q = missing
+        else
+            q = s[duration]
+        end
     else
         q = missing
     end
@@ -32,6 +36,16 @@ function qx(table::XTbMLTable, issueAge::Int, duration::Int)
     end
     return q
 end
+
+"""
+    qx(table::XTbMLTable, age)
+Given a mortality table and an age returns the appropriate ultimate qx.
+"""
+function qx(table::XTbMLTable, age)
+    return table.ultimate[age]
+end
+
+export Tables,loadXTbMLTable, qx
 
 # Load Available Tables
 table_dir = joinpath(dirname(pathof(MortalityTables)), "tables", "SOA")
@@ -53,8 +67,7 @@ end
 
 
 function XtbML_Table_To_Matrix(tbl::XTbMLTable)
-    return MortalityTable(ones(2,2),[qx(tbl,age) for age=0:120])
-    # return MortalityTable([qx(tbl,issue_age,dur) for issue_age=0:120,dur=1:121],[qx(tbl,age) for age=0:120])
+    return MortalityTable([qx(tbl,issue_age,dur) for issue_age=0:99,dur=1:121],[qx(tbl,age) for age=0:120])
 end
 
 ### TABLE STRUCUTRE PARSING ###

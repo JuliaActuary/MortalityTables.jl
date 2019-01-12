@@ -1,9 +1,5 @@
 using Test
 using MortalityTables
-using Logging
-io = open("C:\\Users\\alecl\\.julia\\dev\\MortalityTables\\log.txt", "w+")
-logger = SimpleLogger(io)
-global_logger(logger)
 
 const mt = MortalityTables
 
@@ -11,8 +7,6 @@ tables = mt.Tables()
 cso2001 = tables["2001 CSO Super Preferred Select and Ultimate - Male Nonsmoker, ANB"]
 vbt2001 = tables["2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB"]
 cso1980 = tables["1980 CSO Basic Table – Male, ANB"]
-# @info(cso1980)
-close(io)
 
 @test mt.qx(cso1980,35,1) == .00118
 @test mt.qx(cso1980,35,61) == .27302
@@ -25,6 +19,7 @@ close(io)
 @test mt.qx(cso2001,16) == .00041
 @test mt.qx(cso2001,95) == .26719
 @test ismissing(mt.qx(cso2001,15))
+@test ismissing(mt.qx(cso2001,150))
 @test ismissing(mt.qx(cso2001,35,95))
 
 @test mt.qx(vbt2001,35,1) == .00036
