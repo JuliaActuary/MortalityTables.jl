@@ -1,6 +1,7 @@
 # MortalityTables
 
 #### Code Review: [![Build Status](https://travis-ci.org/alecloudenback/MortalityTables.jl.svg?branch=master)](https://travis-ci.org/alecloudenback/MortalityTables.jl) [![Coverage Status](https://coveralls.io/repos/github/alecloudenback/MortalityTables.jl/badge.svg?branch=master)](https://coveralls.io/github/alecloudenback/MortalityTables.jl?branch=master) [![codecov.io](http://codecov.io/github/alecloudenback/MortalityTables.jl/coverage.svg?branch=master)](http://codecov.io/github/alecloudenback/MortalityTables.jl?branch=master)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Falecloudenback%2FMortalityTables.jl.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Falecloudenback%2FMortalityTables.jl?ref=badge_shield)
 A Julia package for working with MortalityTables. Has first-class support for missing values.
 
 ### Simple Usage Example
@@ -69,3 +70,7 @@ After placing packages in the folder above, restart Julia and the should be disc
 - Usage Examples
 - More tests
 - Performance testing
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Falecloudenback%2FMortalityTables.jl.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Falecloudenback%2FMortalityTables.jl?ref=badge_large)
