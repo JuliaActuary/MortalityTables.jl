@@ -52,7 +52,7 @@ age = 27
 durations = 1:30
 plot([qx(cso_2001,age,durations),qx(cso_1980,age,durations)], 1:1:(100-age),label = ["2001 CSO M SuperPref NS" "1980 CSO M NS"], plot_title = ["Comparison of 1980 and 2001 CSO"])
 ```
-![plot of q's](https://i.imgur.com/BvsplkB.png)
+![plot of q's](https://i.imgur.com/95uFOrY.png)
 
 
 ### Defined functions
