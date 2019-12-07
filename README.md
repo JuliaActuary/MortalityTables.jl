@@ -45,8 +45,8 @@ using MortalityTables, Plots
 
 
 tables = MortalityTables.tables()
-cso_2001 = tbls["2001 CSO Super Preferred Select and Ultimate - Male Nonsmoker, ANB"]
-cso_1980 = tbls["1980 CSO - Male Nonsmoker, ANB"]
+cso_2001 = tables["2001 CSO Super Preferred Select and Ultimate - Male Nonsmoker, ANB"]
+cso_1980 = tables["1980 CSO - Male Nonsmoker, ANB"]
 
 age = 27
 durations = 1:30
