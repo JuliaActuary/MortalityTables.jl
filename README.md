@@ -161,3 +161,13 @@ After placing packages in the folder above, restart Julia and the should be disc
 - Usage Examples
 - More tests
 - Performance testing
+- Easy assumption overlay (e.g. scalars)
+
+
+### References
+- [SOA Mortality Tables](https://mort.soa.org/)
+- [Actuarial Mathematics for Life Contingent Risks, 2nd ed](https://www.cambridge.org/vi/academic/subjects/statistics-probability/statistics-econometrics-finance-and-insurance/actuarial-mathematics-life-contingent-risks-2nd-edition?format=HB)
+- [Experience Study Calculations, SOA](https://www.soa.org/globalassets/assets/Files/Research/2016-10-experience-study-calculations.pdf)
+
+### Similar Projects
+ - [Pyliferisk, a Python package](https://github.com/franciscogarate/pyliferisk)
