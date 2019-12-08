@@ -79,6 +79,8 @@ Base.show(io::IO, ::MIME"text/plain", mt::MortalityTable) =
            $(mt.d.provider)
        mort.SOA.org ID:
            $(mt.d.id)
+       mort.SOA.org link:
+           https://mort.soa.org/ViewTable.aspx?&TableIdentity=$(mt.d.id)
        Description:
            $(mt.d.description)
     """)
