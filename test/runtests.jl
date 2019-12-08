@@ -39,6 +39,18 @@ end
 
 
 
+
+@testset "XtbML constructors" begin
+    pth = joinpath(dirname(pathof(MortalityTables)), "tables", "SOA","t1076.xml")
+    file = MortalityTables.open_and_read(pth) |> MortalityTables.getXML
+    xtbl = MortalityTables.parseXTbMLTable(file,pth)
+    @test qx(xtbl,35,1) ≈ .00037
+    @test qx(xtbl,16) ≈ .00041
+    @test qx(xtbl,35,25) ≈ 0.00508
+    @test qx(xtbl,35,26) ≈ 	0.00621
+end
+
+
 @testset "SOA tables" begin
 
     tables = MortalityTables.tables()
@@ -68,5 +80,14 @@ end
     @test_throws BoundsError qx(vbt2001,150)
 
     @test cso2001[29,1:3] == [0.00029, 0.00035, 0.0004]
+
+    @info "qx with range"
+    #select only
+    @test qx(cso2001,35,1:25) == [0.00037,0.00043,0.00049,0.00057,0.00063,0.0007,0.00077,0.00084,0.00092,0.00101,0.00114,0.00127,0.00143,0.00159,0.00174,0.00188,0.00208,0.00231,0.00251,0.00279,0.00315,0.00357,0.00406,0.00461,0.00508]
+    # crosses into ultimate
+    # crosses into ultimate
+    @test qx(cso2001,35,21:30) == [0.00315,0.00357,0.00406,0.00461,0.00508,0.00621,0.0069,0.00773,0.00867,0.00965]
+    @test qx(cso2001,35,1:30) == [0.00037,0.00043,0.00049,0.00057,0.00063,0.0007,0.00077,0.00084,0.00092,0.00101,0.00114,0.00127,0.00143,0.00159,0.00174,0.00188,0.00208,0.00231,0.00251,0.00279,0.00315,0.00357,0.00406,0.00461,0.00508,0.00621,0.0069,0.00773,0.00867,0.00965]
+
 
 end
