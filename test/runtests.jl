@@ -50,10 +50,11 @@ end
     @test qx(xtbl,35,26) ≈ 	0.00621
 end
 
+tables = MortalityTables.tables()
 
 @testset "SOA tables" begin
 
-    tables = MortalityTables.tables()
+
     cso2001 = tables["2001 CSO Super Preferred Select and Ultimate - Male Nonsmoker, ANB"]
     vbt2001 = tables["2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB"]
     cso1980 = tables["1980 CSO Basic Table – Male, ANB"]
@@ -89,5 +90,26 @@ end
     @test qx(cso2001,35,21:30) == [0.00315,0.00357,0.00406,0.00461,0.00508,0.00621,0.0069,0.00773,0.00867,0.00965]
     @test qx(cso2001,35,1:30) == [0.00037,0.00043,0.00049,0.00057,0.00063,0.0007,0.00077,0.00084,0.00092,0.00101,0.00114,0.00127,0.00143,0.00159,0.00174,0.00188,0.00208,0.00231,0.00251,0.00279,0.00315,0.00357,0.00406,0.00461,0.00508,0.00621,0.0069,0.00773,0.00867,0.00965]
 
+
+end
+
+@testset "Mortality Assumption" begin
+
+    vbt2001 = tables["2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB"]
+
+
+    # q(b,20,0.5) ≈ 0.00077 * # Balducci
+
+    # uniform
+    u = MortalityAssumption(vbt2001,Uniform())
+    @test q(u,25,1) ≈ 0.00101
+    @test p(u,25,0.5) ≈ 1 - 0.00101 * 0.5
+    @test p(u,25,1.5) ≈ (1 - 0.00101) * (1 - 0.00104 * 0.5)
+
+    #constant
+    c = MortalityAssumption(vbt2001,Constant())
+    @test q(c,25,1) ≈ 0.00101 
+    @test p(c,25,0.5) ≈ (1 - 0.00101) ^ 0.5
+    @test p(c,25,1.5) ≈ (1 - 0.00101) * (1 - 0.00104) ^ 0.5
 
 end

@@ -99,6 +99,29 @@ end
 
 
 ##################################
+### Moratlity Assumption        ##
+##################################
+# combines a table with basic assumptions like
+# how to interpolate mortaility for partial years
+# based on https://www.soa.org/globalassets/assets/Files/Research/2016-10-experience-study-calculations.pdf
+abstract type DeathDistribution end
+
+struct Balducci <: DeathDistribution end
+struct Uniform <: DeathDistribution end
+struct Constant <: DeathDistribution end
+
+
+# abstract type MortalityAssumption end
+
+struct MortalityAssumption
+    table::MortalityTable
+    distribution::DeathDistribution
+end
+MortalityAssumption(t::MortalityTable) = MortalityAssumption(t,Constant())
+
+
+
+##################################
 ### Basic Single Life Mortality ##
 ##################################
 
@@ -115,6 +138,17 @@ end
 """
 function p(table::MortalityTable,x,t)
     prod(1.0 .- table.ultimate[x:x+t-1])
+end
+
+function p(a::MortalityAssumption,x::Int,t::Int)
+    prod(1.0 .- a.table.ultimate[x:x+t-1])
+end
+
+function p(a::MortalityAssumption,x::Int,t::Real)
+    # get probability through whole and then subtract the fractional remainder
+    whole = floor(Int,t)
+    rem = t - whole
+    prod(1.0 .- a.table.ultimate[x:x+whole-1]) .* (1 .- q(a,x+whole,rem))
 end
 
 """
@@ -137,6 +171,22 @@ end
 """
 function q(table::MortalityTable,x,t)
     1.0 - p(table,x,t)
+end
+
+function q(a::MortalityAssumption,x,t)
+    if t >= 1
+        @show 1.0 - p(a.table,x,t)
+    else
+        q(a.distribution, a.table.ultimate[x],t)
+    end
+end
+
+function q(::Uniform,q,t)
+    t * q
+end
+
+function q(::Constant,q,t)
+    1 - (1-q) ^ t
 end
 
 """

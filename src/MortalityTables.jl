@@ -5,5 +5,7 @@ include("Mortality.jl")
 
 export MortalityTable,
     q, p, qx,
-    TableMetaData
+    TableMetaData,
+    MortalityAssumption,
+    Uniform,Balducci,Constant
 end # module
