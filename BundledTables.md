@@ -1,6 +1,80 @@
 These Tables come loaded in `/src/tables/`
 
 ```
+2017 Loaded CSO Smoker Distinct Smoker Male ALB
+2017 Loaded CSO Smoker Distinct Smoker Female ALB
+2017 Loaded CSO Smoker Distinct Nonsmoker Male ALB
+2017 Loaded CSO Smoker Distinct Nonsmoker Female ALB
+2017 Loaded CSO Composite Male ALB
+2017 Loaded CSO Composite Female ALB
+2015 VBT Unismoke Male ANB
+2015 VBT Unismoke Male ALB
+2015 VBT Unismoke Female ANB
+2015 VBT Unismoke Female ALB
+2015 VBT Smoker Distinct Male Smoker ANB
+2015 VBT Smoker Distinct Male Smoker ALB
+2015 VBT Smoker Distinct Male Non-Smoker ANB
+2015 VBT Smoker Distinct Male Non-Smoker ALB
+2015 VBT Smoker Distinct Female Smoker ANB
+2015 VBT Smoker Distinct Female Smoker ALB
+2015 VBT Smoker Distinct Female Non-Smoker ANB
+2015 VBT Smoker Distinct Female Non-Smoker ALB
+2015 VBT Male Smoker RR75 ANB
+2015 VBT Male Smoker RR75 ALB
+2015 VBT Male Smoker RR150 ANB
+2015 VBT Male Smoker RR150 ALB
+2015 VBT Male Smoker RR125 ANB
+2015 VBT Male Smoker RR125 ALB
+2015 VBT Male Smoker RR100 ANB
+2015 VBT Male Smoker RR100 ALB
+2015 VBT Male Non-Smoker RR90 ANB
+2015 VBT Male Non-Smoker RR90 ALB
+2015 VBT Male Non-Smoker RR80 ANB
+2015 VBT Male Non-Smoker RR80 ALB
+2015 VBT Male Non-Smoker RR70 ANB
+2015 VBT Male Non-Smoker RR70 ALB
+2015 VBT Male Non-Smoker RR60 ANB
+2015 VBT Male Non-Smoker RR60 ALB
+2015 VBT Male Non-Smoker RR50 ANB
+2015 VBT Male Non-Smoker RR50 ALB
+2015 VBT Male Non-Smoker RR175 ANB
+2015 VBT Male Non-Smoker RR175 ALB
+2015 VBT Male Non-Smoker RR150 ANB
+2015 VBT Male Non-Smoker RR150 ALB
+2015 VBT Male Non-Smoker RR125 ANB
+2015 VBT Male Non-Smoker RR125 ALB
+2015 VBT Male Non-Smoker RR110 ANB
+2015 VBT Male Non-Smoker RR110 ALB
+2015 VBT Male Non-Smoker RR100 ANB
+2015 VBT Male Non-Smoker RR100 ALB
+2015 VBT Female Smoker RR75 ANB
+2015 VBT Female Smoker RR75 ALB
+2015 VBT Female Smoker RR150 ANB
+2015 VBT Female Smoker RR150 ALB
+2015 VBT Female Smoker RR125 ANB
+2015 VBT Female Smoker RR125 ALB
+2015 VBT Female Smoker RR100 ANB
+2015 VBT Female Smoker RR100 ALB
+2015 VBT Female Non-Smoker RR90 ANB
+2015 VBT Female Non-Smoker RR90 ALB
+2015 VBT Female Non-Smoker RR80 ANB
+2015 VBT Female Non-Smoker RR80 ALB
+2015 VBT Female Non-Smoker RR70 ANB
+2015 VBT Female Non-Smoker RR70 ALB
+2015 VBT Female Non-Smoker RR60 ANB
+2015 VBT Female Non-Smoker RR60 ALB
+2015 VBT Female Non-Smoker RR50 ANB
+2015 VBT Female Non-Smoker RR50 ALB
+2015 VBT Female Non-Smoker RR175 ANB
+2015 VBT Female Non-Smoker RR175 ALB
+2015 VBT Female Non-Smoker RR150 ANB
+2015 VBT Female Non-Smoker RR150 ALB
+2015 VBT Female Non-Smoker RR125 ANB
+2015 VBT Female Non-Smoker RR125 ALB
+2015 VBT Female Non-Smoker RR110 ANB
+2015 VBT Female Non-Smoker RR110 ALB
+2015 VBT Female Non-Smoker RR100 ANB
+2015 VBT Female Non-Smoker RR100 ALB
 2001 VBT Super Preferred Select and Ultimate - Male Nonsmoker, ANB
 2001 VBT Super Preferred Select and Ultimate - Male Nonsmoker, ALB
 2001 VBT Super Preferred Select and Ultimate - Female Nonsmoker, ANB
@@ -65,14 +139,14 @@ These Tables come loaded in `/src/tables/`
 2001 CSO Preferred Select and Ultimate - Female Nonsmoker, ALB
 2001 CSO Composite Select and Ultimate - Male, ALB
 2001 CSO Composite Select and Ultimate - Female, ALB
+1980 CSO – Male, ALB
+1980 CSO – Female, ALB
 1980 CSO Basic Table – Male, ANB
 1980 CSO Basic Table – Female, ANB
 1980 CSO Basic Table - Male Smoker, ANB
 1980 CSO Basic Table - Male Nonsmoker, ANB
 1980 CSO Basic Table - Female Smoker, ANB
 1980 CSO Basic Table - Female Nonsmoker, ANB
-1980 CSO – Male, ALB
-1980 CSO – Female, ALB
 1980 CSO - Male Smoker, ANB
 1980 CSO - Male Smoker, ALB
 1980 CSO - Male Nonsmoker, ANB

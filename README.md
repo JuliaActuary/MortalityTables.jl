@@ -7,39 +7,23 @@
 
 A Julia package for working with MortalityTables. Has first-class support for missing values.
 
-## Simple Usage Example
+## Examples
+### Quickstart
 
 ```julia
 using MortalityTables
 
 tables = MortalityTables.tables() # loads the tables stored in the package folder
 vbt2001 = tables["2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB"]
-```
 
-## Usage
-
-### Index by issue age and duration to get select rates
-
-```julia
+# indexed by issue age and duration for select rate
 qx(vbt2001,35,1)        # .00036
-qx(vbt2001,35,61)       # .24298
 
-# can easily get ranges of values:
-qx(vbt2001,35,1:30)     # [0.0036, 0.0048, ...]
-```
-
-### Index by just age to get the ultimate rates
-```julia
+# indexed by just attained age for ultimate rate
 qx(vbt2001,95)          # .24298
-qx(vbt2001,50:70)       # [0.00319, 0.00345, ...]
 ```
 
-### Indexing
-The tables, by default, start at issue age zero and duration one and go to age
-121. For values that are not defined in the table within that range, you will get
-a `missing` value.
-
-## Example: Quickly access and compare tables
+### Example: Quickly access and compare tables
 ```julia
 using MortalityTables, Plots
 
@@ -54,8 +38,63 @@ plot([qx(cso_2001,age,durations),qx(cso_1980,age,durations)], 1:1:(100-age),labe
 ```
 ![plot of q's](https://i.imgur.com/gKqsSro.png)
 
+## Usage
 
-### Defined functions
+### Indexing
+
+The tables, by default, start at issue age zero and duration one and go to age 121. For values that are not defined in the table within that range, you will get
+a `missing` value.
+
+#### Index by issue age and duration to get select rates
+
+```julia
+qx(vbt2001,35,1)        # .00036
+qx(vbt2001,35,61)       # .24298
+
+# can easily get ranges of values:
+qx(vbt2001,35,1:30)     # [0.0036, 0.0048, ...]
+```
+
+#### Index by just age to get the ultimate rates
+```julia
+qx(vbt2001,95)          # .24298
+qx(vbt2001,50:70)       # [0.00319, 0.00345, ...]
+```
+
+### Other Usage
+
+#### Table Attributes
+```julia
+ω(vbt2001)              # 120
+omega(vbt2001)          # 120
+```
+
+#### Table MetaData
+
+When you have an expression that shows a Mortality table, it displays relevant information:
+
+```julia
+tables = MortalityTables.tables()
+vbt2001 = tables["2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB"]
+```
+
+This shows the following in a notebook or REPL:
+
+```
+MortalityTable:
+   Name:
+       2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB
+   Provider:
+       Society of Actuaries
+   mort.SOA.org ID:
+       1118
+   mort.SOA.org link:
+       https://mort.soa.org/ViewTable.aspx?&TableIdentity=1118
+   Description:
+       2001 Valuation Basic Table (VBT) Residual Standard Select and Ultimate Table -  Male Nonsmoker. Basis: Age Nearest Birthday. Minimum Select Age: 0. Maximum Select Age: 99. Minimum Ultimate Age: 25. Maximum Ultimate Age: 120
+```
+
+### Exported functions
 ```julia
 """
 ₜp₍ₓ₎₊ₛ , or the probability that a life aged `x + s` who was select
@@ -96,12 +135,11 @@ q(table::MortalityTable,x)
 
 
 """
-`qx` is a convenience funcsdtion that allows you to get the rate at a given `age`.
-If wanting select/ultimate rates, specifiy the `duration` and `age` should be the issue age.
+`qx` is a convenience function that allows you to get the rate at a given `age`.
+If wanting select/ultimate rates, specify the `duration` and `age` should be the issue age.
 """
 qx(table::MortalityTable,age)
 qx(table::MortalityTable,age,duration)
-```
 
 """
 `omega` (also `ω`) returns the last attained age which the table has defined (ie not including)
@@ -109,32 +147,7 @@ qx(table::MortalityTable,age,duration)
 """
 omega(table::MortalityTable)
 ω(table::MortalityTable)
-
-
-### Table MetaData
-
-When you have an expression that shows a Mortality table, it displays relevant information:
-
-```julia
-tables = MortalityTables.tables()
-vbt2001 = tables["2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB"]
 ```
-
-This shows the following in a notebook or REPL:
-
-```
-MortalityTable:
-   Name:
-       2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB
-   Provider:
-       Society of Actuaries
-   mort.SOA.org ID:
-       1118
-   Description:
-       2001 Valuation Basic Table (VBT) Residual Standard Select and Ultimate Table -  Male Nonsmoker. Basis: Age Nearest Birthday. Minimum Select Age: 0. Maximum Select Age: 99. Minimum Ultimate Age: 25. Maximum Ultimate Age: 120
-```
-
-
 
 ### Some Batteries Included
 
@@ -144,6 +157,8 @@ Not all tables have been tested that they work by default, though I have not enc
 
 Included:
 ```
+2017 Loaded CSO
+2015 VBT
 2001 VBT
 2001 CSO
 1980 CSO
