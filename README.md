@@ -34,9 +34,15 @@ cso_1980 = tables["1980 CSO - Male Nonsmoker, ANB"]
 
 age = 27
 durations = 1:30
-plot([qx(cso_2001,age,durations),qx(cso_1980,age,durations)], 1:1:(100-age),label = ["2001 CSO M SuperPref NS" "1980 CSO M NS"], plot_title = ["Comparison of 1980 and 2001 CSO"])
+plot(
+   durations,
+   [qx(cso_2001,age,durations),qx(cso_1980,age,durations)],
+   label = ["2001 CSO M SuperPref NS" "1980 CSO M NS"], 
+   title = "Comparison of 1980 and 2001 CSO \n for 27-year-old male",
+   xlabel="duration")
 ```
-![plot of q's](https://i.imgur.com/gKqsSro.png)
+![Comparison of 2001 and 1980 CSO](https://user-images.githubusercontent.com/711879/74115814-789cfd80-4b76-11ea-9d27-c4901844bcb4.png)
+
 
 ## Usage
 
