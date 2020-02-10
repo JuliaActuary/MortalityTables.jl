@@ -103,6 +103,13 @@ qx(table::MortalityTable,age)
 qx(table::MortalityTable,age,duration)
 ```
 
+"""
+`omega` (also `ω`) returns the last attained age which the table has defined (ie not including)
+`missing`
+"""
+omega(table::MortalityTable)
+ω(table::MortalityTable)
+
 
 ### Table MetaData
 

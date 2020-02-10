@@ -207,3 +207,18 @@ end
 function qx(table::MortalityTable,age,duration)
     table.select[age,duration]
 end
+
+
+"""
+`omega` (also `ω`) returns the last attained age which the table has defined (ie not including)
+`missing`
+"""
+function omega(table::MortalityTable)
+    age = lastindex(table.ultimate)
+    while  ismissing(table.ultimate[age]) && age > 0
+        age -= 1
+    end
+    return age
+end
+
+ω  = omega

@@ -65,20 +65,29 @@ tables = MortalityTables.tables()
     @test qx(cso1980,95) ≈ .27302
     @test ismissing(qx(cso1980,35,95))
     @test ismissing(qx(cso1980,101))
+    @test omega(cso1980) == 100
+    @test ω(cso1980) == 100
+
 
     @test qx(cso2001,35,1) ≈ .00037
     @test qx(cso2001,35,61) ≈ .26719
     @test qx(cso2001,16) ≈ .00041
     @test qx(cso2001,95) ≈ .26719
+    @test qx(cso2001,120) ≈ 1.0
     @test ismissing(qx(cso2001,15))
     @test_throws BoundsError qx(cso2001,150)
     @test ismissing(qx(cso2001,35,95))
+    @test omega(cso2001) == 120
+    @test ω(cso2001) == 120
 
     @test qx(vbt2001,35,1) ≈ .00036
     @test qx(vbt2001,35,61) ≈ .24298
     @test qx(vbt2001,95) ≈ .24298
+    @test qx(vbt2001,120) ≈ 1.0
     @test ismissing(qx(vbt2001,35,95))
     @test_throws BoundsError qx(vbt2001,150)
+    @test omega(vbt2001) == 120
+    @test ω(vbt2001) == 120
 
     @test cso2001[29,1:3] == [0.00029, 0.00035, 0.0004]
 
@@ -108,7 +117,7 @@ end
 
     #constant
     c = MortalityAssumption(vbt2001,Constant())
-    @test q(c,25,1) ≈ 0.00101 
+    @test q(c,25,1) ≈ 0.00101
     @test p(c,25,0.5) ≈ (1 - 0.00101) ^ 0.5
     @test p(c,25,1.5) ≈ (1 - 0.00101) * (1 - 0.00104) ^ 0.5
 
