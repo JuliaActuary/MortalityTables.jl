@@ -1,5 +1,6 @@
 import DataStructures
 import XMLDict
+using ProgressMeter
 
 include("MortalityTable.jl")
 
@@ -150,7 +151,7 @@ function tables(dir=nothing)
 
     tables = Dict()
     for (root, dirs, files) in walkdir(table_dir)
-        for file in files
+        @showprogress "loading table files..." for file in files
 
             if basename(file)[end-3:end] == ".xml"
                 tbl = readXTbML(joinpath(root,file))
