@@ -36,12 +36,12 @@ end
 
 function parseXTbMLTable(x,path)
     md = x["XTbML"]["ContentClassification"]
-    name = get(md,"TableName",nothing)
-    id = get(md,"TableIdentity",nothing)
-    provider = get(md,"ProviderName",nothing)
-    reference = get(md,"TableReference",nothing)
-    description = get(md,"TableDescription",nothing)
-    comments = get(md,"Comments",nothing)
+    name = get(md,"TableName",nothing) |> strip
+    id = get(md,"TableIdentity",nothing) |> strip
+    provider = get(md,"ProviderName",nothing) |> strip
+    reference = get(md,"TableReference",nothing) |> strip
+    description = get(md,"TableDescription",nothing) |> strip
+    comments = get(md,"Comments",nothing) |> strip
     source_path = path
     d = TableMetaData(name=name,id=id,provider=provider,reference=reference,
         description=description,comments=comments,source_path=source_path)
