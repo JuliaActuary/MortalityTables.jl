@@ -175,7 +175,7 @@ end
 
 function q(a::MortalityAssumption,x,t)
     if t >= 1
-        @show 1.0 - p(a.table,x,t)
+        1.0 - p(a.table,x,t)
     else
         q(a.distribution, a.table.ultimate[x],t)
     end
