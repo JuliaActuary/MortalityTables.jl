@@ -1,11 +1,99 @@
 These Tables come loaded in `/src/tables/`
 
 ```
+2017 Unloaded CSO Smoker Distinct Smoker Male ANB
+2017 Unloaded CSO Smoker Distinct Smoker Male ALB
+2017 Unloaded CSO Smoker Distinct Smoker Female ANB
+2017 Unloaded CSO Smoker Distinct Smoker Female ALB
+2017 Unloaded CSO Smoker Distinct Nonsmoker Male ANB
+2017 Unloaded CSO Smoker Distinct Nonsmoker Male ALB
+2017 Unloaded CSO Smoker Distinct Nonsmoker Female ANB
+2017 Unloaded CSO Smoker Distinct Nonsmoker Female ALB
+2017 Unloaded CSO Preferred Structure Smoker Residual Standard Male ANB
+2017 Unloaded CSO Preferred Structure Smoker Residual Standard Male ALB
+2017 Unloaded CSO Preferred Structure Smoker Residual Standard Female ANB
+2017 Unloaded CSO Preferred Structure Smoker Residual Standard Female ALB
+2017 Unloaded CSO Preferred Structure Smoker Preferred Male ANB
+2017 Unloaded CSO Preferred Structure Smoker Preferred Male ALB
+2017 Unloaded CSO Preferred Structure Smoker Preferred Female ANB
+2017 Unloaded CSO Preferred Structure Smoker Preferred Female ALB
+2017 Unloaded CSO Preferred Structure Nonsmoker Super Preferred Male ANB
+2017 Unloaded CSO Preferred Structure Nonsmoker Super Preferred Male ALB
+2017 Unloaded CSO Preferred Structure Nonsmoker Super Preferred Female ANB
+2017 Unloaded CSO Preferred Structure Nonsmoker Super Preferred Female ALB
+2017 Unloaded CSO Preferred Structure Nonsmoker Residual Standard Male ANB
+2017 Unloaded CSO Preferred Structure Nonsmoker Residual Standard Male ALB
+2017 Unloaded CSO Preferred Structure Nonsmoker Residual Standard Female ANB
+2017 Unloaded CSO Preferred Structure Nonsmoker Residual Standard Female ALB
+2017 Unloaded CSO Preferred Structure Nonsmoker Preferred Male ANB
+2017 Unloaded CSO Preferred Structure Nonsmoker Preferred Male ALB
+2017 Unloaded CSO Preferred Structure Nonsmoker Preferred Female ANB
+2017 Unloaded CSO Preferred Structure Nonsmoker Preferred Female ALB
+2017 Unloaded CSO Composite Male ANB
+2017 Unloaded CSO Composite Male ALB
+2017 Unloaded CSO Composite Female ANB
+2017 Unloaded CSO Composite Female ALB
+2017 Loaded CSO Smoker Gender-Blended 80% Male ANB
+2017 Loaded CSO Smoker Gender-Blended 80% Male ALB
+2017 Loaded CSO Smoker Gender-Blended 60% Male ANB
+2017 Loaded CSO Smoker Gender-Blended 60% Male ALB
+2017 Loaded CSO Smoker Gender-Blended 50% Male ANB
+2017 Loaded CSO Smoker Gender-Blended 50% Male ALB
+2017 Loaded CSO Smoker Gender-Blended 40% Male ANB
+2017 Loaded CSO Smoker Gender-Blended 40% Male ALB
+2017 Loaded CSO Smoker Gender-Blended 20% Male ANB
+2017 Loaded CSO Smoker Gender-Blended 20% Male ALB
+2017 Loaded CSO Smoker Distinct Smoker Male ANB
 2017 Loaded CSO Smoker Distinct Smoker Male ALB
+2017 Loaded CSO Smoker Distinct Smoker Female ANB
 2017 Loaded CSO Smoker Distinct Smoker Female ALB
+2017 Loaded CSO Smoker Distinct Nonsmoker Male ANB
 2017 Loaded CSO Smoker Distinct Nonsmoker Male ALB
+2017 Loaded CSO Smoker Distinct Nonsmoker Female ANB
 2017 Loaded CSO Smoker Distinct Nonsmoker Female ALB
+2017 Loaded CSO Preferred Structure Smoker Residual Standard Male ANB
+2017 Loaded CSO Preferred Structure Smoker Residual Standard Male ALB
+2017 Loaded CSO Preferred Structure Smoker Residual Standard Female ANB
+2017 Loaded CSO Preferred Structure Smoker Residual Standard Female ALB
+2017 Loaded CSO Preferred Structure Smoker Preferred Male ANB
+2017 Loaded CSO Preferred Structure Smoker Preferred Male ALB
+2017 Loaded CSO Preferred Structure Smoker Preferred Female ANB
+2017 Loaded CSO Preferred Structure Smoker Preferred Female ALB
+2017 Loaded CSO Preferred Structure Nonsmoker Super Preferred Male ANB
+2017 Loaded CSO Preferred Structure Nonsmoker Super Preferred Male ALB
+2017 Loaded CSO Preferred Structure Nonsmoker Super Preferred Female ANB
+2017 Loaded CSO Preferred Structure Nonsmoker Super Preferred Female ALB
+2017 Loaded CSO Preferred Structure Nonsmoker Residual Standard Male ANB
+2017 Loaded CSO Preferred Structure Nonsmoker Residual Standard Male ALB
+2017 Loaded CSO Preferred Structure Nonsmoker Residual Standard Female ANB
+2017 Loaded CSO Preferred Structure Nonsmoker Residual Standard Female ALB
+2017 Loaded CSO Preferred Structure Nonsmoker Preferred Male ANB
+2017 Loaded CSO Preferred Structure Nonsmoker Preferred Male ALB
+2017 Loaded CSO Preferred Structure Nonsmoker Preferred Female ANB
+2017 Loaded CSO Preferred Structure Nonsmoker Preferred Female ALB
+2017 Loaded CSO Nonsmoker Gender-Blended 80% Male ANB
+2017 Loaded CSO Nonsmoker Gender-Blended 80% Male ALB
+2017 Loaded CSO Nonsmoker Gender-Blended 60% Male ANB
+2017 Loaded CSO Nonsmoker Gender-Blended 60% Male ALB
+2017 Loaded CSO Nonsmoker Gender-Blended 50% Male ANB
+2017 Loaded CSO Nonsmoker Gender-Blended 50% Male ALB
+2017 Loaded CSO Nonsmoker Gender-Blended 40% Male ANB
+2017 Loaded CSO Nonsmoker Gender-Blended 40% Male ALB
+2017 Loaded CSO Nonsmoker Gender-Blended 20% Male ANB
+2017 Loaded CSO Nonsmoker Gender-Blended 20% Male ALB
+2017 Loaded CSO Composite Male ANB
 2017 Loaded CSO Composite Male ALB
+2017 Loaded CSO Composite Gender-Blended 80% Male ANB
+2017 Loaded CSO Composite Gender-Blended 80% Male ALB
+2017 Loaded CSO Composite Gender-Blended 60% Male ANB
+2017 Loaded CSO Composite Gender-Blended 60% Male ALB
+2017 Loaded CSO Composite Gender-Blended 50% Male ANB
+2017 Loaded CSO Composite Gender-Blended 50% Male ALB
+2017 Loaded CSO Composite Gender-Blended 40% Male ANB
+2017 Loaded CSO Composite Gender-Blended 40% Male ALB
+2017 Loaded CSO Composite Gender-Blended 20% Male ANB
+2017 Loaded CSO Composite Gender-Blended 20% Male ALB
+2017 Loaded CSO Composite Female ANB
 2017 Loaded CSO Composite Female ALB
 2015 VBT Unismoke Male ANB
 2015 VBT Unismoke Male ALB
