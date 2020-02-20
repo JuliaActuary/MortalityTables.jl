@@ -52,6 +52,13 @@ end
 
 tables = MortalityTables.tables()
 
+@testset "TableMetaData" begin
+    @testset "whitespace managment" begin
+        # "2017 Loaded CSO Smoker Distinct Nonsmoker Female ALB" comes with a trailing whitespace
+        @test "2017 Loaded CSO Smoker Distinct Nonsmoker Female ALB" in keys(tables)
+    end
+end
+
 @testset "SOA tables" begin
 
 
