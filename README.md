@@ -37,7 +37,7 @@ durations = 1:30
 plot(
    durations,
    [qx(cso_2001,age,durations),qx(cso_1980,age,durations)],
-   label = ["2001 CSO M SuperPref NS" "1980 CSO M NS"], 
+   label = ["2001 CSO M SuperPref NS" "1980 CSO M NS"],
    title = "Comparison of 1980 and 2001 CSO \n for 27-year-old male",
    xlabel="duration")
 ```
@@ -48,8 +48,11 @@ plot(
 
 ### Indexing
 
-The tables, by default, start at issue age zero and duration one and go to age 121. For values that are not defined in the table within that range, you will get
-a `missing` value.
+Tables are indexed by a starting age and duration (even ultimate tables, under the hood). For tables with a starting age that is defined, but you've requested an attained age beyond the defined rates, you will get a `BoundsError`. If you ask for a starting age that is not defined, you will get a `missing`.
+
+The rationale for this is, for example, this [2001 CSO table](https://mort.soa.org/ViewTable.aspx?&TableIdentity=1076) is not defined for ages 15 and under.
+- You will get a `missing` if you ask for starting age 10 or 150, because it's plausible that you could encounter a a starting age not defined by a table.
+- You will get a `BoundsError` if you ask for an attained age 150 for someone select at age 16, because it is beyond the table's definition of its end.
 
 #### Index by issue age and duration to get select rates
 
