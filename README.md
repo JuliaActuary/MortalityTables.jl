@@ -159,12 +159,12 @@ time = 1
 q(table,issue_age,duration,time)
 ```
 
-"""
-`omega` (also `ω`) returns the last attained age which the table has defined (ie not including)
-`missing`
-"""
-omega(table::MortalityTable)
-ω(table::MortalityTable)
+#### `ω`
+Returns the last attained age which the table has defined (ie not including) for a given issue_age.
+
+```julia
+omega(table, issue_age)
+ω(table, issue_age)
 ```
 
 ### Some Batteries Included
