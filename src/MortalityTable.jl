@@ -128,29 +128,6 @@ Base.show(io::IO, ::MIME"text/plain", mt::MortalityTable) =
 
 
 ##################################
-### Moratlity Assumption        ##
-##################################
-# combines a table with basic assumptions like
-# how to interpolate mortaility for partial years
-# based on https://www.soa.org/globalassets/assets/Files/Research/2016-10-experience-study-calculations.pdf
-abstract type DeathDistribution end
-
-struct Balducci <: DeathDistribution end
-struct Uniform <: DeathDistribution end
-struct Constant <: DeathDistribution end
-
-
-# abstract type MortalityAssumption end
-
-struct MortalityAssumption
-    table::MortalityTable
-    distribution::DeathDistribution
-end
-MortalityAssumption(t::MortalityTable) = MortalityAssumption(t,Constant())
-
-
-
-##################################
 ### Basic Single Life Mortality ##
 ##################################
 
