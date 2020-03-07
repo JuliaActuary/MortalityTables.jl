@@ -1,71 +1,112 @@
-using OffsetArrays
+using DataStructures
 
 
 include("MetaData.jl")
 
+
+## refactor see https://github.com/JuliaActuary/MortalityTables.jl/issues/23
 """
-`MortalityMatrix` is a 2-dimensional array with duration across the columns
-and issue age down the rows. Issue age must begin at age 0 and duration must
-begin at 1. The index of the table is [`issue_age`,`duration`].
-
-For a select table, duration will run across the row until the end of the rates (this is different than
-how tables are typcially displayed given limited width constraints).
+MortalityVector
 """
-const MortalityMatrix= Union{OffsetArray{Union{Missing, Float64},2,Array{Union{Missing, Float64},2}},
-                                OffsetArray{Float64,2,Array{Float64,2}}}
 
-const MortalityArray=  Union{OffsetArray{Union{Missing, Float64},1,Array{Union{Missing, Float64},1}},
-                                OffsetArrays.OffsetArray{Float64,1,Array{Float64,1}}}
-
-"""
-    ultimate_vector_to_matrix(v,start_age=0)
-
-Given a flat vector, turn it into a matrix to fit a select format.
-This enables the same call for select mortality to work on an ultimate-only
-    table. """
-function ultimate_vector_to_matrix(v,start_age=0)
-    age_offset = start_age - 1
-    v = OffsetArray(v,start_age - 1)
-    function inbounds(v,i)
-        indices = axes(v)[1]
-         first(indices) <= i <= last(indices)
-    end
-    OffsetArray([inbounds(v,iss_age + dur - 1) ? v[iss_age + dur - 1] : missing for dur=1:mort_max_dur, iss_age=0:mort_max_issue_age],-1,0)
+struct MortalityVector
+    q
 end
 
-function normalized_vector(v,start_age=0)
-    age_offset = start_age - 1
-    v = OffsetArray(v,start_age - 1)
-    function inbounds(v,i)
-        indices = axes(v)[1]
-        first(indices) <= i <= last(indices)
+"""
+"""
+
+abstract type MortalityDict end
+
+struct SelectMortality <: MortalityDict
+    v
+end
+
+struct UltimateMortality <: MortalityDict
+    v
+end
+
+"""
+Given an ultimate vector, will create a dictionary that is
+indexed by issue age and will return `missing` `if the age is
+not available.
+"""
+function UltimateMortality(v::Array{<:Real,1},start_age=0)
+    d = DefaultDict(missing)
+    for (i,q) in enumerate(v)
+        d[start_age + i - 1] = MortalityVector(v[i:end])
+    end
+    return UltimateMortality(d)
+end
+
+"""
+Given an 2D array, will create a dictionary that is
+indexed by issue age and will return `missing` `if the age is
+not available.
+"""
+
+function SelectMortality(select,ultimate::UltimateMortality,start_age=0)
+    d = DefaultDict(missing)
+    last_select_age = size(select,2) - 1  + size(select,1) - 1 + start_age
+
+    # get the end of the table that would apply to the last select attained age
+    last_ult_age = ω(ultimate,start_age + size(select,1)-1)
+
+    # iterate down the rows (issue ages)
+    for i in 1:size(select,1)
+        iss_age = start_age + i - 1
+        ult_age_start = length(select[i,1:end]) + iss_age
+        select_qs = select[i,1:end]
+
+        if ult_age_start >= maximum(keys(ultimate.v))
+            d[iss_age] = select_qs |> MortalityVector
+
+        else # use ultimate rates if available
+            last_age = ω(ultimate,ult_age_start)
+            last_dur = last_age - ult_age_start + 1
+            start_dur = 1
+            ult_qs = q(ultimate,ult_age_start,start_dur:last_dur)
+            d[iss_age] = vcat(select_qs,ult_qs) |> MortalityVector
+        end
+
+
     end
 
-    OffsetArray([inbounds(v,age) ? v[age] : missing for age=0:mort_max_issue_age],-1)
+    return SelectMortality(d)
 end
+
+
+
 """
     MortalityTable
 
     A struct that holds a select (two-dimensional) and ultimate (vector) rates,
         along with MetaData associated with the table.
 """
-struct MortalityTable
-    select::MortalityMatrix
-    ultimate::MortalityArray
+abstract type MortalityTable end
+
+struct SelectUltimateMortalityTable <: MortalityTable
+    select::SelectMortality
+    ultimate::UltimateMortality
     d::TableMetaData
 end
 
-"""
-    MortalityTable(vector,start_age,::MetaData)
+struct UltimateMortalityTable <: MortalityTable
+    ultimate::UltimateMortality
+    d::TableMetaData
+end
+function MortalityTable(select::SelectMortality,ultimate::UltimateMortality,d::TableMetaData)
+    return SelectUltimateMortalityTable(select,ultimate,d)
+end
 
-    A constructor that will convert a 1-d array of rates into a MortalityTable
-    object. `start_age` is the first age for which the rates apply.
-"""
-function MortalityTable(ultimate::Array{Float64,1},start_age,name=TableMetaData())
-    MortalityTable(
-    ultimate_vector_to_matrix(ultimate,start_age),
-    normalized_vector(ultimate,start_age),
-    name)
+function MortalityTable(ultimate::UltimateMortality,d::TableMetaData)
+    # sel_α, sel_ω = extrema(keys(ultimate.v))
+    # create a dummy select table which has the ultimate rate for the first
+    # duration. From there, the normal SelectMortality constructor can take over
+
+    # select = [q(ultimate,age,1) for age in sel_α:sel_ω ]
+    # select = SelectMortality(select,ultimate,sel_α)
+    return UltimateMortalityTable(ultimate,d)
 end
 
 
@@ -85,140 +126,98 @@ Base.show(io::IO, ::MIME"text/plain", mt::MortalityTable) =
            $(mt.d.description)
     """)
 
-"""
-Return a vector/array of mortality rates. Two arguments returns select rates,
-while one argument returns ultimate rates.
-"""
-function Base.getindex(mt::MortalityTable,ages,durs)
-    return mt.select[ages,durs]
-end
-
-function Base.getindex(mt::MortalityTable,ages)
-    return mt.ultimate[ages]
-end
-
-
-##################################
-### Moratlity Assumption        ##
-##################################
-# combines a table with basic assumptions like
-# how to interpolate mortaility for partial years
-# based on https://www.soa.org/globalassets/assets/Files/Research/2016-10-experience-study-calculations.pdf
-abstract type DeathDistribution end
-
-struct Balducci <: DeathDistribution end
-struct Uniform <: DeathDistribution end
-struct Constant <: DeathDistribution end
-
-
-# abstract type MortalityAssumption end
-
-struct MortalityAssumption
-    table::MortalityTable
-    distribution::DeathDistribution
-end
-MortalityAssumption(t::MortalityTable) = MortalityAssumption(t,Constant())
-
-
 
 ##################################
 ### Basic Single Life Mortality ##
 ##################################
 
-"""
-ₜp₍ₓ₎₊ₛ , or the probability that a life aged `x + s` who was select
+@doc raw"""
+The probability that a life with given `issue_age` and currently in its nth
+`duration`dies survives to at least `duration` + `time`. If given select
+mortality, will be based on select rates.
+
+Equivalant actuarial notation:
+``$_tp_{(x)+s}$``, or the probability that a life aged `x + s` who was select
 at age `x` survives to at least age `x+s+t`
 """
-function p(table::MortalityTable,x,s,t)
-    prod(1.0 .- table.select[x,s+1:s+t])
+function p(table::MortalityDict,issue_age,duration,time)
+    prod(1.0 .- q(table,issue_age,duration:(duration+time-1)))
 end
 
+@doc raw"""
+the probability that a life aged `issue_age` + `duration` - 1
+survives one additional timepoint
+
+Equivalent actuarial notation:
+``$p_x$`` , or
 """
-ₜpₓ , or the probability that a life aged `x` survives to at least age `t`
-"""
-function p(table::MortalityTable,x,t)
-    prod(1.0 .- table.ultimate[x:x+t-1])
+function p(table::MortalityDict,issue_age,duration)
+    return 1.0 - q(table,issue_age,duration)
 end
 
-function p(a::MortalityAssumption,x::Int,t::Int)
-    prod(1.0 .- a.table.ultimate[x:x+t-1])
+function p(table::UltimateMortalityTable,issue_age,duration)
+    return p(table.ultimate,issue_age,duration)
 end
 
-function p(a::MortalityAssumption,x::Int,t::Real)
-    # get probability through whole and then subtract the fractional remainder
-    whole = floor(Int,t)
-    rem = t - whole
-    prod(1.0 .- a.table.ultimate[x:x+whole-1]) .* (1 .- q(a,x+whole,rem))
-end
+@doc raw"""
+The probability that a life with given `issue_age` and currently in its nth
+`duration`dies by at least `duration` + `time`. If given select mortality,
+will be based on select rates.
 
-"""
-pₓ , or the probability that a life aged `x` survives through age `x+1`
-"""
-function p(table::MortalityTable,x)
-    1.0 - q(table,x)
-end
-
-"""
-ₜq₍ₓ₎₊ₛ , or the probability that a life aged `x + s` who was select
+Equivalent actuarial notation:
+``$p_{(x)+s}$``  or the probability that a life aged `x + s` who was select
 at age `x` dies by least age `x+s+t`
 """
-function q(table::MortalityTable,x,s,t)
-    1.0 - p(table,x,s,t)
+function q(table::MortalityDict,issue_age,duration,time)
+    1.0 - p(table::MortalityDict,issue_age,duration,time)
 end
 
-"""
-ₜqₓ , or the probability that a life aged `x` dies by age `x+t`
-"""
-function q(table::MortalityTable,x,t)
-    1.0 - p(table,x,t)
+function q(table::UltimateMortalityTable,issue_age,duration,time)
+    return q(table.ultimate,issue_age,duration,time)
 end
 
-function q(a::MortalityAssumption,x,t)
-    if t >= 1
-        1.0 - p(a.table,x,t)
+
+function q(m::MortalityDict,issue_age::Int,duration)
+    mv = m.v[issue_age]
+    if ismissing(mv)
+        return mv
     else
-        q(a.distribution, a.table.ultimate[x],t)
+        return mv.q[duration]
     end
 end
 
-function q(::Uniform,q,t)
-    t * q
-end
-
-function q(::Constant,q,t)
-    1 - (1-q) ^ t
-end
-
-"""
-qₓ , or the probability that a life aged `x` dies by age `x+1`
-"""
-function q(table::MortalityTable,x)
-    table.ultimate[x]
-end
-
-"""
-`qx` is a convenience function that allows you to get the rate at a given `age`.
-If wanting select/ultimate rates, specifiy the `duration` and `age` should be the issue age.
-"""
-function qx(table::MortalityTable,age)
-    q(table,age)
-end
-
-function qx(table::MortalityTable,age,duration)
-    table.select[age,duration]
-end
-
-
-"""
-`omega` (also `ω`) returns the last attained age which the table has defined (ie not including)
-`missing`
-"""
-function omega(table::MortalityTable)
-    age = lastindex(table.ultimate)
-    while  ismissing(table.ultimate[age]) && age > 0
-        age -= 1
+function q(m::UltimateMortality,issue_age::Int)
+    mv = m.v[issue_age]
+    if ismissing(mv)
+        return mv
+    else
+        return mv.q[1]
     end
-    return age
 end
 
-ω  = omega
+function q(m::UltimateMortalityTable,issue_age,duration)
+    return q(m.ultimate,issue_age,duration)
+end
+
+function q(m::MortalityDict,issue_age::AbstractArray,duration)
+    return [q(m,ia,duration) for ia in issue_age]
+end
+
+function q(m::UltimateMortalityTable,issue_age::AbstractArray,duration)
+    return q(m.ultimate,issue_age,duration)
+end
+
+function omega(m::MortalityDict,issue_age)
+    mv = m.v[issue_age]
+    if ismissing(mv)
+        return mv
+    else
+        return issue_age + length(m.v[issue_age].q) - 1
+    end
+end
+
+function omega(m::UltimateMortalityTable,issue_age)
+    return omega(m.ultimate,issue_age)
+end
+
+ω = omega

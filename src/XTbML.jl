@@ -89,10 +89,10 @@ function parseXTbMLTable(x,path)
 end
 
 """
-    qx(table::XTbMLTable, issueAge, duration)
+    q_select(table::XTbMLTable, issueAge, duration)
 Given a mortality table, an issue age, and a duration, returns the appropriate select or ultimate qx.
 """
-function qx(table::XTbMLTable, issueAge::Int, duration::Int)
+function q_select(table::XTbMLTable, issueAge::Int, duration::Int)
     if length(table.select) > 0
         s = table.select[issueAge]
         if ismissing(s)
@@ -111,22 +111,47 @@ function qx(table::XTbMLTable, issueAge::Int, duration::Int)
 end
 
 """
-    qx(table::XTbMLTable, age)
+    q_ulitmate(table::XTbMLTable, age)
 Given a mortality table and an age returns the appropriate ultimate qx.
 """
-function qx(table::XTbMLTable, age)
+function q_ultimate(table::XTbMLTable, age)
     return table.ultimate[age]
 end
 
 function XTbML_Table_To_MortalityTable(tbl::XTbMLTable)
+    ult_α, ult_ω = extrema(keys(tbl.ultimate))
+    ult = UltimateMortality([tbl.ultimate[age] for age=ult_α:ult_ω],ult_α)
 
-    return MortalityTable(
-    OffsetArray([qx(tbl,issue_age,dur) for issue_age=0:mort_max_issue_age,dur=1:mort_max_dur],-1,0),
-    OffsetArray([qx(tbl,age) for age=0:mort_max_issue_age],-1),
-    tbl.d)
+    if length(tbl.select) > 0
+        sel_α,sel_ω = extrema(keys(tbl.select))
+        sel_end_dur = maximum([length(tbl.select[age]) for age in sel_α:sel_ω])
+
+        select_array = Array{Any}(undef,length(sel_α:sel_ω),sel_end_dur)
+        fill!(select_array,missing)
+
+        for (iss_age,rate_vec) in tbl.select
+            for (dur, rate) in rate_vec
+                select_array[iss_age - sel_α + 1,dur] = rate
+            end
+        end
+
+
+
+        sel = SelectMortality(
+            identity.(select_array), # identity narrows type from Any as much as possible
+
+            ult,
+            sel_α
+        )
+
+        return MortalityTable(sel,ult,tbl.d)
+    else
+        return MortalityTable(ult,tbl.d)
+    end
 end
 
 function readXTbML(path)
+    path
     x = open_and_read(path) |> getXML
     XTbML_Table_To_MortalityTable(parseXTbMLTable(x,path))
 end

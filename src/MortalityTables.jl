@@ -4,9 +4,11 @@ include("Mortality.jl")
 
 
 export MortalityTable,
-    q, p, qx,
+    q, p,
     omega,ω,
     TableMetaData,
-    MortalityAssumption,
-    Uniform,Balducci,Constant
+    SelectMortality,
+    UltimateMortality,
+    MortalityVector,
+    MortalityTable
 end # module

@@ -51,11 +51,6 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 deps = ["Base64"]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 
-[[OffsetArrays]]
-git-tree-sha1 = "707e34562700b81e8aa13548eb6b23b18112e49b"
-uuid = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
-version = "1.0.2"
-
 [[OrderedCollections]]
 deps = ["Random", "Serialization", "Test"]
 git-tree-sha1 = "c4c13474d23c60d20a67b217f1d7f22a40edf8f1"
