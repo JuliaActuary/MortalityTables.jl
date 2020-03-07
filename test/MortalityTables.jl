@@ -24,6 +24,26 @@
             @test ω(cso1980.ultimate,35) == 100
             @test ω(cso1980,35) == 100
         end
+
+        @testset "2001 VBT" begin
+            vbt2001 = tables["2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB"]
+
+
+            @test q(vbt2001.select,35,1) ≈ .00036
+            @test q(vbt2001.select,35,61) ≈ .24298
+            @test q(vbt2001.select,95,1) ≈ .23815
+            @test q(vbt2001.ultimate,95) ≈ .24298
+            @test q(vbt2001.ultimate,120) ≈ 1.0
+            @test ismissing(q(vbt2001.select,120,1))
+            @test_throws BoundsError q(vbt2001.select,35,95)
+            @test ismissing(q(vbt2001.select,150,1))
+            @test ismissing(q(vbt2001.ultimate,150,1))
+            @test omega(vbt2001.select,20) == 120
+            @test ismissing(ω(vbt2001.ultimate,20))
+            @test ω(vbt2001.select,25) == 120
+
+        end
+
         @testset "2001 CSO" begin
             cso2001 = tables["2001 CSO Super Preferred Select and Ultimate - Male Nonsmoker, ANB"]
 
@@ -51,26 +71,17 @@
                 @test q(cso2001.select,35,21:30) == [0.00315,0.00357,0.00406,0.00461,0.00508,0.00621,0.0069,0.00773,0.00867,0.00965]
                 @test q(cso2001.select,35,1:30) == [0.00037,0.00043,0.00049,0.00057,0.00063,0.0007,0.00077,0.00084,0.00092,0.00101,0.00114,0.00127,0.00143,0.00159,0.00174,0.00188,0.00208,0.00231,0.00251,0.00279,0.00315,0.00357,0.00406,0.00461,0.00508,0.00621,0.0069,0.00773,0.00867,0.00965]
             end
+
+            @testset "Time Based Calcs" begin
+                @test q(cso2001.select,29,1,1) == 1.0 - prod(1 .- [0.00029])
+                @test q(cso2001.select,29,1,2) == 1.0 - prod(1 .- [0.00029, 0.00035])
+                @test p(cso2001.select,29,1,2) == prod(1 .- [0.00029, 0.00035])
+
+            end
         end
 
-        @testset "2001 VBT" begin
-            vbt2001 = tables["2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB"]
 
 
-            @test q(vbt2001.select,35,1) ≈ .00036
-            @test q(vbt2001.select,35,61) ≈ .24298
-            @test q(vbt2001.select,95,1) ≈ .23815
-            @test q(vbt2001.ultimate,95) ≈ .24298
-            @test q(vbt2001.ultimate,120) ≈ 1.0
-            @test ismissing(q(vbt2001.select,120,1))
-            @test_throws BoundsError q(vbt2001.select,35,95)
-            @test ismissing(q(vbt2001.select,150,1))
-            @test ismissing(q(vbt2001.ultimate,150,1))
-            @test omega(vbt2001.select,20) == 120
-            @test ismissing(ω(vbt2001.ultimate,20))
-            @test ω(vbt2001.select,25) == 120
-
-        end
 
 
     end
