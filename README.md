@@ -17,10 +17,11 @@ tables = MortalityTables.tables() # loads the tables stored in the package folde
 vbt2001 = tables["2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB"]
 
 # indexed by issue age and duration for select rate
-qx(vbt2001,35,1)        # .00036
+q(vbt2001.select,35,1)        # .00036
+q(vbt2001.ultimate,95,1)          # .24298
 
-# indexed by just attained age for ultimate rate
-qx(vbt2001,95)          # .24298
+# when accessing ultimate rates, don't always need to specify the duration
+q(vbt2001.ultimate,95)          # .24298
 ```
 
 ### Example: Quickly access and compare tables
@@ -32,16 +33,18 @@ tables = MortalityTables.tables()
 cso_2001 = tables["2001 CSO Super Preferred Select and Ultimate - Male Nonsmoker, ANB"]
 cso_1980 = tables["1980 CSO - Male Nonsmoker, ANB"]
 
-age = 27
+issue_age = 27
 durations = 1:30
+mort = [q(cso_2001.select,issue_age,durations),
+        q(cso_1980.ultimate,issue_age,durations)]
 plot(
    durations,
-   [qx(cso_2001,age,durations),qx(cso_1980,age,durations)],
+   mort,
    label = ["2001 CSO M SuperPref NS" "1980 CSO M NS"],
    title = "Comparison of 1980 and 2001 CSO \n for 27-year-old male",
    xlabel="duration")
 ```
-![Comparison of 2001 and 1980 CSO](https://user-images.githubusercontent.com/711879/74115814-789cfd80-4b76-11ea-9d27-c4901844bcb4.png)
+![Comparison of 2001 and 1980 CSO](https://user-images.githubusercontent.com/711879/76151403-739a7380-607a-11ea-861b-8fe9fe6607c4.png)
 
 
 ## Usage
@@ -54,28 +57,29 @@ The rationale for this is, for example, this [2001 CSO table](https://mort.soa.o
 - You will get a `missing` if you ask for starting age 10 or 150, because it's plausible that you could encounter a a starting age not defined by a table.
 - You will get a `BoundsError` if you ask for an attained age 150 for someone select at age 16, because it is beyond the table's definition of its end.
 
-#### Index by issue age and duration to get select rates
+#### Index by issue age and duration
 
 ```julia
-qx(vbt2001,35,1)        # .00036
-qx(vbt2001,35,61)       # .24298
+q(vbt2001.select,35,1)        # .00036
+q(vbt2001.select,35,61)       # .24298
 
 # can easily get ranges of values:
-qx(vbt2001,35,1:30)     # [0.0036, 0.0048, ...]
+q(vbt2001.select,35,1:30)     # [0.0036, 0.0048, ...]
 ```
 
 #### Index by just age to get the ultimate rates
 ```julia
-qx(vbt2001,95)          # .24298
-qx(vbt2001,50:70)       # [0.00319, 0.00345, ...]
+q(vbt2001,95)          # .24298
+q(vbt2001,50:70)       # [0.00319, 0.00345, ...]
 ```
 
 ### Other Usage
 
 #### Table Attributes
 ```julia
-ω(vbt2001)              # 120
-omega(vbt2001)          # 120
+issue_age = 50
+ω(vbt2001.select,issue_age)              # 120
+omega(vbt2001.ultimate, issue_age)          # 120
 ```
 
 #### Table MetaData
@@ -103,52 +107,57 @@ MortalityTable:
        2001 Valuation Basic Table (VBT) Residual Standard Select and Ultimate Table -  Male Nonsmoker. Basis: Age Nearest Birthday. Minimum Select Age: 0. Maximum Select Age: 99. Minimum Ultimate Age: 25. Maximum Ultimate Age: 120
 ```
 
-### Exported functions
+### Actuarial Notation Equivalants
+#### `ₜp₍ₓ₎₊ₛ`
+The probability that a life aged `x + s` who was select
+at age `x` survives to at least age `x+s+t`.
+
 ```julia
-"""
-ₜp₍ₓ₎₊ₛ , or the probability that a life aged `x + s` who was select
-at age `x` survives to at least age `x+s+t`
-"""
-p(table::MortalityTable,x,s,t)
+issue_age = x
+duration = s - 1
+time = t
+p(table,issue_age,duration,time)
+```
 
+#### `ₜpₓ`
+The probability that a life aged `x` survives to at least age `t`.
 
-"""
-ₜpₓ , or the probability that a life aged `x` survives to at least age `t`
-"""
-p(table::MortalityTable,x,t)
+```julia
+issue_age = x
+duration = 1
+time = t
+p(table,issue_age,duration,time)
+```
 
+#### `pₓ`
+The probability that a life aged `x` survives through age `x+1`
 
-"""
-pₓ , or the probability that a life aged `x` survives through age `x+1`
-"""
-p(table::MortalityTable,x)
+```julia
+issue_age = x
+duration = 1
+time = 1
+p(table,issue_age,duration,time)
+```
 
+#### `ₜqₓ`
+The probability that a life aged `x` dies by age `x+t`
 
-"""
-ₜq₍ₓ₎₊ₛ , or the probability that a life aged `x + s` who was select
-at age `x` dies by least age `x+s+t`
-"""
-q(table::MortalityTable,x,s,t)
+```julia
+issue_age = x
+duration = 1
+time = t
+q(table,issue_age,duration,time)
+```
 
+#### `qₓ`
+The probability that a life aged `x` dies by age `x+1`
 
-"""
-ₜqₓ , or the probability that a life aged `x` dies by age `x+t`
-"""
-q(table::MortalityTable,x,t)
-
-
-"""
-qₓ , or the probability that a life aged `x` dies by age `x+1`
-"""
-q(table::MortalityTable,x)
-
-
-"""
-`qx` is a convenience function that allows you to get the rate at a given `age`.
-If wanting select/ultimate rates, specify the `duration` and `age` should be the issue age.
-"""
-qx(table::MortalityTable,age)
-qx(table::MortalityTable,age,duration)
+```julia
+issue_age = x
+duration = 1
+time = 1
+q(table,issue_age,duration,time)
+```
 
 """
 `omega` (also `ω`) returns the last attained age which the table has defined (ie not including)
@@ -164,7 +173,7 @@ Comes with some tables built in via [mort.SOA.org](https://mort.soa.org) and by 
 
 Not all tables have been tested that they work by default, though I have not encountered issues with any of the the VBT/CSO/other usual tables.
 
-Included:
+Sample of some of the included table sets:
 ```
 2017 Loaded CSO
 2015 VBT
@@ -184,15 +193,7 @@ To add more tables for your use, download the `.xml` (aka the (`Xtbml` format)[h
 
 After placing packages in the folder above, restart Julia and the should be discoverable when you run `mt.Tables()`
 
-### Todos
-
-- Docs
-- Automatically parse built-in tables
-- Add more built-in tables
-- Usage Examples
-- More tests
-- Performance testing
-- Easy assumption overlay (e.g. scalars)
+If you would like more tables added by default, please open a GitHub issue with the request.
 
 
 ### References
