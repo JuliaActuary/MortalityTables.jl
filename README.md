@@ -53,8 +53,8 @@ plot(
 
 Tables are indexed by a starting age and duration (even ultimate tables, under the hood). For tables with a starting age that is defined, but you've requested an attained age beyond the defined rates, you will get a `BoundsError`. If you ask for a starting age that is not defined, you will get a `missing`.
 
-The rationale for this is, for example, this [2001 CSO table](https://mort.soa.org/ViewTable.aspx?&TableIdentity=1076) is not defined for ages 15 and under.
-- You will get a `missing` if you ask for starting age 10 or 150, because it's plausible that you could encounter a a starting age not defined by a table.
+The rationale for this is, for example, this [2001 CSO table](https://mort.soa.org/ViewTable.aspx?&TableIdentity=1076) is not defined for ages 15 and under and ends at 120.
+- You will get a `missing` if you ask for starting age 10 or 15, because it's plausible that you could encounter a a starting age not defined by a table.
 - You will get a `BoundsError` if you ask for an attained age 150 for someone select at age 16, because it is beyond the table's definition of its end.
 
 #### Index by issue age and duration
