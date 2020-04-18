@@ -3,6 +3,7 @@ using Test
 
 include("basic.jl")
 include("XTbML.jl")
+include("distribution.jl")
 
 #load tables to be used in subsequent tests
 tables = MortalityTables.tables()
