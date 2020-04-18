@@ -39,4 +39,10 @@
             end
         end
     end
+
+    @testset "Error when asking for a fractional without assumption" begin
+        mort = UltimateMortality([.20,.50])
+        @test_throws ArgumentError q(mort,0,1,1.5)
+        @test_throws ArgumentError p(mort,0,1,1.5)
+    end
 end
