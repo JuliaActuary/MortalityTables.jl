@@ -128,7 +128,7 @@ When you call a method below that uses the `time` argument (ie a period over whi
 
 For example:
 
-Don't need to specify because you gave an `Int` time:
+**_Don't_** need to specify because you gave an `Int` time:
 
 ```julia
 # calculate the 5-year survival for a person issued at age 50 and in
@@ -138,7 +138,7 @@ duration = 1
 time = 5
 p(table,issue_age,duration,time)
 ```
-Don't need to specify because you gave an fractional floating time:
+**_Do_** need to specify because you gave an fractional floating time:
 
 ```julia
 # calculate the 5-and-a-half-year survival for a
