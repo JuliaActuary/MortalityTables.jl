@@ -140,8 +140,16 @@ Equivalant actuarial notation:
 ``$_tp_{(x)+s}$``, or the probability that a life aged `x + s` who was select
 at age `x` survives to at least age `x+s+t`
 """
-function p(table::MortalityDict,issue_age,duration,time)
+function p(table::MortalityDict,issue_age,duration,time::Int)
     prod(1.0 .- q(table,issue_age,duration:(duration+time-1)))
+end
+function p(table::MortalityDict,issue_age,duration,time)
+    throw(
+        ArgumentError("time: $time - If you use non-integer time, you need to specify a \n
+        distribution of deaths assumption (e.g. `Balducci()`, \n
+        `Constant()`, or `Uniform()` as the last argument to your \n
+        function call.")
+    )
 end
 
 @doc raw"""
@@ -155,8 +163,17 @@ function p(table::MortalityDict,issue_age,duration)
     return 1.0 - q(table,issue_age,duration)
 end
 
-function p(table::UltimateMortalityTable,issue_age,duration)
+function p(table::UltimateMortalityTable,issue_age,duration::Int)
     return p(table.ultimate,issue_age,duration)
+end
+
+function p(table::UltimateMortalityTable,issue_age,duration)
+    throw(
+        ArgumentError("time: $time - If you use non-integer time, you need to specify a \n
+        distribution of deaths assumption (e.g. `Balducci()`, \n
+        `Constant()`, or `Uniform()` as the last argument to your \n
+        function call.")
+    )
 end
 
 @doc raw"""
@@ -168,12 +185,30 @@ Equivalent actuarial notation:
 ``$p_{(x)+s}$``  or the probability that a life aged `x + s` who was select
 at age `x` dies by least age `x+s+t`
 """
-function q(table::MortalityDict,issue_age,duration,time)
+function q(table::MortalityDict,issue_age,duration,time::Int)
     1.0 - p(table::MortalityDict,issue_age,duration,time)
+end
+function q(table::MortalityDict,issue_age,duration,time)
+    throw(
+        ArgumentError("time: $time - If you use non-integer time, you need to specify a \n
+        distribution of deaths assumption (e.g. `Balducci()`, \n
+        `Constant()`, or `Uniform()` as the last argument to your \n
+        function call.")
+    )
+
+end
+
+function q(table::UltimateMortalityTable,issue_age,duration,time::Int)
+    return q(table.ultimate,issue_age,duration,time)
 end
 
 function q(table::UltimateMortalityTable,issue_age,duration,time)
-    return q(table.ultimate,issue_age,duration,time)
+    throw(
+        ArgumentError("time: $time - If you use non-integer time, you need to specify a \n
+        distribution of deaths assumption (e.g. `Balducci()`, \n
+        `Constant()`, or `Uniform()` as the last argument to your \n
+        function call.")
+    )
 end
 
 

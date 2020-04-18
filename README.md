@@ -107,6 +107,54 @@ MortalityTable:
        2001 Valuation Basic Table (VBT) Residual Standard Select and Ultimate Table -  Male Nonsmoker. Basis: Age Nearest Birthday. Minimum Select Age: 0. Maximum Select Age: 99. Minimum Ultimate Age: 25. Maximum Ultimate Age: 120
 ```
 
+#### Fractional Years
+When evaluating survival over partial years when you are given full year mortality
+rates, you must make an assumption over how those deaths are distributed throughout
+the year. Three assumptions are provided as options and are based on formulas
+from the [2016 Experience Study Calculations paper from the SOA](https://www.soa.org/globalassets/assets/Files/Research/2016-10-experience-study-calculations.pdf), specifically pages 40-44.
+
+The three assumptions are:
+
+- `Uniform()` which assumes an increasing force of mortality throughout the year.
+- `Constant()` which assumes a level force of mortality throughout the year.
+- `Balducci()` which assumes a decreasing force of mortality over the year. It seems [to
+be for](https://www.soa.org/globalassets/assets/library/research/actuarial-research-clearing-house/1978-89/1988/arch-1/arch88v17.pdf) making it easier to calculate successive months by hand.
+
+##### Usage
+
+When you call a method below that uses the `time` argument (ie a period over which
+    you want to calculate the force of mortality), if you use a non `Int` (integer)
+    number then you need to specify the assumption as the last argument.
+
+For example:
+
+Don't need to specify because you gave an `Int` time:
+
+```julia
+# calculate the 5-year survival for a person issued at age 50 and in
+# the first duration
+issue_age = 50
+duration = 1
+time = 5
+p(table,issue_age,duration,time)
+```
+Don't need to specify because you gave an fractional floating time:
+
+```julia
+# calculate the 5-and-a-half-year survival for a
+# person issued at age 50 and in the first duration
+issue_age = 50
+duration = 1
+time = 5.5
+p(table,issue_age,duration,time, Balducci())
+```
+
+Note that if you are passing floating point numbers as the `time`
+argument, you still have to specify a mortality assumption because
+[floating point numbers](https://en.wikipedia.org/wiki/Floating-point_arithmetic) are often *technically* not whole numbers even
+if you define a number to be, say, `5.0`.
+
+
 ### Actuarial Notation Equivalants
 #### `ₜp₍ₓ₎₊ₛ`
 The probability that a life aged `x + s` who was select
