@@ -4,7 +4,6 @@ using DataStructures
 include("MetaData.jl")
 
 
-## refactor see https://github.com/JuliaActuary/MortalityTables.jl/issues/23
 """
 MortalityVector
 """
@@ -31,10 +30,10 @@ Given an ultimate vector, will create a dictionary that is
 indexed by issue age and will return `missing` `if the age is
 not available.
 """
-function UltimateMortality(v::Array{<:Real,1},start_age=0)
+function UltimateMortality(v::Array{<:Real,1}, start_age = 0)
     d = DefaultDict(missing)
-    for (i,q) in enumerate(v)
-        d[start_age + i - 1] = MortalityVector(v[i:end])
+    for (i, q) in enumerate(v)
+        d[start_age+i-1] = MortalityVector(v[i:end])
     end
     return UltimateMortality(d)
 end
@@ -44,32 +43,41 @@ Given an 2D array, will create a dictionary that is
 indexed by issue age and will return `missing` `if the age is
 not available.
 """
-
-function SelectMortality(select,ultimate::UltimateMortality,start_age=0)
+function SelectMortality(select, ultimate::UltimateMortality, start_age = 0)
     d = DefaultDict(missing)
-    last_select_age = size(select,2) - 1  + size(select,1) - 1 + start_age
+    last_select_age = size(select, 2) - 1 + size(select, 1) - 1 + start_age
 
     # get the end of the table that would apply to the last select attained age
-    last_ult_age = ω(ultimate,start_age + size(select,1)-1)
+    last_ult_age = ω(ultimate, start_age + size(select, 1) - 1)
 
     # iterate down the rows (issue ages)
-    for i in 1:size(select,1)
+    for i = 1:size(select, 1)
         iss_age = start_age + i - 1
-        ult_age_start = length(select[i,1:end]) + iss_age
-        select_qs = select[i,1:end]
+        ult_age_start = length(select[i, 1:end]) + iss_age
+        select_qs = select[i, 1:end]
 
         if ult_age_start >= maximum(keys(ultimate.v))
             d[iss_age] = select_qs |> MortalityVector
 
         else # use ultimate rates if available
-            last_age = ω(ultimate,ult_age_start)
+            last_age = ω(ultimate, ult_age_start)
             last_dur = last_age - ult_age_start + 1
             start_dur = 1
-            ult_qs = q(ultimate,ult_age_start,start_dur:last_dur)
-            d[iss_age] = vcat(select_qs,ult_qs) |> MortalityVector
+            ult_qs = q(ultimate, ult_age_start, start_dur:last_dur)
+            d[iss_age] = vcat(select_qs, ult_qs) |> MortalityVector
         end
 
 
+    end
+
+    # fill in "select table" for ages past the select issue ages
+    # but ultimate rates are available
+    for iss_age = (maximum(keys(d))+1):last_ult_age
+        last_age = ω(ultimate, iss_age)
+        last_dur = last_age - iss_age + 1
+        start_dur = 1
+        ult_qs = q(ultimate, iss_age, start_dur:last_dur)
+        d[iss_age] = ult_qs |> MortalityVector
     end
 
     return SelectMortality(d)
@@ -95,23 +103,27 @@ struct UltimateMortalityTable <: MortalityTable
     ultimate::UltimateMortality
     d::TableMetaData
 end
-function MortalityTable(select::SelectMortality,ultimate::UltimateMortality,d::TableMetaData)
-    return SelectUltimateMortalityTable(select,ultimate,d)
+function MortalityTable(
+    select::SelectMortality,
+    ultimate::UltimateMortality,
+    d::TableMetaData,
+)
+    return SelectUltimateMortalityTable(select, ultimate, d)
 end
 
-function MortalityTable(ultimate::UltimateMortality,d::TableMetaData)
+function MortalityTable(ultimate::UltimateMortality, d::TableMetaData)
     # sel_α, sel_ω = extrema(keys(ultimate.v))
     # create a dummy select table which has the ultimate rate for the first
     # duration. From there, the normal SelectMortality constructor can take over
 
     # select = [q(ultimate,age,1) for age in sel_α:sel_ω ]
     # select = SelectMortality(select,ultimate,sel_α)
-    return UltimateMortalityTable(ultimate,d)
+    return UltimateMortalityTable(ultimate, d)
 end
 
 
-Base.show(io::IO, ::MIME"text/plain", mt::MortalityTable) =
-    print(io,
+Base.show(io::IO, ::MIME"text/plain", mt::MortalityTable) = print(
+    io,
     """
     MortalityTable:
        Name:
@@ -124,7 +136,8 @@ Base.show(io::IO, ::MIME"text/plain", mt::MortalityTable) =
            https://mort.soa.org/ViewTable.aspx?&TableIdentity=$(mt.d.id)
        Description:
            $(mt.d.description)
-    """)
+    """,
+)
 
 
 ##################################
@@ -140,16 +153,14 @@ Equivalant actuarial notation:
 ``$_tp_{(x)+s}$``, or the probability that a life aged `x + s` who was select
 at age `x` survives to at least age `x+s+t`
 """
-function p(table::MortalityDict,issue_age,duration,time::Int)
-    prod(1.0 .- q(table,issue_age,duration:(duration+time-1)))
+function p(table::MortalityDict, issue_age, duration, time::Int)
+    prod(1.0 .- q(table, issue_age, duration:(duration+time-1)))
 end
-function p(table::MortalityDict,issue_age,duration,time)
-    throw(
-        ArgumentError("time: $time - If you use non-integer time, you need to specify a \n
-        distribution of deaths assumption (e.g. `Balducci()`, \n
-        `Constant()`, or `Uniform()` as the last argument to your \n
-        function call.")
-    )
+function p(table::MortalityDict, issue_age, duration, time)
+    throw(ArgumentError("time: $time - If you use non-integer time, you need to specify a \n
+          distribution of deaths assumption (e.g. `Balducci()`, \n
+          `Constant()`, or `Uniform()` as the last argument to your \n
+          function call."))
 end
 
 @doc raw"""
@@ -159,21 +170,19 @@ survives one additional timepoint
 Equivalent actuarial notation:
 ``$p_x$`` , or
 """
-function p(table::MortalityDict,issue_age,duration)
-    return 1.0 - q(table,issue_age,duration)
+function p(table::MortalityDict, issue_age, duration)
+    return 1.0 - q(table, issue_age, duration)
 end
 
-function p(table::UltimateMortalityTable,issue_age,duration::Int)
-    return p(table.ultimate,issue_age,duration)
+function p(table::UltimateMortalityTable, issue_age, duration::Int)
+    return p(table.ultimate, issue_age, duration)
 end
 
-function p(table::UltimateMortalityTable,issue_age,duration)
-    throw(
-        ArgumentError("time: $time - If you use non-integer time, you need to specify a \n
-        distribution of deaths assumption (e.g. `Balducci()`, \n
-        `Constant()`, or `Uniform()` as the last argument to your \n
-        function call.")
-    )
+function p(table::UltimateMortalityTable, issue_age, duration)
+    throw(ArgumentError("time: $time - If you use non-integer time, you need to specify a \n
+          distribution of deaths assumption (e.g. `Balducci()`, \n
+          `Constant()`, or `Uniform()` as the last argument to your \n
+          function call."))
 end
 
 @doc raw"""
@@ -185,34 +194,30 @@ Equivalent actuarial notation:
 ``$p_{(x)+s}$``  or the probability that a life aged `x + s` who was select
 at age `x` dies by least age `x+s+t`
 """
-function q(table::MortalityDict,issue_age,duration,time::Int)
-    1.0 - p(table::MortalityDict,issue_age,duration,time)
+function q(table::MortalityDict, issue_age, duration, time::Int)
+    1.0 - p(table::MortalityDict, issue_age, duration, time)
 end
-function q(table::MortalityDict,issue_age,duration,time)
-    throw(
-        ArgumentError("time: $time - If you use non-integer time, you need to specify a \n
-        distribution of deaths assumption (e.g. `Balducci()`, \n
-        `Constant()`, or `Uniform()` as the last argument to your \n
-        function call.")
-    )
+function q(table::MortalityDict, issue_age, duration, time)
+    throw(ArgumentError("time: $time - If you use non-integer time, you need to specify a \n
+          distribution of deaths assumption (e.g. `Balducci()`, \n
+          `Constant()`, or `Uniform()` as the last argument to your \n
+          function call."))
 
 end
 
-function q(table::UltimateMortalityTable,issue_age,duration,time::Int)
-    return q(table.ultimate,issue_age,duration,time)
+function q(table::UltimateMortalityTable, issue_age, duration, time::Int)
+    return q(table.ultimate, issue_age, duration, time)
 end
 
-function q(table::UltimateMortalityTable,issue_age,duration,time)
-    throw(
-        ArgumentError("time: $time - If you use non-integer time, you need to specify a \n
-        distribution of deaths assumption (e.g. `Balducci()`, \n
-        `Constant()`, or `Uniform()` as the last argument to your \n
-        function call.")
-    )
+function q(table::UltimateMortalityTable, issue_age, duration, time)
+    throw(ArgumentError("time: $time - If you use non-integer time, you need to specify a \n
+          distribution of deaths assumption (e.g. `Balducci()`, \n
+          `Constant()`, or `Uniform()` as the last argument to your \n
+          function call."))
 end
 
 
-function q(m::MortalityDict,issue_age::Int,duration)
+function q(m::MortalityDict, issue_age::Int, duration)
     mv = m.v[issue_age]
     if ismissing(mv)
         return mv
@@ -221,7 +226,7 @@ function q(m::MortalityDict,issue_age::Int,duration)
     end
 end
 
-function q(m::UltimateMortality,issue_age::Int)
+function q(m::UltimateMortality, issue_age::Int)
     mv = m.v[issue_age]
     if ismissing(mv)
         return mv
@@ -230,19 +235,19 @@ function q(m::UltimateMortality,issue_age::Int)
     end
 end
 
-function q(m::UltimateMortalityTable,issue_age,duration)
-    return q(m.ultimate,issue_age,duration)
+function q(m::UltimateMortalityTable, issue_age, duration)
+    return q(m.ultimate, issue_age, duration)
 end
 
-function q(m::MortalityDict,issue_age::AbstractArray,duration)
-    return [q(m,ia,duration) for ia in issue_age]
+function q(m::MortalityDict, issue_age::AbstractArray, duration)
+    return [q(m, ia, duration) for ia in issue_age]
 end
 
-function q(m::UltimateMortalityTable,issue_age::AbstractArray,duration)
-    return q(m.ultimate,issue_age,duration)
+function q(m::UltimateMortalityTable, issue_age::AbstractArray, duration)
+    return q(m.ultimate, issue_age, duration)
 end
 
-function omega(m::MortalityDict,issue_age)
+function omega(m::MortalityDict, issue_age)
     mv = m.v[issue_age]
     if ismissing(mv)
         return mv
@@ -251,8 +256,8 @@ function omega(m::MortalityDict,issue_age)
     end
 end
 
-function omega(m::UltimateMortalityTable,issue_age)
-    return omega(m.ultimate,issue_age)
+function omega(m::UltimateMortalityTable, issue_age)
+    return omega(m.ultimate, issue_age)
 end
 
 ω = omega

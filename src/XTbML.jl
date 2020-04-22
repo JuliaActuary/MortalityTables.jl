@@ -6,7 +6,7 @@ include("MortalityTable.jl")
 
 function open_and_read(path)
     s = open(path) do file
-        read(file,String)
+        read(file, String)
     end
 end
 
@@ -17,11 +17,11 @@ function getXML(open_file)
 end
 
 # get potentially missing value out of dict
-function getVal(dict,key)
+function getVal(dict, key)
     try
-        return val = parse(Float64,dict[key])
+        return val = parse(Float64, dict[key])
     catch y
-        if isa(y,KeyError)
+        if isa(y, KeyError)
             return val = missing
         else
             throw(y)
@@ -35,54 +35,65 @@ struct XTbMLTable
     d::TableMetaData
 end
 
-function parseXTbMLTable(x,path)
+function parseXTbMLTable(x, path)
     md = x["XTbML"]["ContentClassification"]
-    name = get(md,"TableName",nothing) |> strip
-    id = get(md,"TableIdentity",nothing) |> strip
-    provider = get(md,"ProviderName",nothing) |> strip
-    reference = get(md,"TableReference",nothing) |> strip
-    description = get(md,"TableDescription",nothing) |> strip
-    comments = get(md,"Comments",nothing) |> strip
+    name = get(md, "TableName", nothing) |> strip
+    id = get(md, "TableIdentity", nothing) |> strip
+    provider = get(md, "ProviderName", nothing) |> strip
+    reference = get(md, "TableReference", nothing) |> strip
+    description = get(md, "TableDescription", nothing) |> strip
+    comments = get(md, "Comments", nothing) |> strip
     source_path = path
-    d = TableMetaData(name=name,id=id,provider=provider,reference=reference,
-        description=description,comments=comments,source_path=source_path)
-    tbl = XTbMLTable(DataStructures.DefaultOrderedDict(missing),DataStructures.DefaultOrderedDict(missing),d)
+    d = TableMetaData(
+        name = name,
+        id = id,
+        provider = provider,
+        reference = reference,
+        description = description,
+        comments = comments,
+        source_path = source_path,
+    )
+    tbl = XTbMLTable(
+        DataStructures.DefaultOrderedDict(missing),
+        DataStructures.DefaultOrderedDict(missing),
+        d,
+    )
 
-    if isa(x["XTbML"]["Table"],Vector)
+    if isa(x["XTbML"]["Table"], Vector)
         # for a select and ultimate table, will have multiple tables
         # parsed into a vector of tables
         for ai in x["XTbML"]["Table"][1]["Values"]["Axis"]
-            issue_age = parse(Int,ai[:t])
+            issue_age = parse(Int, ai[:t])
             tbl.select[issue_age] = DataStructures.DefaultOrderedDict(missing)
             for aj in ai["Axis"]["Y"]
-                duration = parse(Int,aj[:t])
-                rate = getVal(aj,"")
+                duration = parse(Int, aj[:t])
+                rate = getVal(aj, "")
                 if !ismissing(rate)
-                    tbl.select[issue_age][duration]= rate
+                    tbl.select[issue_age][duration] = rate
                 end
             end
         end
 
         for ai in x["XTbML"]["Table"][2]["Values"]["Axis"]["Y"]
-            age = parse(Int,ai[:t])
-            rate = getVal(ai,"")
+            age = parse(Int, ai[:t])
+            rate = getVal(ai, "")
             if !ismissing(rate)
-                tbl.ultimate[age]= rate
+                tbl.ultimate[age] = rate
             end
         end
-    elseif isa(x["XTbML"]["Table"],DataStructures.OrderedDict)
+    elseif isa(x["XTbML"]["Table"], DataStructures.OrderedDict)
         # a table without select period will just have one set of values, which
         # are loaded into the OrderedDict
 
         for ai in x["XTbML"]["Table"]["Values"]["Axis"]["Y"]
-            age = parse(Int,ai[:t])
-            rate = getVal(ai,"")
+            age = parse(Int, ai[:t])
+            rate = getVal(ai, "")
             if !ismissing(rate)
-                tbl.ultimate[age]= rate
+                tbl.ultimate[age] = rate
             end
         end
     else
-        error("don't know how to handle table: "  *  name)
+        error("don't know how to handle table: " * name)
     end
 
     return tbl
@@ -105,7 +116,7 @@ function q_select(table::XTbMLTable, issueAge::Int, duration::Int)
     end
 
     if ismissing(q)
-        q = table.ultimate[issueAge + duration - 1]
+        q = table.ultimate[issueAge+duration-1]
     end
     return q
 end
@@ -120,40 +131,35 @@ end
 
 function XTbML_Table_To_MortalityTable(tbl::XTbMLTable)
     ult_α, ult_ω = extrema(keys(tbl.ultimate))
-    ult = UltimateMortality([tbl.ultimate[age] for age=ult_α:ult_ω],ult_α)
+    ult = UltimateMortality([tbl.ultimate[age] for age = ult_α:ult_ω], ult_α)
 
     if length(tbl.select) > 0
-        sel_α,sel_ω = extrema(keys(tbl.select))
-        sel_end_dur = maximum([length(tbl.select[age]) for age in sel_α:sel_ω])
+        sel_α, sel_ω = extrema(keys(tbl.select))
+        sel_end_dur = maximum([length(tbl.select[age]) for age = sel_α:sel_ω])
 
-        select_array = Array{Any}(undef,length(sel_α:sel_ω),sel_end_dur)
-        fill!(select_array,missing)
+        select_array = Array{Any}(undef, length(sel_α:sel_ω), sel_end_dur)
+        fill!(select_array, missing)
 
-        for (iss_age,rate_vec) in tbl.select
+        for (iss_age, rate_vec) in tbl.select
             for (dur, rate) in rate_vec
-                select_array[iss_age - sel_α + 1,dur] = rate
+                select_array[iss_age-sel_α+1, dur] = rate
             end
         end
 
 
 
-        sel = SelectMortality(
-            identity.(select_array), # identity narrows type from Any as much as possible
+        sel = SelectMortality(identity.(select_array), ult, sel_α)
 
-            ult,
-            sel_α
-        )
-
-        return MortalityTable(sel,ult,tbl.d)
+        return MortalityTable(sel, ult, tbl.d)
     else
-        return MortalityTable(ult,tbl.d)
+        return MortalityTable(ult, tbl.d)
     end
 end
 
 function readXTbML(path)
     path
     x = open_and_read(path) |> getXML
-    XTbML_Table_To_MortalityTable(parseXTbMLTable(x,path))
+    XTbML_Table_To_MortalityTable(parseXTbMLTable(x, path))
 end
 
 
@@ -167,7 +173,7 @@ end
     MortalityTables package directory. To see where your system keeps packages,
     run `DEPOT_PATH` from a Julia REPL.
 """
-function tables(dir=nothing)
+function tables(dir = nothing)
     if isnothing(dir)
         table_dir = joinpath(dirname(pathof(MortalityTables)), "tables", "SOA")
     else
@@ -177,9 +183,8 @@ function tables(dir=nothing)
     tables = Dict()
     for (root, dirs, files) in walkdir(table_dir)
         @showprogress "loading table files..." for file in files
-
             if basename(file)[end-3:end] == ".xml"
-                tbl = readXTbML(joinpath(root,file))
+                tbl = readXTbML(joinpath(root, file))
                 tables[tbl.d.name] = tbl
             end
         end
