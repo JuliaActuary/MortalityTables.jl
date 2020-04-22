@@ -72,6 +72,16 @@ function SelectMortality(select,ultimate::UltimateMortality,start_age=0)
 
     end
 
+    # fill in "select table" for ages past the select issue ages
+    # but ultimate rates are available
+    for iss_age in (maximum(keys(d))+1):last_ult_age
+        last_age = ω(ultimate,iss_age)
+        last_dur = last_age - iss_age + 1
+        start_dur = 1
+        ult_qs = q(ultimate,iss_age,start_dur:last_dur)
+        d[iss_age] = ult_qs |> MortalityVector
+    end
+
     return SelectMortality(d)
 end
 

@@ -34,13 +34,18 @@
             @test q(vbt2001.select,95,1) ≈ .23815
             @test q(vbt2001.ultimate,95) ≈ .24298
             @test q(vbt2001.ultimate,120) ≈ 1.0
-            @test ismissing(q(vbt2001.select,120,1))
+            @test q(vbt2001.select,120,1) ≈ 1.0
             @test_throws BoundsError q(vbt2001.select,35,95)
             @test ismissing(q(vbt2001.select,150,1))
             @test ismissing(q(vbt2001.ultimate,150,1))
             @test omega(vbt2001.select,20) == 120
             @test ismissing(ω(vbt2001.ultimate,20))
             @test ω(vbt2001.select,25) == 120
+
+            # this tests that mortality vectors are generated
+            # when there are ultimate rates available
+            # but no select rates for the issue age
+            @test q(vbt2001.select,116,1) ≈ 0.79988
 
         end
 
@@ -54,7 +59,7 @@
             @test q(cso2001.ultimate,95,1) ≈ .26719
             @test q(cso2001.ultimate,120) ≈ 1.0
             @test q(cso2001.ultimate,120,1) ≈ 1.0
-            @test ismissing(q(cso2001.select,120,1))
+            @test q(cso2001.select,120,1) ≈ 1.0
             @test ismissing(q(cso2001.select,15,1))
             @test ismissing(q(cso2001.ultimate,150))
             @test_throws BoundsError q(cso2001.select,35,95)
