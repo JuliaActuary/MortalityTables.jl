@@ -5,12 +5,17 @@ include("death_distribution.jl")
 
 
 export MortalityTable,
-    q, p,
-    omega,ω,
+    q,
+    p,
+    omega,
+    ω,
     TableMetaData,
     SelectMortality,
     UltimateMortality,
     MortalityVector,
     MortalityTable,
-    Balducci, Uniform, Constant, DeathDistribution
+    Balducci,
+    Uniform,
+    Constant,
+    DeathDistribution
 end # module
