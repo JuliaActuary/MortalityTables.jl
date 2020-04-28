@@ -48,7 +48,7 @@ plot(
    title = "Comparison of 1980 and 2001 CSO \n for 27-year-old male",
    xlabel="duration")
 ```
-![Comparison of 2001 and 1980 CSO](https://user-images.githubusercontent.com/711879/80447126-2ef2c200-88de-11ea-9ae6-18e4528d218f.png)
+![Comparison of 2001 and 1980 CSO](https://user-images.githubusercontent.com/711879/80447339-c48e5180-88de-11ea-81ee-4babd0f84755.png)
 
 Easily extend the analysis to move up the [ladder of abstraction](http://worrydream.com/LadderOfAbstraction/):
 
