@@ -5,7 +5,11 @@
 [![Build Status](https://travis-ci.com/JuliaActuary/MortalityTables.jl.svg?branch=master)](https://travis-ci.com/JuliaActuary/MortalityTables.jl)
 [![codecov](https://codecov.io/gh/JuliaActuary/MortalityTables.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaActuary/MortalityTables.jl)
 
-A Julia package for working with MortalityTables. Has first-class support for missing values.
+A Julia package for working with MortalityTables. Has:
+- First-class support for missing values.
+- Lots of bundled SOA mort.soa.org tables
+- Many common functions, including partial year mortality calculations (Uniform, Constant, Balducci)
+- Friendly syntax and flexible usage
 
 ## Examples
 ### Quickstart
