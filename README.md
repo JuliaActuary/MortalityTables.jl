@@ -35,7 +35,7 @@ using MortalityTables, Plots
 
 tables = MortalityTables.tables()
 cso_2001 = tables["2001 CSO Super Preferred Select and Ultimate - Male Nonsmoker, ANB"]
-cso_1980 = tables["1980 CSO - Male Nonsmoker, ANB"]
+cso_2017 = tables["2017 Loaded CSO Preferred Structure Nonsmoker Super Preferred Male ANB"]
 
 issue_age = 27
 durations = 1:30
@@ -48,7 +48,25 @@ plot(
    title = "Comparison of 1980 and 2001 CSO \n for 27-year-old male",
    xlabel="duration")
 ```
-![Comparison of 2001 and 1980 CSO](https://user-images.githubusercontent.com/711879/76151403-739a7380-607a-11ea-861b-8fe9fe6607c4.png)
+![Comparison of 2001 and 1980 CSO](https://user-images.githubusercontent.com/711879/80447126-2ef2c200-88de-11ea-9ae6-18e4528d218f.png)
+
+Easily extend the analysis to move up the [ladder of abstraction](http://worrydream.com/LadderOfAbstraction/):
+
+```julia
+ages = 25:80
+durs = 1:35
+
+# compute the relative rates with the element-wise division ("brodcasting" in Julia)
+diff = q(cso_2017.select,ages,durs) ./ q(cso_2001.select,ages,durs) 
+
+contour(durs,ages,diff,
+        xlabel="Duration",ylabel="ages",
+        title="Relative difference between 2017 and 2001 CSO \n M PFN",
+        fill=true
+        )
+```
+
+![Heatmap comparison](https://user-images.githubusercontent.com/711879/80447066-036fd780-88de-11ea-9f2f-e459ed7fd993.png)
 
 
 ## Usage
