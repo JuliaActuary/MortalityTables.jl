@@ -240,7 +240,7 @@ function q(m::UltimateMortalityTable, issue_age, duration)
 end
 
 function q(m::MortalityDict, issue_age::AbstractArray, duration)
-    return [q(m, ia, duration) for ia in issue_age]
+    return [q(m, ia, dur) for ia in issue_age, dur in duration]
 end
 
 function q(m::UltimateMortalityTable, issue_age::AbstractArray, duration)
