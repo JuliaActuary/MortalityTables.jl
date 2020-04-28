@@ -60,7 +60,7 @@ durs = 1:35
 diff = q(cso_2017.select,ages,durs) ./ q(cso_2001.select,ages,durs) 
 
 contour(durs,ages,diff,
-        xlabel="Duration",ylabel="ages",
+        xlabel="duration",ylabel="issue ages",
         title="Relative difference between 2017 and 2001 CSO \n M PFN",
         fill=true
         )
