@@ -234,20 +234,72 @@ Sample of some of the included table sets:
 [Click here to see the full list of tables included.](BundledTables.md)
 
 
+## Adding more tables
 
-### Adding more tables
+### Constructing Dynamically
 
-To add more tables for your use, download the `.xml` (aka the (`Xtbml` format)[https://mort.soa.org/About.aspx]) version of the table from [mort.SOA.org](https://mort.soa.org) and place it in the directory the package is installed in. This is usually `~user/.julia/packages/MortalityTables/[changing hash value]/src/tables/`. *Note: updating the package may remove your existing tables. Make a backup before updating your packages*
+Say you have an ultimate vector and select matrix, and you want to leverage the MortalityTables package.
+
+Here's an example, where we first construct the `UlitmateMortality` and then combine
+it with the select rates to get a `SelectMortality` table.
+```julia
+using MortalityTables
+
+# represents attained ages of 15 through 100
+ult_start_age = 15
+ult_vec = [0.005, 0.008, ...,0.805,1.00]
+ult = UltimateMortality(ult_vec,ult_start_age)
+```
+
+We can now use this the ulitmate rates all by itself:
+```julia
+q(ult,15,1) # 0.005
+q(ult,10,1) # missing (no age 10 rate)
+```
+And join with the select rates, which for our example will start at age 0:
+```julia
+# attained age going down the column, duration across
+select_matrix = [ 0.001 0.002 ... 0.010;
+                  0.002 0.003 ... 0.012;
+                  ...
+                ]
+sel_start_age = 0
+sel = SelectMortality(select_matrix,ult,sel_start_age)
+
+q(sel,0,1) # 0.001
+```
+
+Lastly, to take the `SelectMortality` and `UltimateMortality` we just created, 
+we can combine them into one stored object, along with MetaData:
+
+```julia
+my_table = MortalityTable(
+              s1, 
+              u1, 
+              TableMetaData(name="My Table", comments="Rates for Product XYZ")
+              )
+```
+
+
+
+### Load with bundled tables
+
+To add more tables for your use, download the `.xml` (aka the (`Xtbml` format)[https://mort.soa.org/About.aspx]) version of the table from [mort.SOA.org](https://mort.soa.org) and place it in the directory the package is installed in. This is usually `~user/.julia/packages/MortalityTables/[changing hash value]/src/tables/`. 
+
+> :warning: *updating the package may remove your existing tables. Make a backup before updating your packages*
 
 After placing packages in the folder above, restart Julia and the should be discoverable when you run `mt.Tables()`
+
+
+### Getting more tables bundled with the package
 
 If you would like more tables added by default, please open a GitHub issue with the request.
 
 
-### References
+## References
 - [SOA Mortality Tables](https://mort.soa.org/)
 - [Actuarial Mathematics for Life Contingent Risks, 2nd ed](https://www.cambridge.org/vi/academic/subjects/statistics-probability/statistics-econometrics-finance-and-insurance/actuarial-mathematics-life-contingent-risks-2nd-edition?format=HB)
 - [Experience Study Calculations, SOA](https://www.soa.org/globalassets/assets/Files/Research/2016-10-experience-study-calculations.pdf)
 
-### Similar Projects
+## Similar Projects
  - [Pyliferisk, a Python package](https://github.com/franciscogarate/pyliferisk)
