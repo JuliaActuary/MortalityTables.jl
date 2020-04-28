@@ -48,7 +48,7 @@ plot(
    title = "Comparison of 1980 and 2001 CSO \n for 27-year-old male",
    xlabel="duration")
 ```
-![Comparison of 2001 and 1980 CSO](https://user-images.githubusercontent.com/711879/80447339-c48e5180-88de-11ea-81ee-4babd0f84755.png)
+![Comparison of 2001 and 2017 CSO](https://user-images.githubusercontent.com/711879/80447339-c48e5180-88de-11ea-81ee-4babd0f84755.png)
 
 Easily extend the analysis to move up the [ladder of abstraction](http://worrydream.com/LadderOfAbstraction/):
 
@@ -66,7 +66,7 @@ contour(durs,ages,diff,
         )
 ```
 
-![Heatmap comparison](https://user-images.githubusercontent.com/711879/80447066-036fd780-88de-11ea-9f2f-e459ed7fd993.png)
+![Heatmap comparison](https://user-images.githubusercontent.com/711879/80447494-251d8e80-88df-11ea-9335-761d1a1739c7.png)
 
 
 ## Usage
