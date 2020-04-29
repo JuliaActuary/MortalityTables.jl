@@ -5,7 +5,9 @@ version = "0.7.0"
 
 [deps]
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
+HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
 ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
+StringEncodings = "69024149-9ee7-55f6-a4c4-859efe599b68"
 XMLDict = "228000da-037f-5747-90a9-8195ccbf91a5"
 
 [compat]

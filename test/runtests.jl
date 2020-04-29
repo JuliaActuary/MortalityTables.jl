@@ -10,3 +10,4 @@ tables = MortalityTables.tables()
 @test length(tables) > 0
 
 include("MortalityTables.jl")
+include("get_SOA_tables.jl")
