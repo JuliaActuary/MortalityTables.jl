@@ -57,7 +57,7 @@ ages = 25:80
 durs = 1:35
 
 # compute the relative rates with the element-wise division ("brodcasting" in Julia)
-diff = q(cso_2017.select,ages,durs) ./ q(cso_2001.select,ages,durs) 
+diff = q(cso_2017.select,ages,durs) ./ q(cso_2001.select,ages,durs)
 
 contour(durs,ages,diff,
         xlabel="duration",ylabel="issue ages",
@@ -258,6 +258,28 @@ Sample of some of the included table sets:
 
 ## Adding more tables
 
+### Getting tables from [mort.SOA.org](https://mort.soa.org)
+
+Given a table id ([for example](https://mort.soa.org/ViewTable.aspx?&TableIdentity=60029) `60029`)
+you can request the table directly from the SOA's mortality table service.
+
+```
+aus_life_table_female = get_SOA_table(60029)
+q(aus_life_table_female,0,1)  # returns the issue age 0, first duration rate of 0.10139
+```
+
+You can combine it with the bundled tables too:
+
+```
+tables = MortalityTables.tables()
+
+get_SOA_table!(tables,60029) # this modifies `tables` by adding the new table
+
+t = tables["Australian Life Tables 1891-1900 Female"]
+q(t,0,1)  # returns the issue age 0, first duration rate of 0.10139
+```
+
+
 ### Constructing Dynamically
 
 Say you have an ultimate vector and select matrix, and you want to leverage the MortalityTables package.
@@ -291,13 +313,13 @@ sel = SelectMortality(select_matrix,ult,sel_start_age)
 q(sel,0,1) # 0.001
 ```
 
-Lastly, to take the `SelectMortality` and `UltimateMortality` we just created, 
+Lastly, to take the `SelectMortality` and `UltimateMortality` we just created,
 we can combine them into one stored object, along with MetaData:
 
 ```julia
 my_table = MortalityTable(
-              s1, 
-              u1, 
+              s1,
+              u1,
               TableMetaData(name="My Table", comments="Rates for Product XYZ")
               )
 ```
@@ -306,7 +328,7 @@ my_table = MortalityTable(
 
 ### Load with bundled tables
 
-To add more tables for your use when loading with all of the other bundled tables, download the `.xml` [aka the (`XTbML` format)](https://mort.soa.org/About.aspx) version of the table from [mort.SOA.org](https://mort.soa.org) and place it in the directory the package is installed in. This is usually `~user/.julia/packages/MortalityTables/[changing hash value]/src/tables/`. 
+To add more tables for your use when loading with all of the other bundled tables, download the `.xml` [aka the (`XTbML` format)](https://mort.soa.org/About.aspx) version of the table from [mort.SOA.org](https://mort.soa.org) and place it in the directory the package is installed in. This is usually `~user/.julia/packages/MortalityTables/[changing hash value]/src/tables/`.
 
 > :warning: *updating the package may remove your existing tables. Make a backup before updating your packages*
 
