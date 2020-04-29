@@ -3,6 +3,8 @@ using HTTP
     get_SOA_table(id)
 
 Given the id of a `mort.SOA.org` table, grab it and return it as a `MortalityTable`.
+
+!! Remember that not all tables have been tested to work.
 """
 function get_SOA_table(id::Int)
     path = "https://mort.soa.org/Export.aspx?Type=xml&TableIdentity=$id"
@@ -30,6 +32,7 @@ the table acting as the added key in the dictionary.
 This modifies the given `dict` (as is indicated by the conventional `!` at the end
 of the function name).
 
+!! Remember that not all tables have been tested to work.
 """
 function get_SOA_table!(dict,id::Int)
     path = "https://mort.soa.org/Export.aspx?Type=xml&TableIdentity=$id"
