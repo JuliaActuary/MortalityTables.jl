@@ -1,4 +1,4 @@
-# LifeContingencies.jl
+# MortalityTables.jl
 
 ```@index
 ```
