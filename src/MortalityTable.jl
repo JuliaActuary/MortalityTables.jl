@@ -222,7 +222,7 @@ function q(m::MortalityDict, issue_age::Int, duration)
     if ismissing(mv)
         return mv
     else
-        return mv.q[duration]
+        return @view mv.q[duration]
     end
 end
 
@@ -231,7 +231,7 @@ function q(m::UltimateMortality, issue_age::Int)
     if ismissing(mv)
         return mv
     else
-        return mv.q[1]
+        return @view mv.q[1]
     end
 end
 
@@ -252,7 +252,7 @@ function omega(m::MortalityDict, issue_age)
     if ismissing(mv)
         return mv
     else
-        return issue_age + length(m.v[issue_age].q) - 1
+        return issue_age + length(mv.q) - 1
     end
 end
 
