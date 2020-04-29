@@ -266,14 +266,14 @@ you can request the table directly from the SOA's mortality table service. Remem
 that not all tables have been tested, though the standard source format should mean
 compatibility with `MortalityTables.jl`.
 
-```
+```julia
 aus_life_table_female = get_SOA_table(60029)
 q(aus_life_table_female,0,1)  # returns the issue age 0, first duration rate of 0.10139
 ```
 
 You can combine it with the bundled tables too:
 
-```
+```julia
 tables = MortalityTables.tables()
 
 get_SOA_table!(tables,60029) # this modifies `tables` by adding the new table
