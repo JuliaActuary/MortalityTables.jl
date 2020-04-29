@@ -2,7 +2,7 @@
 
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://alecloudenback.github.io/MortalityTables.jl/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://alecloudenback.github.io/MortalityTables.jl/dev)
-[![Build Status](https://travis-ci.com/JuliaActuary/MortalityTables.jl.svg?branch=master)](https://travis-ci.com/JuliaActuary/MortalityTables.jl)
+![CI](https://github.com/JuliaActuary/MortalityTables.jl/workflows/CI/badge.svg)
 [![codecov](https://codecov.io/gh/JuliaActuary/MortalityTables.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaActuary/MortalityTables.jl)
 
 A Julia package for working with MortalityTables. Has:
