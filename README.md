@@ -241,7 +241,8 @@ omega(table, issue_age)
 
 Comes with some tables built in via [mort.SOA.org](https://mort.soa.org) and by using [you agree to their terms](https://mort.soa.org/TermsOfUse.aspx).
 
-Not all tables have been tested that they work by default, though I have not encountered issues with any of the the VBT/CSO/other usual tables.
+Not all tables have been tested that they work by default, though no issues have
+been reported with any of the the VBT/CSO/other common tables.
 
 Sample of some of the included table sets:
 ```
@@ -261,7 +262,9 @@ Sample of some of the included table sets:
 ### Getting tables from [mort.SOA.org](https://mort.soa.org)
 
 Given a table id ([for example](https://mort.soa.org/ViewTable.aspx?&TableIdentity=60029) `60029`)
-you can request the table directly from the SOA's mortality table service.
+you can request the table directly from the SOA's mortality table service. Remember
+that not all tables have been tested, though the standard source format should mean
+compatibility with `MortalityTables.jl`.
 
 ```
 aus_life_table_female = get_SOA_table(60029)
