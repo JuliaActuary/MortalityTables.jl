@@ -1,6 +1,5 @@
 import DataStructures
 import XMLDict
-using ProgressMeter
 
 include("MortalityTable.jl")
 
