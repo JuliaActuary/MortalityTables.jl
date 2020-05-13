@@ -187,3 +187,29 @@ function tables(dir = nothing)
     # return tables
     return Dict(tbl.d.name => tbl for tbl in tables if ~isnothing(tbl))
 end
+
+function eztbl(path)
+    doc = readxml(path).root
+
+    # https://bicycle1885.github.io/EzXML.jl/stable/manual/#XPath-1
+    tbls = findall("//Table",doc)
+
+    parsemort = n->(parse(Int,n["t"]), parse(Float64,n.content))
+    
+    # parse the last table, assuming it's the ultimate
+    ult = tcopy(Map( parsemort), findall("//Y",tbls[end]))
+
+    iss_ages = findall("//Axis[@t]", tbls[1] )
+    # tcopy(Map(parsemort),eachnode(x)
+    select = tcopy(Map(x -> (parse(Int,x["t"]),tcopy(Map(parsemort),findall("//Y",firstnode(x))))) ,iss_ages)
+
+    if length(tbls) == 2
+        @show "TODO"
+    elseif length(tbls) == 1
+
+    else
+        error("Unknown table format: $path")
+    end
+
+    return tbls, ult,select
+end
