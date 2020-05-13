@@ -179,15 +179,12 @@ function tables(dir = nothing)
     else
         table_dir = dir
     end
-
-    tables = Dict()
+    tables = []
+    @info "Loading built-in Mortality Tables..."
     for (root, dirs, files) in walkdir(table_dir)
-        @showprogress "loading table files..." for file in files
-            if basename(file)[end-3:end] == ".xml"
-                tbl = readXTbML(joinpath(root, file))
-                tables[tbl.d.name] = tbl
-            end
-        end
+        transducer = Filter(x -> basename(x)[end-3:end] == ".xml") |> Map(x ->  readXTbML(joinpath(root, x)) )
+        tables = tcopy(transducer,files  )
     end
-    return tables
+    # return tables
+    return Dict(tbl.d.name => tbl for tbl in tables if ~isnothing(tbl))
 end

@@ -1,5 +1,5 @@
 using DataStructures
-
+using Transducers
 
 include("MetaData.jl")
 
@@ -154,8 +154,9 @@ Equivalant actuarial notation:
 at age `x` survives to at least age `x+s+t`
 """
 function p(table::MortalityDict, issue_age, duration, time::Int)
-    prod(1.0 .- q(table, issue_age, duration:(duration+time-1)))
+    reduce(*,1.0 .- q(table, issue_age, duration:(duration+time-1)))
 end
+
 function p(table::MortalityDict, issue_age, duration, time)
     throw(ArgumentError("time: $time - If you use non-integer time, you need to specify a \n
           distribution of deaths assumption (e.g. `Balducci()`, \n
