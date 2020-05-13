@@ -194,22 +194,21 @@ function eztbl(path)
     # https://bicycle1885.github.io/EzXML.jl/stable/manual/#XPath-1
     tbls = findall("//Table",doc)
 
-    parsemort = n->(parse(Int,n["t"]), parse(Float64,n.content))
+    parserate = Map(n->(parse(Int,n["t"]), parse(Float64,n.content)))
     
     # parse the last table, assuming it's the ultimate
-    ult = tcopy(Map( parsemort), findall("//Y",tbls[end]))
+    ultimate = tcopy(parserate, findall("//Y",tbls[end]))
 
-    iss_ages = findall("//Axis[@t]", tbls[1] )
-    # tcopy(Map(parsemort),eachnode(x)
-    select = tcopy(Map(x -> (parse(Int,x["t"]),tcopy(Map(parsemort),findall("//Y",firstnode(x))))) ,iss_ages)
 
     if length(tbls) == 2
-        @show "TODO"
+        iss_ages = findall("//Axis[@t]", tbls[1] )
+        parse_select_issue_age = Map(x -> (parse(Int,x["t"]),tcopy(parserate,findall("//Y",firstnode(x)))))
+        select = tcopy(parse_select_issue_age ,iss_ages)
     elseif length(tbls) == 1
-
+        select = nothing
     else
         error("Unknown table format: $path")
     end
 
-    return tbls, ult,select
+    return select, ultimate
 end
