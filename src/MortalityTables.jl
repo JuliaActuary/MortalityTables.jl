@@ -1,8 +1,14 @@
 module MortalityTables
+using DataStructures
+using HTTP
+using Transducers
+using QuadGK
+using XMLDict
 
 include("Mortality.jl")
 include("death_distribution.jl")
 include("get_SOA_table.jl")
+include("parameterized_models.jl")
 
 export MortalityTable,
     q,
@@ -19,5 +25,6 @@ export MortalityTable,
     Constant,
     DeathDistribution,
     get_SOA_table,
-    get_SOA_table!
+    get_SOA_table!,
+    Makeham
 end # module
