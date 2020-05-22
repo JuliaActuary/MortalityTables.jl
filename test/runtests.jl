@@ -2,6 +2,7 @@ using MortalityTables
 using Test
 
 include("basic.jl")
+include("parameterized_models.jl")
 include("XTbML.jl")
 include("distribution.jl")
 
