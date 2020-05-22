@@ -256,6 +256,21 @@ Sample of some of the included table sets:
 
 [Click here to see the full list of tables included.](BundledTables.md)
 
+#### Parameterized Models
+Makeham's Law is included. Use like so:
+
+```julia
+a = 0.00022
+b = 2.7e-6
+c = 1.124
+m = Makeham(a,b,c) 
+
+age = 20
+q(m,age) # the one year mortality rate
+q(m,age,5) # the five year cumulative mortality rate
+p(m,age) # the one year survival rate
+p(m,age,5) # the five year survival rate
+```
 
 ## Adding more tables
 
