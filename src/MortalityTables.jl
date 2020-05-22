@@ -1,4 +1,8 @@
 module MortalityTables
+using DataStructures
+using HTTP
+using Transducers
+using XMLDict
 
 include("Mortality.jl")
 include("death_distribution.jl")

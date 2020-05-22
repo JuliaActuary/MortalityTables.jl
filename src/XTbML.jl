@@ -1,6 +1,3 @@
-import DataStructures
-import XMLDict
-
 include("MortalityTable.jl")
 
 function open_and_read(path)
