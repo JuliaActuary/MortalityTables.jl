@@ -26,5 +26,5 @@ export MortalityTable,
     DeathDistribution,
     get_SOA_table,
     get_SOA_table!,
-    Makeham
+    Makeham, Gompertz
 end # module

@@ -2,12 +2,31 @@
 """
     Makeham(a,b,c)
 
-Construct a mortality model using following Makeham's law. Call it like a `MortalityTable`
+Construct a mortality model following Makeham's law:
+
+``\\mu_x = A + Bc^x``
+
 """
 struct Makeham
     a
     b
     c
+end
+
+"""
+    Gompertz(b,c)
+
+Construct a mortality model following Gompertz' law of mortality:
+
+``\\mu_x = Bc^x``
+
+This is a special case of Makeham's law ``\\mu_x = A + Bc^x``, where ``A=0``.
+
+Calling this will create a `Makeham` model that can be called with `q` or `p`.
+
+"""
+function Gompertz(b,c) 
+    return Makeham(0,b,c)
 end
 
 """
