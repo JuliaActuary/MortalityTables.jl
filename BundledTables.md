@@ -227,6 +227,18 @@ These Tables come loaded in `/src/tables/`
 2001 CSO Preferred Select and Ultimate - Female Nonsmoker, ALB
 2001 CSO Composite Select and Ultimate - Male, ALB
 2001 CSO Composite Select and Ultimate - Female, ALB
+1986-92 CIA – Male Smoker, ANB
+1986-92 CIA – Male Smoker, ALB
+1986-92 CIA – Male Nonsmoker, ANB
+1986-92 CIA – Male Nonsmoker, ALB
+1986-92 CIA – Female Smoker, ANB
+1986-92 CIA – Female Smoker, ALB
+1986-92 CIA – Female Nonsmoker, ANB
+1986-92 CIA – Female Nonsmoker, ALB
+1986-92 CIA - Male, ANB
+1986-92 CIA - Male, ALB
+1986-92 CIA - Female, ANB
+1986-92 CIA - Female, ALB
 1980 CSO – Male, ALB
 1980 CSO – Female, ALB
 1980 CSO Basic Table – Male, ANB
