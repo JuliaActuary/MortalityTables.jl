@@ -15,7 +15,7 @@
 
         # test whole ages with assumption argument
         for method in methods
-            @test q(soa_mort,0,1,method) == 0.12
+            @test q(soa_mort,0,1,1,method) == 0.12
         end
     
         # test fractional ages
@@ -42,8 +42,8 @@
         
         # test whole ages with assumption argument
         for method in methods
-            @test q(soa_mort,0,1,method) == 0.20
-            @test q(soa_mort,1,1,method) == 0.50
+            @test q(mort,0,1,1,method) ≈ 0.20
+            @test q(mort,1,1,1,method) ≈ 0.50
         end
     
         # test fractional ages
