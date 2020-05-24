@@ -177,10 +177,7 @@ function p(table::UltimateMortalityTable, issue_age, duration::Int)
 end
 
 function p(table::UltimateMortalityTable, issue_age, duration)
-    throw(ArgumentError("time: $time - If you use non-integer time, you need to specify a \n
-          distribution of deaths assumption (e.g. `Balducci()`, \n
-          `Constant()`, or `Uniform()` as the last argument to your \n
-          function call."))
+    throw(ArgumentError("time: $time - If you use non-integer time, you need to specify a distribution of deaths assumption (e.g. `Balducci()`, Constant()`, or `Uniform()` as the last argument to your function call."))
 end
 
 @doc raw"""
@@ -196,9 +193,7 @@ function q(table::MortalityDict, issue_age, duration, time::Int)
     1.0 - p(table::MortalityDict, issue_age, duration, time)
 end
 function q(table::MortalityDict, issue_age, duration, time)
-    throw(ArgumentError("time: $time - If you use non-integer time, you need to specify a \n
-          distribution of deaths assumption (e.g. `Balducci()`, \n
-          `Constant()`, or `Uniform()` as the last argument to your \n
+    throw(ArgumentError("time: $time - If you use non-integer time, you need to specify a distribution of deaths assumption (e.g. `Balducci()`, `Constant()`, or `Uniform()` as the last argument to your \n
           function call."))
 
 end
@@ -208,9 +203,7 @@ function q(table::UltimateMortalityTable, issue_age, duration, time::Int)
 end
 
 function q(table::UltimateMortalityTable, issue_age, duration, time)
-    throw(ArgumentError("time: $time - If you use non-integer time, you need to specify a \n
-          distribution of deaths assumption (e.g. `Balducci()`, \n
-          `Constant()`, or `Uniform()` as the last argument to your \n
+    throw(ArgumentError("time: $time - If you use non-integer time, you need to specify a distribution of deaths assumption (e.g. `Balducci()`, `Constant()`, or `Uniform()` as the last argument to your 
           function call."))
 end
 
