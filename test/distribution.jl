@@ -2,6 +2,25 @@
 # https://www.soa.org/globalassets/assets/Files/Research/2016-10-experience-study-calculations.pdf
 # examples on pages 41-45
 @testset "Fractional Year and distribution of deaths" begin
+
+    @testset "ALMCR §9.4" begin
+        ℓ =[43302,42854,42081,41351,40050]
+
+        ps =  ℓ ./ ℓ[1]
+        qs = [1 - ps[t] / ps[t-1] for t in 2:5 ] 
+        
+        m1 = UltimateMortality(qs,65)
+
+        @test p(m1,65,1,1) == ℓ[2] / ℓ[1]
+        @test q(m1,65,1,1) == 1 - ℓ[2] / ℓ[1]
+        @test q(m1,65,1,1,Uniform()) == 1 - ℓ[2] / ℓ[1]
+
+        @test p(m1,65,1,2) == ℓ[3] / ℓ[1]
+        @test q(m1,65,1,2) == 1 - ℓ[3] / ℓ[1]
+        @test q(m1,65,1,2,Uniform()) == 1 - ℓ[3] / ℓ[1]
+
+    end
+
     @testset "SOA Experience Study Calcuations distribution examples" begin
         soa_mort = UltimateMortality([0.12])
 
