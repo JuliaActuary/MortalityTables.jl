@@ -12,6 +12,13 @@
             7 / 12 => [0.9263, 0.9300, 0.9281],
             12 / 12 => [0.8800, 0.8800, 0.8800],
         )
+
+        # test whole ages with assumption argument
+        for method in methods
+            @test q(soa_mort,0,1,1,method) == 0.12
+        end
+    
+        # test fractional ages
         for i = 1:length(methods)
             for (t, target) in time_targets
                 @test round(p(soa_mort, 0, 1, t, methods[i]), digits = 4) ==
@@ -32,6 +39,14 @@
             1 + 7 / 12 => [0.5053, 0.5667, 0.5339],
             1 + 12 / 12 => [0.4000, 0.4000, 0.4000],
         )
+        
+        # test whole ages with assumption argument
+        for method in methods
+            @test q(mort,0,1,1,method) ≈ 0.20
+            @test q(mort,1,1,1,method) ≈ 0.50
+        end
+    
+        # test fractional ages
         for i = 1:length(methods)
             for (t, target) in time_targets
                 @test round(p(mort, 0, 1, t, methods[i]), digits = 4) ==
