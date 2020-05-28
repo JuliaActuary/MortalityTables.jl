@@ -28,7 +28,7 @@
 
     mt1 = MortalityTable(s1, u1, TableMetaData())
 
-    q(mt1.select, 0, 1) == 1
-    q(mt1.ultimate, 0, 1) == 1
+    @test q(mt1.select, 0, 1) == 1
+    @test q(mt1.ultimate, 0, 1) == 1
 
 end
