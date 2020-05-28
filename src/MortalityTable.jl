@@ -169,7 +169,7 @@ Equivalent actuarial notation:
 ``$p_x$`` , or
 """
 function p(table::MortalityDict, issue_age, duration)
-    return 1.0 - q(table, issue_age, duration)
+    return 1.0 .- q(table, issue_age, duration)
 end
 
 function p(table::UltimateMortalityTable, issue_age, duration::Int)
