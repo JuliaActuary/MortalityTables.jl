@@ -31,4 +31,7 @@
     @test q(mt1.select, 0, 1) == 1
     @test q(mt1.ultimate, 0, 1) == 1
 
+    @test q(mt1.ultimate,0,1,0) == 0
+    @test p(mt1.ultimate,0,1,0) == 1
+
 end

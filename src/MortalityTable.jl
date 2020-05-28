@@ -151,7 +151,11 @@ Equivalant actuarial notation:
 at age `x` survives to at least age `x+s+t`
 """
 function p(table::MortalityDict, issue_age, duration, time::Int)
-    reduce(*,1.0 .- q(table, issue_age, duration:(duration+time-1)))
+    if time == 0 
+        return 1.0
+    else
+        reduce(*,1.0 .- q(table, issue_age, duration:(duration+time-1)))
+    end
 end
 
 function p(table::MortalityDict, issue_age, duration, time)
