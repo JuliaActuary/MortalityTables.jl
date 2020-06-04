@@ -103,8 +103,10 @@ A function to calculate non-whole year survivorship, where you must
     mortaility applies through the rest of the year.
 """
 function p(tbl, issue_age, duration, time, dist::Uniform)
-
-    if time > 1
+    if time == 0 
+        return 1.0
+    
+    elseif time > 1
         whole_time = trunc(Int, time)
         p′ = p(tbl, issue_age, duration, whole_time)
         return p′ *

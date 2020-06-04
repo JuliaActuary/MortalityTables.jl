@@ -27,6 +27,10 @@
                       round(1 - target[i], digits = 4)
             end
         end
+
+        # test time zero when given distribution of deaths
+        @test q(soa_mort,0,1,0,Uniform()) == 0.0
+        @test p(soa_mort,0,1,0,Uniform()) == 1.0
     end
     @testset "Multi-year examples" begin
         mort = UltimateMortality([0.20, 0.50])
