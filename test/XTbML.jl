@@ -13,22 +13,22 @@
     end
 
     @testset "Ultimate Only" begin
-    pth = joinpath(
+        pth = joinpath(
         dirname(pathof(MortalityTables)),
         "tables",
         "SOA",
         "t17.xml",
     )
-    file = MortalityTables.open_and_read(pth) |> MortalityTables.getXML
-    xtbl = MortalityTables.parseXTbMLTable(file, pth)
+        file = MortalityTables.open_and_read(pth) |> MortalityTables.getXML
+        xtbl = MortalityTables.parseXTbMLTable(file, pth)
 
-    mt = MortalityTables.XTbML_Table_To_MortalityTable(xtbl)
-    @test isa(mt, MortalityTable)
+        mt = MortalityTables.XTbML_Table_To_MortalityTable(xtbl)
+        @test isa(mt, MortalityTable)
 
-    @test mt.ultimate[0] ≈ 0.00245
-    @test mt.ultimate[100] ≈ 1.0
-    @test_throws BoundsError mt.ultimate[101]
-end
+        @test mt.ultimate[0] ≈ 0.00245
+        @test mt.ultimate[100] ≈ 1.0
+        @test_throws BoundsError mt.ultimate[101]
+    end
 
     @testset "XTbML to MortalityTable" begin
         @testset "Select and Ultimate" begin

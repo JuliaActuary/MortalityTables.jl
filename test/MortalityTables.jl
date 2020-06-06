@@ -28,7 +28,7 @@
 
 
             @test vbt2001.select[35][35] ≈ 0.00036
-            @test vbt2001.select[35][35+60] ≈ 0.24298
+            @test vbt2001.select[35][35 + 60] ≈ 0.24298
             @test vbt2001.select[95][95] ≈ 0.23815
             @test vbt2001.ultimate[95] ≈ 0.24298
             @test vbt2001.ultimate[120] ≈ 1.0
@@ -48,7 +48,7 @@
                 tables["2001 CSO Super Preferred Select and Ultimate - Male Nonsmoker, ANB"]
 
             @test cso2001.select[35][35] ≈ 0.00037
-            @test cso2001.select[35][35+60] ≈ 0.26719
+            @test cso2001.select[35][35 + 60] ≈ 0.26719
             @test cso2001.ultimate[16] ≈ 0.00041
             @test cso2001.ultimate[95] ≈ 0.26719
             @test cso2001.ultimate[120] ≈ 1.0
@@ -60,7 +60,7 @@
             @test omega(cso2001.ultimate) == 120
 
             @testset "duration ranges" begin
-                #select only
+                # select only
                 @test all(cso2001.select[29][29:31] .== [0.00029, 0.00035, 0.0004])
                 @test all(cso2001.select[35][35:59] .== [
                     0.00037,

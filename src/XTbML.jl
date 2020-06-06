@@ -54,32 +54,24 @@ function parseXTbMLTable(x, path)
         # for a select and ultimate table, will have multiple tables
         # parsed into a vector of tables
         sel = map(x["XTbML"]["Table"][1]["Values"]["Axis"]) do ai
-            (
-                issue_age = parse(Int, ai[:t]),
+            (issue_age = parse(Int, ai[:t]),
                 rates = map(ai["Axis"]["Y"]) do aj
-                    (
-                        duration = parse(Int, aj[:t]),
-                        rate = getVal(aj, ""),
-                    )
-                end
-            )
+                (duration = parse(Int, aj[:t]),
+                        rate = getVal(aj, ""),)
+            end)
         end
 
         ult = map(x["XTbML"]["Table"][2]["Values"]["Axis"]["Y"]) do ai 
-            (
-                age  = parse(Int, ai[:t]),
-                rate = getVal(ai, ""),
-            )
+            (age  = parse(Int, ai[:t]),
+                rate = getVal(ai, ""),)
         end
 
     else
         # a table without select period will just have one set of values
 
         ult = map(x["XTbML"]["Table"]["Values"]["Axis"]["Y"]) do ai
-            (
-                age = parse(Int, ai[:t]), 
-                rate=getVal(ai, "")
-            )
+            (age = parse(Int, ai[:t]), 
+                rate = getVal(ai, ""))
         end
 
         sel = nothing
@@ -98,7 +90,7 @@ end
 function XTbML_Table_To_MortalityTable(tbl::XTbMLTable)
     ult = UltimateMortality(
                 [v.rate for v in  tbl.ultimate], 
-                start_age=tbl.ultimate[1].age
+                start_age = tbl.ultimate[1].age
             )
 
     if !isnothing(tbl.select)
@@ -114,12 +106,12 @@ function XTbML_Table_To_MortalityTable(tbl::XTbMLTable)
         sel = SelectMortality(
                     rate_matrix,
                     ult, 
-                    start_age =tbl.select[1].issue_age
+                    start_age = tbl.select[1].issue_age
                 )
 
-        return MortalityTable(sel, ult, metadata=tbl.d)
+        return MortalityTable(sel, ult, metadata = tbl.d)
     else
-        return MortalityTable(ult, metadata=tbl.d)
+        return MortalityTable(ult, metadata = tbl.d)
     end
 end
 
@@ -151,8 +143,8 @@ function tables(dir = nothing)
     tables = []
     @info "Loading built-in Mortality Tables..."
     for (root, dirs, files) in walkdir(table_dir)
-        transducer = Filter(x -> basename(x)[end-3:end] == ".xml") |> Map(x ->  readXTbML(joinpath(root, x)) )
-        tables = tcopy(transducer,files  )
+        transducer = Filter(x->basename(x)[end - 3:end] == ".xml") |> Map(x->readXTbML(joinpath(root, x)))
+        tables = tcopy(transducer, files)
     end
     # return tables
     return Dict(tbl.d.name => tbl for tbl in tables if ~isnothing(tbl))

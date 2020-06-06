@@ -20,7 +20,7 @@ julia> m[18]
 ```
 """
 function UltimateMortality(v::Array{<:Real,1}; start_age = 0)
-    return OffsetArray(v,start_age - 1)
+    return OffsetArray(v, start_age - 1)
 end
 
 """
@@ -56,10 +56,10 @@ function SelectMortality(select, ultimate; start_age = 0)
     # iterate down the rows (issue ages)
     vs = map(enumerate(eachrow(select))) do (i, r)
         end_age = start_age + (i - 1) + (length(r) - 1)
-        OffsetArray([r ; ultimate[end_age+1:end]],(start_age - 1) + (i - 1))
+        OffsetArray([r ; ultimate[end_age + 1:end]], (start_age - 1) + (i - 1))
     end
 
-    return OffsetArray(vs,start_age - 1)
+    return OffsetArray(vs, start_age - 1)
 end
 
 
@@ -109,11 +109,11 @@ Base.getindex(u::UltimateTable,x) = u.ultimate[x]
 Base.lastindex(u::UltimateTable) = lastindex(u.ultimate)
 
 
-function MortalityTable(select,ultimate; metadata=TableMetaData())
+function MortalityTable(select, ultimate; metadata = TableMetaData())
     return SelectUltimateTable(select, ultimate, metadata)
 end
 
-function MortalityTable(ultimate; metadata=TableMetaData())
+function MortalityTable(ultimate; metadata = TableMetaData())
     return UltimateTable(ultimate, metadata)
 end
 
@@ -165,39 +165,39 @@ julia> survivorship(qs,0.5,Uniform())
 0.95
 ```
 """
-function survivorship(v,to_age)
+function survivorship(v, to_age)
     return survivorship(v, firstindex(v), to_age)
 end
-function survivorship(v,to_age,dd::DeathDistribution)
-    return survivorship(v, firstindex(v), to_age,dd)
+function survivorship(v, to_age, dd::DeathDistribution)
+    return survivorship(v, firstindex(v), to_age, dd)
 end
 
-function survivorship(v::T,from_age::Int,to_age::Int) where {T<:AbstractArray}
+function survivorship(v::T, from_age::Int, to_age::Int) where {T <: AbstractArray}
     if from_age == to_age
         return 1.0
     else
         return reduce(*,
-            1 .- v[from_age:(to_age-1)],
-            init=1.0
+            1 .- v[from_age:(to_age - 1)],
+            init = 1.0
             )
     end
 end
 
-function survivorship(v::T,from_age,to_age,dd::DeathDistribution) where {T<:AbstractArray}
+function survivorship(v::T, from_age, to_age, dd::DeathDistribution) where {T <: AbstractArray}
     # calculate the survivorship for the rounded ages, and then the high and low high_residual
-    age_low = ceil(Int,from_age)
-    age_high = floor(Int,to_age)
+    age_low = ceil(Int, from_age)
+    age_high = floor(Int, to_age)
 
     if age_low == from_age
         low_residual = 1.0
     else
-        low_residual = 1 - decrement_partial_year(v,from_age,age_low,dd)
+        low_residual = 1 - decrement_partial_year(v, from_age, age_low, dd)
     end
 
     if age_high == to_age
         high_residual = 1.0
     else
-        high_residual = 1 - decrement_partial_year(v,age_high,to_age,dd)
+        high_residual = 1 - decrement_partial_year(v, age_high, to_age, dd)
     end
 
     if from_age == to_age
@@ -205,8 +205,8 @@ function survivorship(v::T,from_age,to_age,dd::DeathDistribution) where {T<:Abst
     else
          
         whole = reduce(*,
-            1 .- v[age_low:(age_high-1)],
-            init=1.0
+            1 .- v[age_low:(age_high - 1)],
+            init = 1.0
             )
 
         return whole * low_residual * high_residual
@@ -216,29 +216,29 @@ end
 # Reference: Experience Study Calculations, 2016, Society of Actuaries
 # https://www.soa.org/globalassets/assets/Files/Research/2016-10-experience-study-calculations.pdf
 
-function decrement_partial_year(v,from_age::Int,to_age,dd::Uniform)
+function decrement_partial_year(v, from_age::Int, to_age, dd::Uniform)
     return v[from_age] * (to_age - from_age)
 end
 
-function decrement_partial_year(v,from_age,to_age::Int,dd::Uniform)
+function decrement_partial_year(v, from_age, to_age::Int, dd::Uniform)
     return v[to_age - 1] * (to_age - from_age)
 end
 
-function decrement_partial_year(v,from_age::Int,to_age,dd::Constant)
-    return 1 - (1-v[from_age]) ^ (to_age - from_age)
+function decrement_partial_year(v, from_age::Int, to_age, dd::Constant)
+    return 1 - (1 - v[from_age])^(to_age - from_age)
 end
 
-function decrement_partial_year(v,from_age,to_age::Int,dd::Constant)
-    return 1 - (1 - v[to_age - 1]) ^ (to_age - from_age)
+function decrement_partial_year(v, from_age, to_age::Int, dd::Constant)
+    return 1 - (1 - v[to_age - 1])^(to_age - from_age)
 end
 
-function decrement_partial_year(v,from_age::Int,to_age,dd::Balducci)
+function decrement_partial_year(v, from_age::Int, to_age, dd::Balducci)
     q′ = v[from_age]
     frac = (to_age - from_age)
     return 1 - (1 - q′) / (1 - (1 - frac) * q′)
 end
 
-function decrement_partial_year(v,from_age,to_age::Int,dd::Balducci)
+function decrement_partial_year(v, from_age, to_age::Int, dd::Balducci)
     q′ = v[to_age - 1]
     frac = (to_age - from_age)
     return 1 - (1 - q′) / (1 - (1 - frac) * q′)
@@ -271,10 +271,10 @@ julia> cumulative_decrement(qs,0.5,Uniform())
 0.05
 ```
 """
-cumulative_decrement(v,to_age) = 1 .- survivorship(v,to_age)
-cumulative_decrement(v,to_age,dd::DeathDistribution) = 1 .- survivorship(v,to_age,dd)  
-cumulative_decrement(v,from_age,to_age) = 1 .- survivorship(v,from_age,to_age) 
-cumulative_decrement(v,from_age,to_age,dd::DeathDistribution) = 1 .- survivorship(v,from_age,to_age,dd) 
+cumulative_decrement(v,to_age) = 1 .- survivorship(v, to_age)
+cumulative_decrement(v,to_age,dd::DeathDistribution) = 1 .- survivorship(v, to_age, dd)  
+cumulative_decrement(v,from_age,to_age) = 1 .- survivorship(v, from_age, to_age) 
+cumulative_decrement(v,from_age,to_age,dd::DeathDistribution) = 1 .- survivorship(v, from_age, to_age, dd) 
 
 
 """

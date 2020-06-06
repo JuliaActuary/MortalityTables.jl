@@ -15,7 +15,7 @@ function get_SOA_table(id::Int)
     # To increase the reliability with which a UTF-8 encoding can be detected,
     # Microsoft invented a variant of UTF-8 (that Python 2.5 calls "utf-8-sig")
     # for its Notepad program: Before any of the Unicode characters is written
-    #to the file, a UTF-8 encoded BOM (which looks like this as a byte sequence:
+    # to the file, a UTF-8 encoded BOM (which looks like this as a byte sequence:
     # 0xef, 0xbb, 0xbf) is written.
     xml = getXML(String(r.body[4:end]))
     return XTbML_Table_To_MortalityTable(parseXTbMLTable(xml, path))
@@ -33,7 +33,7 @@ of the function name).
 
 !! Remember that not all tables have been tested to work.
 """
-function get_SOA_table!(dict,id::Int)
+function get_SOA_table!(dict, id::Int)
     path = "https://mort.soa.org/Export.aspx?Type=xml&TableIdentity=$id"
     r = HTTP.request("GET", path)
 
@@ -43,7 +43,7 @@ function get_SOA_table!(dict,id::Int)
     # To increase the reliability with which a UTF-8 encoding can be detected,
     # Microsoft invented a variant of UTF-8 (that Python 2.5 calls "utf-8-sig")
     # for its Notepad program: Before any of the Unicode characters is written
-    #to the file, a UTF-8 encoded BOM (which looks like this as a byte sequence:
+    # to the file, a UTF-8 encoded BOM (which looks like this as a byte sequence:
     # 0xef, 0xbb, 0xbf) is written.
     xml = getXML(String(r.body[4:end]))
     tbl = XTbML_Table_To_MortalityTable(parseXTbMLTable(xml, path))
