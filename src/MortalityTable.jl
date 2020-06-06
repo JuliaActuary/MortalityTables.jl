@@ -73,20 +73,23 @@ Base.show(io::IO, ::MIME"text/plain", mt::MortalityTable) = print(
 
 
 
-function survivorship(v,to_time)
-    return survivorship(v, 0, to_time)
+function survivorship(v,to_age)
+    return survivorship(v, firstindex(v), to_age)
 end
 
-function survivorship(v,from_time::Int,to_time::Int)
-    i1 = firstindex(v)
-    return reduce(*,
-        1 .- v[(from_time+i1):(to_time + i1)],
-        init=1.0
-        )
+function survivorship(v::T,from_age::Int,to_age::Int) where {T<:AbstractArray}
+    if from_age == to_age
+        return 1.0
+    else
+        return reduce(*,
+            1 .- v[from_age:(to_age-1)],
+            init=1.0
+            )
+    end
 end
 
-cumulative_decrement(v,to_time) = 1 .- survivorship(v,to_time) 
-cumulative_decrement(v,from_time,to_time) = 1 .- survivorship(v,fromt_time,to_time) 
+cumulative_decrement(v,to_age) = 1 .- survivorship(v,to_age) 
+cumulative_decrement(v,from_age,to_age) = 1 .- survivorship(v,from_age,to_age) 
 
 """
     omega(x)

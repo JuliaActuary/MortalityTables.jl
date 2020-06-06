@@ -1,4 +1,4 @@
-
+abstract type ParametricMortality end
 """
     Makeham(a,b,c)
 
@@ -7,7 +7,7 @@ Construct a mortality model following Makeham's law:
 ``\\mu_x = A + Bc^x``
 
 """
-struct Makeham
+struct Makeham <: ParametricMortality
     a
     b
     c
@@ -34,7 +34,10 @@ end
 
 ``\\mu_x``: Return the force of mortality at the given age. 
 """
-μ(m::Makeham,age) = m.a + m.b * m.c ^ age
+μ(m::Makeham,age::UnitRange) = m.a .+ m.b .* m.c .^ collect(age)
+function μ(m::Makeham,age) 
+    m.a .+ m.b * m.c .^ age
+end
 
 # use the integral to calculate the one-year survival
 """
@@ -44,8 +47,14 @@ end
 With `time` argument: ``_tp_x``, the survival from `age` to `age + time`.
 Otherwise: ``p_x``, the survival from `age` to `age  + 1`.
 """
-p(m::Makeham,x,t) = exp(-quadgk(s->μ(m,x+s),0,t)[1])
-p(m::Makeham,x) = p(m::Makeham,x,1)
+function survivorship(m::Makeham,from_age,to_age) 
+    if from_age == to_age
+        return 1.0
+    else
+        return exp(-quadgk(age->μ(m,age),from_age,to_age)[1])
+    end
+end
+survivorship(m::Makeham,to_age) = survivorship(m::Makeham,0,to_age)
 
 """
     q(m::Makeham,age,time) 
@@ -54,6 +63,8 @@ p(m::Makeham,x) = p(m::Makeham,x,1)
 With `time` argument: ``_tq_x``, the cumulative mortality from `age` to `age + time`.
 Otherwise: ``q_x``, the cumulative mortality from `age` to `age  + 1`.
 """
-q(m::Makeham,x,t) = 1 - p(m,x,t)
-q(m::Makeham,x) = 1 - p(m,x,1)
+cumulative_decrement(m::Makeham,from_age,to_age) = 1 - survivorship(m,from_age,to_age)
+cumulative_decrement(m::Makeham,to_age) = 1 - survivorship(m,to_age)
 
+(m::ParametricMortality)(x) = μ(m,x)
+Base.getindex(m::ParametricMortality,x) = m(x)
