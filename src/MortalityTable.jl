@@ -2,14 +2,6 @@ include("MetaData.jl")
 
 
 """
-MortalityVector
-"""
-
-struct MortalityVector
-    q
-end
-
-"""
 """
 
 abstract type MortalityDict end
@@ -30,7 +22,7 @@ not available.
 function UltimateMortality(v::Array{<:Real,1}, start_age = 0)
     d = DefaultDict(missing)
     for (i, q) in enumerate(v)
-        d[start_age+i-1] = MortalityVector(v[i:end])
+        d[start_age+i-1] = v[i:end]
     end
     return UltimateMortality(d)
 end
@@ -54,14 +46,14 @@ function SelectMortality(select, ultimate::UltimateMortality, start_age = 0)
         select_qs = select[i, 1:end]
 
         if ult_age_start >= maximum(keys(ultimate.v))
-            d[iss_age] = select_qs |> MortalityVector
+            d[iss_age] = select_qs 
 
         else # use ultimate rates if available
             last_age = ω(ultimate, ult_age_start)
             last_dur = last_age - ult_age_start + 1
             start_dur = 1
             ult_qs = q(ultimate, ult_age_start, start_dur:last_dur)
-            d[iss_age] = vcat(select_qs, ult_qs) |> MortalityVector
+            d[iss_age] = vcat(select_qs, ult_qs)
         end
 
 
@@ -74,7 +66,7 @@ function SelectMortality(select, ultimate::UltimateMortality, start_age = 0)
         last_dur = last_age - iss_age + 1
         start_dur = 1
         ult_qs = q(ultimate, iss_age, start_dur:last_dur)
-        d[iss_age] = ult_qs |> MortalityVector
+        d[iss_age] = ult_qs
     end
 
     return SelectMortality(d)
@@ -217,7 +209,7 @@ function q(m::MortalityDict, issue_age::Int, duration)
     if ismissing(mv)
         return mv
     else
-        return mv.q[duration]
+        return mv[duration]
     end
 end
 
@@ -226,7 +218,7 @@ function q(m::UltimateMortality, issue_age::Int)
     if ismissing(mv)
         return mv
     else
-        return mv.q[1]
+        return mv[1]
     end
 end
 
@@ -247,7 +239,7 @@ function omega(m::MortalityDict, issue_age)
     if ismissing(mv)
         return mv
     else
-        return issue_age + length(m.v[issue_age].q) - 1
+        return issue_age + length(m.v[issue_age]) - 1
     end
 end
 
