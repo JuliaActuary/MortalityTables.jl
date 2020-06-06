@@ -2,11 +2,17 @@ include("MetaData.jl")
 
 
 """
-Given an ultimate vector, will create a dictionary that is
-indexed by issue age and will return `missing` `if the age is
-not available.
+    UltimateMortality(vector; start_age=0)
+
+Given a vector of rates, returns an `OffsetArray` that is indexed by attained age.
+
+# Examples
+```julia-repl
+
+
+```
 """
-function UltimateMortality(v::Array{<:Real,1}, start_age = 0)
+function UltimateMortality(v::Array{<:Real,1}; start_age = 0)
     return OffsetArray(v,start_age - 1)
 end
 
@@ -14,7 +20,7 @@ end
 Given an 2D array, will create a an array that is indexed by issue age cotaining an array
 which is then indexed by attained age.
 """
-function SelectMortality(select, ultimate, start_age = 0)
+function SelectMortality(select, ultimate; start_age = 0)
 
     # iterate down the rows (issue ages)
     vs = map(enumerate(eachrow(select))) do (i, r)

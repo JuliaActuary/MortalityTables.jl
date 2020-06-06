@@ -98,7 +98,10 @@ function parseXTbMLTable(x, path)
 end
 
 function XTbML_Table_To_MortalityTable(tbl::XTbMLTable)
-    ult = UltimateMortality([v.rate for v in  tbl.ultimate], tbl.ultimate[1].age)
+    ult = UltimateMortality(
+                [v.rate for v in  tbl.ultimate], 
+                start_age=tbl.ultimate[1].age
+            )
 
     if !isnothing(tbl.select)
         rate_matrix = map(tbl.select) do row
@@ -110,7 +113,11 @@ function XTbML_Table_To_MortalityTable(tbl::XTbMLTable)
         rate_matrix = hcat(rate_matrix...)'
 
         tbl.select[1].issue_age
-        sel = SelectMortality(rate_matrix,ult,tbl.select[1].issue_age )
+        sel = SelectMortality(
+                    rate_matrix,
+                    ult, 
+                    start_age =tbl.select[1].issue_age
+                )
 
         return MortalityTable(sel, ult, tbl.d)
     else
