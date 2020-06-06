@@ -31,6 +31,11 @@
     @test mt1.select[0][1] == 1
     @test mt1.ultimate[1] == 1
 
+    mt2 = MortalityTable(q1,TableMetaData())
+
+    @test mt2.ultimate[0] == 0
+    @test mt2[0] == 0
+
     # test time zero accumlated force
 
     q4 = UltimateMortality([0.1,0.3,0.6,1],0)
