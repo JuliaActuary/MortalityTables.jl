@@ -1,7 +1,7 @@
 module MortalityTables
-using DataStructures
 using HTTP
 using Transducers
+using OffsetArrays
 using QuadGK
 using XMLDict
 
