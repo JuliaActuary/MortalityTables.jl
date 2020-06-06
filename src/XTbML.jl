@@ -72,9 +72,8 @@ function parseXTbMLTable(x, path)
             )
         end
 
-    elseif isa(x["XTbML"]["Table"], DataStructures.OrderedDict)
-        # a table without select period will just have one set of values, which
-        # are loaded into the OrderedDict
+    else
+        # a table without select period will just have one set of values
 
         ult = map(x["XTbML"]["Table"]["Values"]["Axis"]["Y"]) do ai
             (
@@ -84,8 +83,7 @@ function parseXTbMLTable(x, path)
         end
 
         sel = nothing
-    else
-        error("don't know how to handle table: " * name)
+
     end
 
     tbl = XTbMLTable(
