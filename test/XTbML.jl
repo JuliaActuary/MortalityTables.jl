@@ -1,5 +1,15 @@
 @testset "XTbML" begin
+    @testset "dict parse" begin
+        g = MortalityTables.get_and_parse
+        d = Dict(:a => "1.2", :c => "a")
 
+        @test g(d,:a) == 1.2
+        @test ismissing(g(d,:b))
+        @test ismissing(g(d,:b))
+        @test_throws ArgumentError g(d,:c)
+
+    end
+    
     @testset "XTbML loading" begin
         pth = joinpath(
             dirname(pathof(MortalityTables)),

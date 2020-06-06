@@ -13,7 +13,7 @@ function getXML(open_file)
 end
 
 # get potentially missing value out of dict
-function getVal(dict, key)
+function get_and_parse(dict, key)
     try
         return val = parse(Float64, dict[key])
     catch y
@@ -57,13 +57,13 @@ function parseXTbMLTable(x, path)
             (issue_age = parse(Int, ai[:t]),
                 rates = map(ai["Axis"]["Y"]) do aj
                 (duration = parse(Int, aj[:t]),
-                        rate = getVal(aj, ""),)
+                        rate = get_and_parse(aj, ""),)
             end)
         end
 
         ult = map(x["XTbML"]["Table"][2]["Values"]["Axis"]["Y"]) do ai 
             (age  = parse(Int, ai[:t]),
-                rate = getVal(ai, ""),)
+                rate = get_and_parse(ai, ""),)
         end
 
     else
@@ -71,7 +71,7 @@ function parseXTbMLTable(x, path)
 
         ult = map(x["XTbML"]["Table"]["Values"]["Axis"]["Y"]) do ai
             (age = parse(Int, ai[:t]), 
-                rate = getVal(ai, ""))
+                rate = get_and_parse(ai, ""))
         end
 
         sel = nothing
