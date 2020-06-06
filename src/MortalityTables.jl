@@ -6,6 +6,7 @@ using OffsetArrays
 using QuadGK
 using XMLDict
 
+include("MetaData.jl")
 include("death_distribution.jl")
 include("MortalityTable.jl")
 include("XTbML.jl")

@@ -1,6 +1,3 @@
-include("MetaData.jl")
-
-
 """
     UltimateMortality(vector; start_age=0)
 
