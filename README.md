@@ -8,24 +8,66 @@
 A Julia package for working with MortalityTables. Has:
 - First-class support for missing values.
 - Lots of bundled SOA mort.soa.org tables
-- Many common functions, including partial year mortality calculations (Uniform, Constant, Balducci)
+- `survivorship` and `cumualtive_decrement` functions to calculate decrements over period of time
+- Partial year mortality calculations (Uniform, Constant, Balducci)
 - Friendly syntax and flexible usage
 
 ## Examples
 ### Quickstart
 
+Loading the package and bundled tables:
 ```julia
-using MortalityTables
+julia> using MortalityTables
 
-tables = MortalityTables.tables() # loads the tables stored in the package folder
-vbt2001 = tables["2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB"]
+julia> tables = MortalityTables.tables()
+Dict{String,MortalityTable} with 266 entries:
+  "2015 VBT Female Non-Smoker RR90 ALB"                                       => SelectUltimateTable{OffsetArray{OffsetArray{Float64,1,Array{Float64,1}},1,Array{OffsetArray{F…  
+  "2017 Loaded CSO Preferred Structure Nonsmoker Preferred Female ANB"        => SelectUltimateTable{OffsetArray{OffsetArray{Float64,1,Array{Float64,1}},1,Array{OffsetArray{F…  
+  ⋮                                                                            => ⋮
+```
+Get information about a particular table:
+```julia
+julia> vbt2001 = tables["2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB"]
+MortalityTable:
+   Name:
+       2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB
+   Provider:
+       Society of Actuaries
+   mort.SOA.org ID:
+       1118
+   mort.SOA.org link:
+       https://mort.soa.org/ViewTable.aspx?&TableIdentity=1118
+   Description:
+       2001 Valuation Basic Table (VBT) Residual Standard Select and Ultimate Table -  Male Nonsmoker. Basis: Age Nearest Birthday. Minimum Select Age: 0. Maximum Select Age: 99. Minimum Ultimate Age: 25. Maximum Ultimate Age: 120
+```
 
-# indexed by issue age and duration for select rate
-q(vbt2001.select,35,1)        # .00036
-q(vbt2001.ultimate,95,1)          # .24298
+The package revolves around easy-to-access vectors which are indexed by attained age:
+```julia
+julia> vbt2001.select[35] # vector of rates for issue age 35
+ 0.00036
+ 0.00048
+ ⋮
+ 0.94729
+ 1.0
+julia> vbt2001.select[35][35] #issue age 35, attained age 35
 
-# when accessing ultimate rates, don't always need to specify the duration
-q(vbt2001.ultimate,95)          # .24298
+julia> vbt2001.ultimate[95]  # ultimate vectors only need to be called with the attained age
+0.24298
+```
+
+Calculate the force of mortality or survivorship over a range of time:
+```julia
+julia> survivorship(vbt2001.ultimate,30,40) # the survivorship between ages 30 and 40
+0.9894404665434904
+
+julia> cumulative_decrement(vbt2001.ultimate,30,40) # the survivorship between ages 30 and 40
+0.010559533456509618
+```
+
+Non-whole periods of time are supported when you specify the assumption (`Constant()`, `Uniform()`, or `Balducci()`) for fractional periods:
+```
+julia> survivorship(vbt2001.ultimate,30,40.5,Uniform()) # the survivorship between ages 30 and 40.5
+0.9887676470262408
 ```
 
 ### Example: Quickly access and compare tables
@@ -39,95 +81,46 @@ cso_2017 = tables["2017 Loaded CSO Preferred Structure Nonsmoker Super Preferred
 
 issue_age = 27
 durations = 1:30
-mort = [q(cso_2001.select,issue_age,durations),
-        q(cso_1980.ultimate,issue_age,durations)]
+mort = [
+     cso_2001.select[issue_age][issue_age .+ durations .- 1],
+     cso_2017.select[issue_age][issue_age .+ durations .- 1],
+     ]
 plot(
    durations,
    mort,
-   label = ["2001 CSO M SuperPref NS" "1980 CSO M NS"],
-   title = "Comparison of 1980 and 2001 CSO \n for 27-year-old male",
+   label = ["2001 CSO" "2017 CSO"],
+   title = "Comparison of 2107 and 2001 CSO \n for SuperPref NS 27-year-old male",
    xlabel="duration")
 ```
-![Comparison of 2001 and 2017 CSO](https://user-images.githubusercontent.com/711879/80447339-c48e5180-88de-11ea-81ee-4babd0f84755.png)
+![Comparison of 1980 and 2001 CSO \n for 27-year-old male](https://user-images.githubusercontent.com/711879/83955217-1c8d7180-a816-11ea-9406-d98ed360d5c8.png)
 
 Easily extend the analysis to move up the [ladder of abstraction](http://worrydream.com/LadderOfAbstraction/):
 
 ```julia
-ages = 25:80
-durs = 1:35
+
+issue_ages = 18:80
+durations = 1:40
 
 # compute the relative rates with the element-wise division ("brodcasting" in Julia)
-diff = q(cso_2017.select,ages,durs) ./ q(cso_2001.select,ages,durs)
+function rel_diff(a, b, issue_age,duration)
+        att_age = issue_age + duration - 1
+        return a[issue_age][att_age] / b[issue_age][att_age]
+end
 
-contour(durs,ages,diff,
+
+diff = [rel_diff(cso_2017.select,cso_2001.select,ia,dur) for ia in issue_ages, dur in durations]
+contour(durations,
+        issue_ages,
+        diff,
         xlabel="duration",ylabel="issue ages",
         title="Relative difference between 2017 and 2001 CSO \n M PFN",
         fill=true
         )
 ```
 
-![Heatmap comparison](https://user-images.githubusercontent.com/711879/80447494-251d8e80-88df-11ea-9335-761d1a1739c7.png)
+![heatmap comparison of 2017 CSO and 2001 CSO Mortality Table](https://user-images.githubusercontent.com/711879/83955100-11861180-a815-11ea-9a22-c85bacceb4bc.png)
 
 
-## Usage
-
-### Indexing
-
-Tables are indexed by a starting age and duration (even ultimate tables, under the hood). For tables with a starting age that is defined, but you've requested an attained age beyond the defined rates, you will get a `BoundsError`. If you ask for a starting age that is not defined, you will get a `missing`.
-
-The rationale for this is, for example, this [2001 CSO table](https://mort.soa.org/ViewTable.aspx?&TableIdentity=1076) is not defined for ages 15 and under and ends at 120.
-- You will get a `missing` if you ask for starting age 10 or 15, because it's plausible that you could encounter a a starting age not defined by a table.
-- You will get a `BoundsError` if you ask for an attained age 150 for someone select at age 16, because it is beyond the table's definition of its end.
-
-#### Index by issue age and duration
-
-```julia
-q(vbt2001.select,35,1)        # .00036
-q(vbt2001.select,35,61)       # .24298
-
-# can easily get ranges of values:
-q(vbt2001.select,35,1:30)     # [0.0036, 0.0048, ...]
-```
-
-#### Index by just age to get the ultimate rates
-```julia
-q(vbt2001,95)          # .24298
-q(vbt2001,50:70)       # [0.00319, 0.00345, ...]
-```
-
-### Other Usage
-
-#### Table Attributes
-```julia
-issue_age = 50
-ω(vbt2001.select,issue_age)              # 120
-omega(vbt2001.ultimate, issue_age)          # 120
-```
-
-#### Table MetaData
-
-When you have an expression that shows a Mortality table, it displays relevant information:
-
-```julia
-tables = MortalityTables.tables()
-vbt2001 = tables["2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB"]
-```
-
-This shows the following in a notebook or REPL:
-
-```
-MortalityTable:
-   Name:
-       2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB
-   Provider:
-       Society of Actuaries
-   mort.SOA.org ID:
-       1118
-   mort.SOA.org link:
-       https://mort.soa.org/ViewTable.aspx?&TableIdentity=1118
-   Description:
-       2001 Valuation Basic Table (VBT) Residual Standard Select and Ultimate Table -  Male Nonsmoker. Basis: Age Nearest Birthday. Minimum Select Age: 0. Maximum Select Age: 99. Minimum Ultimate Age: 25. Maximum Ultimate Age: 120
-```
 
 #### Fractional Years
 When evaluating survival over partial years when you are given full year mortality
@@ -142,100 +135,6 @@ The three assumptions are:
 - `Balducci()` which assumes a decreasing force of mortality over the year. It seems [to
 be for](https://www.soa.org/globalassets/assets/library/research/actuarial-research-clearing-house/1978-89/1988/arch-1/arch88v17.pdf) making it easier to calculate successive months by hand.
 
-##### Usage
-
-When you call a method below that uses the `time` argument (ie a period over which
-    you want to calculate the force of mortality), if you use a non `Int` (integer)
-    number then you need to specify the assumption as the last argument.
-
-For example:
-
-**_Don't_** need to specify because you gave an `Int` time:
-
-```julia
-# calculate the 5-year survival for a person issued at age 50 and in
-# the first duration
-issue_age = 50
-duration = 1
-time = 5
-p(table,issue_age,duration,time)
-```
-**_Do_** need to specify because you gave an fractional floating time:
-
-```julia
-# calculate the 5-and-a-half-year survival for a
-# person issued at age 50 and in the first duration
-issue_age = 50
-duration = 1
-time = 5.5
-p(table,issue_age,duration,time, Balducci())
-```
-
-Note that if you are passing floating point numbers as the `time`
-argument, you still have to specify a mortality assumption because
-[floating point numbers](https://en.wikipedia.org/wiki/Floating-point_arithmetic) are often *technically* not whole numbers even
-if you define a number to be, say, `5.0`.
-
-
-### Actuarial Notation Equivalants
-#### `ₜp₍ₓ₎₊ₛ`
-The probability that a life aged `x + s` who was select
-at age `x` survives to at least age `x+s+t`.
-
-```julia
-issue_age = x
-duration = s - 1
-time = t
-p(table,issue_age,duration,time)
-```
-
-#### `ₜpₓ`
-The probability that a life aged `x` survives to at least age `t`.
-
-```julia
-issue_age = x
-duration = 1
-time = t
-p(table,issue_age,duration,time)
-```
-
-#### `pₓ`
-The probability that a life aged `x` survives through age `x+1`
-
-```julia
-issue_age = x
-duration = 1
-time = 1
-p(table,issue_age,duration,time)
-```
-
-#### `ₜqₓ`
-The probability that a life aged `x` dies by age `x+t`
-
-```julia
-issue_age = x
-duration = 1
-time = t
-q(table,issue_age,duration,time)
-```
-
-#### `qₓ`
-The probability that a life aged `x` dies by age `x+1`
-
-```julia
-issue_age = x
-duration = 1
-time = 1
-q(table,issue_age,duration,time)
-```
-
-#### `ω`
-Returns the last attained age which the table has defined (ie not including) for a given issue_age.
-
-```julia
-omega(table, issue_age)
-ω(table, issue_age)
-```
 
 ### Some Batteries Included
 
@@ -271,10 +170,9 @@ Now some examples with `m`, but could use `g` interchangably:
 
 ```julia
 age = 20
-q(m,age) # the one year mortality rate
-q(m,age,5) # the five year cumulative mortality rate
-p(m,age) # the one year survival rate
-p(m,age,5) # the five year survival rate
+m[20] # the mortality rate at age 20
+cumulative_decrement(m,20,25) # the five year cumulative mortality rate
+survivorship(m,20,25) # the five year survivorship rate
 ```
 
 ## Adding more tables
@@ -288,7 +186,7 @@ compatibility with `MortalityTables.jl`.
 
 ```julia
 aus_life_table_female = get_SOA_table(60029)
-q(aus_life_table_female,0,1)  # returns the issue age 0, first duration rate of 0.10139
+aus_life_table_female[0]  # returns the attained age 0 rate of 0.10139
 ```
 
 You can combine it with the bundled tables too:
@@ -299,7 +197,7 @@ tables = MortalityTables.tables()
 get_SOA_table!(tables,60029) # this modifies `tables` by adding the new table
 
 t = tables["Australian Life Tables 1891-1900 Female"]
-q(t,0,1)  # returns the issue age 0, first duration rate of 0.10139
+t[0]  # returns the attained age 0 rate of 0.10139
 ```
 
 
@@ -313,15 +211,13 @@ it with the select rates to get a `SelectMortality` table.
 using MortalityTables
 
 # represents attained ages of 15 through 100
-ult_start_age = 15
 ult_vec = [0.005, 0.008, ...,0.805,1.00]
-ult = UltimateMortality(ult_vec,ult_start_age)
+ult = UltimateMortality(ult_vec,start_age = 15)
 ```
 
 We can now use this the ulitmate rates all by itself:
 ```julia
 q(ult,15,1) # 0.005
-q(ult,10,1) # missing (no age 10 rate)
 ```
 And join with the select rates, which for our example will start at age 0:
 ```julia
@@ -331,9 +227,10 @@ select_matrix = [ 0.001 0.002 ... 0.010;
                   ...
                 ]
 sel_start_age = 0
-sel = SelectMortality(select_matrix,ult,sel_start_age)
+sel = SelectMortality(select_matrix,ult,start_age = 0)
 
-q(sel,0,1) # 0.001
+sel[0][0] #issue age 0, attained age 0 rate of  0.001
+sel[0][100] #issue age 0, attained age 100 rate of  1.0
 ```
 
 Lastly, to take the `SelectMortality` and `UltimateMortality` we just created,
@@ -343,7 +240,7 @@ we can combine them into one stored object, along with MetaData:
 my_table = MortalityTable(
               s1,
               u1,
-              TableMetaData(name="My Table", comments="Rates for Product XYZ")
+              metadata=TableMetaData(name="My Table", comments="Rates for Product XYZ")
               )
 ```
 

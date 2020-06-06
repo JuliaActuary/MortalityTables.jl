@@ -123,6 +123,11 @@ function XTbML_Table_To_MortalityTable(tbl::XTbMLTable)
     end
 end
 
+"""
+    readXTbML(path)
+
+    Loads the [XtbML](https://mort.soa.org/About.aspx) (the SOA XML data format for mortality tables) stored at the given path and returns a `MortalityTable`.
+"""
 function readXTbML(path)
     path
     x = open_and_read(path) |> getXML
@@ -135,10 +140,7 @@ end
 """
     tables(dir=nothing)
 
-    Loads the XtbML (the SOA XML data format for mortality tables) stored in the
-    given path. If no path is specified, will load the packages in the
-    MortalityTables package directory. To see where your system keeps packages,
-    run `DEPOT_PATH` from a Julia REPL.
+Loads the [XtbML](https://mort.soa.org/About.aspx) (the SOA XML data format for mortality tables) stored in the given path. If no path is specified, will load the packages in the MortalityTables package directory. To see where your system keeps packages, run `DEPOT_PATH` from a Julia REPL.
 """
 function tables(dir = nothing)
     if isnothing(dir)

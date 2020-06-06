@@ -30,7 +30,7 @@ function Gompertz(b,c)
 end
 
 """
-    μ(m::Makeham,age)
+    μ(m::ParametricMortality,age)
 
 ``\\mu_x``: Return the force of mortality at the given age. 
 """
@@ -40,13 +40,6 @@ function μ(m::Makeham,age)
 end
 
 # use the integral to calculate the one-year survival
-"""
-    p(m::Makeham,age,time) 
-    p(m::Makeham,age) 
-
-With `time` argument: ``_tp_x``, the survival from `age` to `age + time`.
-Otherwise: ``p_x``, the survival from `age` to `age  + 1`.
-"""
 function survivorship(m::Makeham,from_age,to_age) 
     if from_age == to_age
         return 1.0
@@ -56,13 +49,6 @@ function survivorship(m::Makeham,from_age,to_age)
 end
 survivorship(m::Makeham,to_age) = survivorship(m::Makeham,0,to_age)
 
-"""
-    q(m::Makeham,age,time) 
-    q(m::Makeham,age) 
-
-With `time` argument: ``_tq_x``, the cumulative mortality from `age` to `age + time`.
-Otherwise: ``q_x``, the cumulative mortality from `age` to `age  + 1`.
-"""
 cumulative_decrement(m::Makeham,from_age,to_age) = 1 - survivorship(m,from_age,to_age)
 cumulative_decrement(m::Makeham,to_age) = 1 - survivorship(m,to_age)
 

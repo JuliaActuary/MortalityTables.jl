@@ -1,11 +1,21 @@
 """
     UltimateMortality(vector; start_age=0)
 
-Given a vector of rates, returns an `OffsetArray` that is indexed by attained age.
+Given a vector of rates, returns an `OffsetArray` that is indexed by attained age. 
+
+Give the optional keyword argument to start the indexing at an age other than zero.
 
 # Examples
 ```julia-repl
+julia> m = UltimateMortality([0.1,0.3,0.6,1]);
 
+julia> m[0]
+0.1
+
+julia> m = UltimateMortality([0.1,0.3,0.6,1], start_age = 18);
+
+julia> m[18]
+0.1
 
 ```
 """
@@ -14,8 +24,32 @@ function UltimateMortality(v::Array{<:Real,1}; start_age = 0)
 end
 
 """
-Given an 2D array, will create a an array that is indexed by issue age cotaining an array
-which is then indexed by attained age.
+    SelectMortality(select, ultimate; start_age=0)
+
+Given a matrix rates, where the first row represents the select rates for a risk, will create a an `OffsetArray` that is indexed by issue age, containing a vector of rate indexed by attained age. The ultimate mortality vector is used for rates in the post-select period.
+
+Give the optional keyword argument to start the indexing at an age other than zero.
+
+# Examples
+``` 
+julia> ult = UltimateMortality([x / 100 for x in 0:100]);
+
+julia> matrix = rand(50,10); # represents random(!) mortality rates with a select period of 10 years
+
+julia> sel = SelectMortality(matrix,ult,start_age=0);
+
+julia> sel[0] # the mortality vector for a select life with issue age 0
+ 0.12858960119349439
+ 0.1172480189376135
+ 0.8237661916705163
+ ⋮
+ 0.98
+ 0.99
+ 1.0
+
+julia> sel[0][95] # the mortality rate for a life age 95, that was issued at age 0
+0.95
+```
 """
 function SelectMortality(select, ultimate; start_age = 0)
 
@@ -31,34 +65,56 @@ end
 
 
 """
-    MortalityTable
+    MortalityTable(ultimate)
+    MortalityTable(select, ultimate)
+    MortalityTable(select, ultimate; metadata::MetaData)
 
-    A struct that holds a select (two-dimensional) and ultimate (vector) rates,
-        along with MetaData associated with the table.
+Constructs a container object which can hold either:
+    - ultimate-only rates (an `UltimateTable`)
+    - select and ultimate rates (a `SelectUltimateTable`)
+
+Also pass a keyword argument `metadata=MetaData(...)` to store relevant information (source, notes, etc) about the table itself.
+
+# Examples
+```julia
+# first construct the underlying data
+ult = UltimateMortality([x / 100 for x in 0:100]); # first ma
+matrix = rand(10,50); # represents random mortality rates with a select period of 10 years
+sel = SelectMortality(matrix,ult,start_age=0);
+
+table = MortalityTable(sel,ult)
+
+# can now get rates, indexed by attained age:
+
+table.select[10] # the vector of rates for a risk issued select at age 10 
+
+table.ultimate[99] # 0.99
+
+```
 """
 abstract type MortalityTable end
 
-struct SelectUltimateMortalityTable{S,U} <: MortalityTable
+struct SelectUltimateTable{S,U} <: MortalityTable
     select::S
     ultimate::U
     d::TableMetaData
 end
 
-struct UltimateMortalityTable{U} <: MortalityTable
+struct UltimateTable{U} <: MortalityTable
     ultimate::U
     d::TableMetaData
 end
 
-Base.getindex(u::UltimateMortalityTable,x) = u.ultimate[x]
-Base.lastindex(u::UltimateMortalityTable) = lastindex(u.ultimate)
+Base.getindex(u::UltimateTable,x) = u.ultimate[x]
+Base.lastindex(u::UltimateTable) = lastindex(u.ultimate)
 
 
 function MortalityTable(select,ultimate; metadata=TableMetaData())
-    return SelectUltimateMortalityTable(select, ultimate, metadata)
+    return SelectUltimateTable(select, ultimate, metadata)
 end
 
 function MortalityTable(ultimate; metadata=TableMetaData())
-    return UltimateMortalityTable(ultimate, metadata)
+    return UltimateTable(ultimate, metadata)
 end
 
 
@@ -80,7 +136,33 @@ Base.show(io::IO, ::MIME"text/plain", mt::MortalityTable) = print(
 )
 
 
+"""
+    survivorship(mortality_vector,to_age)
+    survivorship(mortality_vector,from_age,to_age)
 
+Returns the survivorship through attained age `to_age`. The start of the calculation is either the start of the vector, or attained_age `from_age`. `from_age` and `to_age` need to be Integers. Add a DeathDistribution as the last argument to handle floating point and non-whole ages:
+
+    survivorship(mortality_vector,to_age,::DeathDistribution)
+    survivorship(mortality_vector,from_age,to_age,::DeathDistribution)
+
+# Examples
+```julia-repl
+julia> qs = UltimateMortality([0.1,0.3,0.6,1]);
+    
+julia> survivorship(qs,0)
+1.0
+julia> survivorship(qs,1)
+0.9
+
+julia> survivorship(qs,1,1)
+1.0
+julia> survivorship(qs,1,2)
+0.7
+
+julia> survivorship(qs,0.5,Uniform())
+0.95
+```
+"""
 function survivorship(v,to_age)
     return survivorship(v, firstindex(v), to_age)
 end
@@ -160,15 +242,59 @@ function decrement_partial_year(v,from_age,to_age::Int,dd::Balducci)
     return 1 - (1 - q′) / (1 - (1 - frac) * q′)
 end
 
+"""
+    cumulative_decrement(mortality_vector,to_age)
+    cumulative_decrement(mortality_vector,from_age,to_age)
+
+Returns the cumulative decrement through attained age `to_age`. The start of the calculation is either the start of the vector, or attained_age `from_age`. `from_age` and `to_age` need to be Integers. Add a DeathDistribution as the last argument to handle floating point and non-whole ages:
+
+    cumulative_decrement(mortality_vector,to_age,::DeathDistribution)
+    cumulative_decrement(mortality_vector,from_age,to_age,::DeathDistribution)
+
+# Examples
+```julia-repl
+julia> qs = UltimateMortality([0.1,0.3,0.6,1]);
+    
+julia> cumulative_decrement(qs,0)
+0.0
+julia> cumulative_decrement(qs,1)
+0.1
+
+julia> cumulative_decrement(qs,1,1)
+0.0
+julia> cumulative_decrement(qs,1,2)
+0.3
+
+julia> cumulative_decrement(qs,0.5,Uniform())
+0.05
+```
+"""
 cumulative_decrement(v,to_age) = 1 .- survivorship(v,to_age)
 cumulative_decrement(v,to_age,dd::DeathDistribution) = 1 .- survivorship(v,to_age,dd)  
 cumulative_decrement(v,from_age,to_age) = 1 .- survivorship(v,from_age,to_age) 
 cumulative_decrement(v,from_age,to_age,dd::DeathDistribution) = 1 .- survivorship(v,from_age,to_age,dd) 
+
+
 """
     omega(x)
     ω(x)
 
-Returns the last index of the given vector.
+Returns the last index of the given vector. For mortality vectors this means the last attained age for which a rate is defined.
+
+ω is aliased to omega, but unexported. To use, do `using MortalityTables: ω` when importing or call `MortalityTables.ω()`
+
+# Examples
+
+```julia-repl
+julia> qs = UltimateMortality([0.1,0.3,0.6,1]);
+julia> omega(qs)
+3
+
+julia> qs = UltimateMortality([0.1,0.3,0.6,1],start_age=10);
+julia> omega(qs)
+13
+
+```
 """
 function omega(x)
     return lastindex(x)
