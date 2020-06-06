@@ -47,6 +47,8 @@ struct UltimateMortalityTable{U} <: MortalityTable
 end
 
 Base.getindex(u::UltimateMortalityTable,x) = u.ultimate[x]
+Base.lastindex(u::UltimateMortalityTable) = lastindex(u.ultimate)
+
 
 function MortalityTable(select,ultimate,d::TableMetaData)
     return SelectUltimateMortalityTable(select, ultimate, d)
