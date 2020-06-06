@@ -1,10 +1,21 @@
 @testset "Parameterized Models" begin
     @testset "Makeham" begin
-        # these values come from the 'Standard 
-        # from Actuarial Mathematics for Life Contingent Risks, 2nd end
 
 
         m = Makeham(0.00022,2.7e-6,1.124)
+
+        @test MortalityTables.μ(m,20) == 0.00022 + 2.7e-6 * 1.124 ^ 20
+        @test m[20] == MortalityTables.μ(m,20)
+        @test m(20) == MortalityTables.μ(m,20)
+        
+        # vs manually calculated (via QuadGK) integrals
+        @test cumulative_decrement(m,20,25) ≈ 0.0012891622754368504
+        @test survivorship(m,20,25) ≈ 1 - 0.0012891622754368504
+        @test cumulative_decrement(m,25) ≈ 0.005888764668801838
+        @test survivorship(m,25) ≈ 1 - 0.005888764668801838
+
+        # these values come from the 'Standard Select and Ultimate Survival Model'
+        # from Actuarial Mathematics for Life Contingent Risks, 2nd end
 
         ℓ = 100_000
         ℓs = [survivorship(m,20,age) for age in 21:100] .* ℓ
