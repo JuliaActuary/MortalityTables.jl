@@ -145,6 +145,8 @@ Returns the survivorship through attained age `to_age`. The start of the calcula
     survivorship(mortality_vector,to_age,::DeathDistribution)
     survivorship(mortality_vector,from_age,to_age,::DeathDistribution)
 
+If given a negative `to_age`, it will return `1.0`. Aside from simplifying the code, this makes sense as for something to exist in order to decrement in the first place, it must have existed and surived to the point of  being able to be decremented.
+
 # Examples
 ```julia-repl
 julia> qs = UltimateMortality([0.1,0.3,0.6,1]);

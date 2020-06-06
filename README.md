@@ -234,7 +234,7 @@ sel[0][100] #issue age 0, attained age 100 rate of  1.0
 ```
 
 Lastly, to take the `SelectMortality` and `UltimateMortality` we just created,
-we can combine them into one stored object, along with MetaData:
+we can combine them into one stored object, along with a `TableMetaData`:
 
 ```julia
 my_table = MortalityTable(

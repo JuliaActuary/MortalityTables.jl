@@ -30,6 +30,10 @@
             for (t, target) in time_targets
                 @test round(survivorship(soa_mort,t, methods[i]), digits = 4) ==
                       target[i]
+
+                @test round(MortalityTables.decrement_partial_year(soa_mort,0,t,methods[i]),
+                    digits = 4) ≈  1 - target[i]
+
                 @test round(cumulative_decrement(soa_mort,t, methods[i]), digits = 4) ==
                       round(1 - target[i], digits = 4)
             end

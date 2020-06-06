@@ -54,4 +54,22 @@
     @test survivorship(q4,1,4) ≈ 0.0
     @test cumulative_decrement(q4,1,4) ≈ 1.0
 
+    
+    @test survivorship(q4,-1) ≈ 1.0
+    @test survivorship(q4,4,-1) ≈ 1.0
+    @test cumulative_decrement(q4,-1) ≈ 0.0
+    @test cumulative_decrement(q4,4,-1) ≈ 0.0
+
+
+    @testset "Metadata" begin
+        d = TableMetaData()
+
+        @test isnothing(d.name)
+        
+        d = TableMetaData(name="test")
+        @test d.name == "test"
+    end
+
+    
+
 end
