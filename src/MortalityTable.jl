@@ -53,12 +53,12 @@ Base.getindex(u::UltimateMortalityTable,x) = u.ultimate[x]
 Base.lastindex(u::UltimateMortalityTable) = lastindex(u.ultimate)
 
 
-function MortalityTable(select,ultimate,d::TableMetaData)
-    return SelectUltimateMortalityTable(select, ultimate, d)
+function MortalityTable(select,ultimate; metadata=TableMetaData())
+    return SelectUltimateMortalityTable(select, ultimate, metadata)
 end
 
-function MortalityTable(ultimate, d::TableMetaData)
-    return UltimateMortalityTable(ultimate, d)
+function MortalityTable(ultimate; metadata=TableMetaData())
+    return UltimateMortalityTable(ultimate, metadata)
 end
 
 

@@ -1,5 +1,4 @@
 module MortalityTables
-using DataStructures
 using HTTP
 using Transducers
 using OffsetArrays

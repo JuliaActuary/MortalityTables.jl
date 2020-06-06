@@ -89,7 +89,7 @@ function parseXTbMLTable(x, path)
     tbl = XTbMLTable(
         sel,
         ult,
-        d,
+        d
     )
 
     return tbl
@@ -117,9 +117,9 @@ function XTbML_Table_To_MortalityTable(tbl::XTbMLTable)
                     start_age =tbl.select[1].issue_age
                 )
 
-        return MortalityTable(sel, ult, tbl.d)
+        return MortalityTable(sel, ult, metadata=tbl.d)
     else
-        return MortalityTable(ult, tbl.d)
+        return MortalityTable(ult, metadata=tbl.d)
     end
 end
 
