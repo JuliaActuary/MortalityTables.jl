@@ -8,6 +8,3 @@ Base.@kwdef struct TableMetaData
     comments::Union{Nothing,String} = nothing
     source_path::Union{Nothing,String} = nothing
 end
-
-mort_max_dur = 121
-mort_max_issue_age = 120
