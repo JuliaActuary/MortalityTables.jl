@@ -1,16 +1,13 @@
 include("MetaData.jl")
 
 
-rates(m::UltimateMortality) = m.v
-rates(m::UltimateMortality,issue_age) = m.v[issue_age]
-
 """
 Given an ultimate vector, will create a dictionary that is
 indexed by issue age and will return `missing` `if the age is
 not available.
 """
 function UltimateMortality(v::Array{<:Real,1}, start_age = 0)
-    return OffsetArray(v,start_age)
+    return OffsetArray(v,start_age - 1)
 end
 
 """
@@ -21,11 +18,11 @@ function SelectMortality(select, ultimate, start_age = 0)
 
     # iterate down the rows (issue ages)
     vs = map(enumerate(eachrow(select))) do (i, r)
-        end_age = start_age + i - 1 + length(r)
-        OffsetArray([r ; ultimate[end_age+1:end]],start_age + i)
+        end_age = start_age + (i - 1) + (length(r) - 1)
+        OffsetArray([r ; ultimate[end_age+1:end]],(start_age - 1) + (i - 1))
     end
 
-    return OffsetArray(vs,start_age)
+    return OffsetArray(vs,start_age - 1)
 end
 
 
@@ -87,6 +84,9 @@ function survivorship(v,from_time::Int,to_time::Int)
         init=1.0
         )
 end
+
+cumulative_decrement(v,to_time) = 1 .- survivorship(v,to_time) 
+cumulative_decrement(v,from_time,to_time) = 1 .- survivorship(v,fromt_time,to_time) 
 
 """
     omega(x)

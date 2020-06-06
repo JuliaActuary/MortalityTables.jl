@@ -25,9 +25,9 @@ function getVal(dict, key)
     end
 end
 
-struct XTbMLTable
-    select::DataStructures.DefaultOrderedDict
-    ultimate::DataStructures.DefaultOrderedDict
+struct XTbMLTable{S,U}
+    select::S
+    ultimate::U
     d::TableMetaData
 end
 
@@ -49,102 +49,68 @@ function parseXTbMLTable(x, path)
         comments = comments,
         source_path = source_path,
     )
-    tbl = XTbMLTable(
-        DataStructures.DefaultOrderedDict(missing),
-        DataStructures.DefaultOrderedDict(missing),
-        d,
-    )
 
     if isa(x["XTbML"]["Table"], Vector)
         # for a select and ultimate table, will have multiple tables
         # parsed into a vector of tables
-        for ai in x["XTbML"]["Table"][1]["Values"]["Axis"]
-            issue_age = parse(Int, ai[:t])
-            tbl.select[issue_age] = DataStructures.DefaultOrderedDict(missing)
-            for aj in ai["Axis"]["Y"]
-                duration = parse(Int, aj[:t])
-                rate = getVal(aj, "")
-                if !ismissing(rate)
-                    tbl.select[issue_age][duration] = rate
+        sel = map(x["XTbML"]["Table"][1]["Values"]["Axis"]) do ai
+            (
+                issue_age = parse(Int, ai[:t]),
+                rates = map(ai["Axis"]["Y"]) do aj
+                    (
+                        duration = parse(Int, aj[:t]),
+                        rate = getVal(aj, ""),
+                    )
                 end
-            end
+            )
         end
 
-        for ai in x["XTbML"]["Table"][2]["Values"]["Axis"]["Y"]
-            age = parse(Int, ai[:t])
-            rate = getVal(ai, "")
-            if !ismissing(rate)
-                tbl.ultimate[age] = rate
-            end
+        ult = map(x["XTbML"]["Table"][2]["Values"]["Axis"]["Y"]) do ai 
+            (
+                age  = parse(Int, ai[:t]),
+                rate = getVal(ai, ""),
+            )
         end
+
     elseif isa(x["XTbML"]["Table"], DataStructures.OrderedDict)
         # a table without select period will just have one set of values, which
         # are loaded into the OrderedDict
 
-        for ai in x["XTbML"]["Table"]["Values"]["Axis"]["Y"]
-            age = parse(Int, ai[:t])
-            rate = getVal(ai, "")
-            if !ismissing(rate)
-                tbl.ultimate[age] = rate
-            end
+        ult = map(x["XTbML"]["Table"]["Values"]["Axis"]["Y"]) do ai
+            (
+                age = parse(Int, ai[:t]), 
+                rate=getVal(ai, "")
+            )
         end
+
+        sel = nothing
     else
         error("don't know how to handle table: " * name)
     end
 
+    tbl = XTbMLTable(
+        sel,
+        ult,
+        d,
+    )
+
     return tbl
 end
 
-"""
-    q_select(table::XTbMLTable, issueAge, duration)
-Given a mortality table, an issue age, and a duration, returns the appropriate select or ultimate qx.
-"""
-function q_select(table::XTbMLTable, issueAge::Int, duration::Int)
-    if length(table.select) > 0
-        s = table.select[issueAge]
-        if ismissing(s)
-            q = missing
-        else
-            q = s[duration]
-        end
-    else
-        q = missing
-    end
-
-    if ismissing(q)
-        q = table.ultimate[issueAge+duration-1]
-    end
-    return q
-end
-
-"""
-    q_ulitmate(table::XTbMLTable, age)
-Given a mortality table and an age returns the appropriate ultimate qx.
-"""
-function q_ultimate(table::XTbMLTable, age)
-    return table.ultimate[age]
-end
-
 function XTbML_Table_To_MortalityTable(tbl::XTbMLTable)
-    ult_α, ult_ω = extrema(keys(tbl.ultimate))
-    ult = OffsetArray([tbl.ultimate[age] for age = ult_α:ult_ω], ult_α)
+    ult = UltimateMortality([v.rate for v in  tbl.ultimate], tbl.ultimate[1].age)
 
-    if length(tbl.select) > 0
-        sel_α, sel_ω = extrema(keys(tbl.select))
-        sel_end_dur = maximum([length(tbl.select[age]) for age = sel_α:sel_ω])
-
-        select_array = Array{Any}(undef, length(sel_α:sel_ω), sel_end_dur)
-        fill!(select_array, missing)
-
-        for (iss_age, rate_vec) in tbl.select
-            for (dur, rate) in rate_vec
-                select_array[iss_age-sel_α+1, dur] = rate
+    if !isnothing(tbl.select)
+        rate_matrix = map(tbl.select) do row
+            map(row.rates) do val
+                val.rate
             end
-        end
+        end 
 
+        rate_matrix = hcat(rate_matrix...)'
 
-
-        sel = SelectMortality(identity.(select_array), ult, sel_α)
+        tbl.select[1].issue_age
+        sel = SelectMortality(rate_matrix,ult,tbl.select[1].issue_age )
 
         return MortalityTable(sel, ult, tbl.d)
     else

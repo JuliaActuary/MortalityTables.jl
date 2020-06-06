@@ -1,40 +1,38 @@
 
-@testset "basic `Ultimate` MortalityTable" begin
+@testset "basic MortalityTable" begin
 
-    q1 = UltimateMortality([i for i = 1:20], 0) |> rates
-    @test q1[0] == 1
-    @test q1[1] == 2
-    @test q1[0:1] == [1, 2]
-    @test ω(q1) == 19
-    @test_throws BoundsError q1[ω(q1) + 1]
+    q1 = UltimateMortality([i for i = 0:19], 0)
+    @test q1[0] == 0
+    @test q1[1] == 1
+    @test q1[0:1] == [0, 1]
+    @test omega(q1) == 19
+    @test_throws BoundsError q1[omega(q1) + 1]
 
     # non-zero start age
-    q2 = UltimateMortality([i for i = 1:10], 5) |> rates
+    q2 = UltimateMortality([i for i = 0:9], 5)
     @test_throws BoundsError q2[4]
-    @test q2[5] == 1
+    @test q2[5] == 0
 
     # select strucutre
-    s = [ia + d for ia = 0:5, d = 1:5]
+    s = [ia + d for ia = 0:5, d = 0:4]
 
-    s1 = SelectMortality(s, u1, 0)
-    q3 = rates(s1,0)
-    @test q3[0] == 1
-    @test q3[0:1] == [1, 2]
-    @test ω(q3) == 19
-    @test_throws BoundsError q3[ω(q3) + 1]
-    @test q3[19] == 20
+    q3 = SelectMortality(s, q1, 0)
+    @test q3[0][0] == 0
+    @test q3[0][0:1] == [0, 1]
+    @test omega(q3[0]) == 19
+    @test_throws BoundsError q3[omega(q3[0]) + 1]
+    @test q3[0][19] == 19
     
-    q4 = rates(s1,5)
-    @test q4[6] == 5
+    @test q3[5][5] == 5
 
 
-    mt1 = MortalityTable(s1, u1, TableMetaData())
+    mt1 = MortalityTable(q3, q1, TableMetaData())
 
-    @test mt1.select[0] == 1
-    @test mt1.ultimate[0][1] == 1
+    @test mt1.select[0][1] == 1
+    @test mt1.ultimate[1] == 1
 
     # test time zero accumlated force
-    @test cumulative_decrement(mt1.ultimate[0],0) == 0
-    @test survivorship(mt1.ultimate[0],0) == 1
+    @test cumulative_decrement(mt1.ultimate,0) == 0
+    @test survivorship(mt1.ultimate,0) == 1
 
 end

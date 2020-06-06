@@ -12,22 +12,23 @@
         @test isa(xtbl, MortalityTables.XTbMLTable)
     end
 
+    @testset "Ultimate Only" begin
+    pth = joinpath(
+        dirname(pathof(MortalityTables)),
+        "tables",
+        "SOA",
+        "t17.xml",
+    )
+    file = MortalityTables.open_and_read(pth) |> MortalityTables.getXML
+    xtbl = MortalityTables.parseXTbMLTable(file, pth)
 
-    @testset "XTbML rates" begin
-        pth = joinpath(
-            dirname(pathof(MortalityTables)),
-            "tables",
-            "SOA",
-            "t1076.xml",
-        )
-        file = MortalityTables.open_and_read(pth) |> MortalityTables.getXML
-        xtbl = MortalityTables.parseXTbMLTable(file, pth)
+    mt = MortalityTables.XTbML_Table_To_MortalityTable(xtbl)
+    @test isa(mt, MortalityTable)
 
-        @test MortalityTables.q_select(xtbl, 35, 1) ≈ 0.00037
-        @test MortalityTables.q_ultimate(xtbl, 16) ≈ 0.00041
-        @test MortalityTables.q_select(xtbl, 35, 25) ≈ 0.00508
-        @test MortalityTables.q_select(xtbl, 35, 26) ≈ 0.00621
-    end
+    @test mt.ultimate[0] ≈ 0.00245
+    @test mt.ultimate[100] ≈ 1.0
+    @test_throws BoundsError mt.ultimate[101]
+end
 
     @testset "XTbML to MortalityTable" begin
         @testset "Select and Ultimate" begin
@@ -42,20 +43,13 @@
 
             mt = MortalityTables.XTbML_Table_To_MortalityTable(xtbl)
             @test isa(mt, MortalityTable)
-        end
-        @testset "Ultimate Only" begin
-            pth = joinpath(
-                dirname(pathof(MortalityTables)),
-                "tables",
-                "SOA",
-                "t17.xml",
-            )
-            file = MortalityTables.open_and_read(pth) |> MortalityTables.getXML
-            xtbl = MortalityTables.parseXTbMLTable(file, pth)
 
-            mt = MortalityTables.XTbML_Table_To_MortalityTable(xtbl)
-            @test isa(mt, MortalityTable)
+            @test mt.select[35][35] ≈ 0.00037
+            @test mt.ultimate[16] ≈ 0.00041
+            @test mt.select[35][59] ≈ 0.00508
+            @test mt.select[35][60] ≈ 0.00621 
         end
+        
         @testset "Ultimate Only, not begin at age 0" begin
             pth = joinpath(
                 dirname(pathof(MortalityTables)),
