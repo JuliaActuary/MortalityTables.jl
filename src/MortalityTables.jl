@@ -6,9 +6,9 @@ using OffsetArrays
 using QuadGK
 using XMLDict
 
+include("death_distribution.jl")
 include("MortalityTable.jl")
 include("XTbML.jl")
-include("death_distribution.jl")
 include("get_SOA_table.jl")
 include("parameterized_models.jl")
 

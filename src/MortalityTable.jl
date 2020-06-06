@@ -76,6 +76,9 @@ Base.show(io::IO, ::MIME"text/plain", mt::MortalityTable) = print(
 function survivorship(v,to_age)
     return survivorship(v, firstindex(v), to_age)
 end
+function survivorship(v,to_age,dd::DeathDistribution)
+    return survivorship(v, firstindex(v), to_age,dd)
+end
 
 function survivorship(v::T,from_age::Int,to_age::Int) where {T<:AbstractArray}
     if from_age == to_age
@@ -88,9 +91,71 @@ function survivorship(v::T,from_age::Int,to_age::Int) where {T<:AbstractArray}
     end
 end
 
-cumulative_decrement(v,to_age) = 1 .- survivorship(v,to_age) 
-cumulative_decrement(v,from_age,to_age) = 1 .- survivorship(v,from_age,to_age) 
+function survivorship(v::T,from_age,to_age,dd::DeathDistribution) where {T<:AbstractArray}
+    # calculate the survivorship for the rounded ages, and then the high and low high_residual
+    age_low = ceil(Int,from_age)
+    age_high = floor(Int,to_age)
 
+    if age_low == from_age
+        low_residual = 1.0
+    else
+        low_residual = 1 - decrement_partial_year(v,from_age,age_low,dd)
+    end
+
+    if age_high == to_age
+        high_residual = 1.0
+    else
+        high_residual = 1 - decrement_partial_year(v,age_high,to_age,dd)
+    end
+
+    if from_age == to_age
+        return 1.0
+    else
+         
+        whole = reduce(*,
+            1 .- v[age_low:(age_high-1)],
+            init=1.0
+            )
+
+        return whole * low_residual * high_residual
+    end
+end
+
+# Reference: Experience Study Calculations, 2016, Society of Actuaries
+# https://www.soa.org/globalassets/assets/Files/Research/2016-10-experience-study-calculations.pdf
+
+function decrement_partial_year(v,from_age::Int,to_age,dd::Uniform)
+    return v[from_age] * (to_age - from_age)
+end
+
+function decrement_partial_year(v,from_age,to_age::Int,dd::Uniform)
+    return v[to_age - 1] * (to_age - from_age)
+end
+
+function decrement_partial_year(v,from_age::Int,to_age,dd::Constant)
+    return 1 - (1-v[from_age]) ^ (to_age - from_age)
+end
+
+function decrement_partial_year(v,from_age,to_age::Int,dd::Constant)
+    return 1 - (1 - v[to_age - 1]) ^ (to_age - from_age)
+end
+
+function decrement_partial_year(v,from_age::Int,to_age,dd::Balducci)
+    q′ = v[from_age]
+    frac = (to_age - from_age)
+    return 1 - (1 - q′) / (1 - (1 - frac) * q′)
+end
+
+function decrement_partial_year(v,from_age,to_age::Int,dd::Balducci)
+    q′ = v[to_age - 1]
+    frac = (to_age - from_age)
+    return 1 - (1 - q′) / (1 - (1 - frac) * q′)
+end
+
+cumulative_decrement(v,to_age) = 1 .- survivorship(v,to_age)
+cumulative_decrement(v,to_age,dd::DeathDistribution) = 1 .- survivorship(v,to_age,dd)  
+cumulative_decrement(v,from_age,to_age) = 1 .- survivorship(v,from_age,to_age) 
+cumulative_decrement(v,from_age,to_age,dd::DeathDistribution) = 1 .- survivorship(v,from_age,to_age,dd) 
 """
     omega(x)
     ω(x)
