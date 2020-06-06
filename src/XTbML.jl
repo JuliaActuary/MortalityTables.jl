@@ -1,4 +1,4 @@
-include("MortalityTable.jl")
+
 
 function open_and_read(path)
     s = open(path) do file
@@ -127,7 +127,7 @@ end
 
 function XTbML_Table_To_MortalityTable(tbl::XTbMLTable)
     ult_α, ult_ω = extrema(keys(tbl.ultimate))
-    ult = UltimateMortality([tbl.ultimate[age] for age = ult_α:ult_ω], ult_α)
+    ult = OffsetArray([tbl.ultimate[age] for age = ult_α:ult_ω], ult_α)
 
     if length(tbl.select) > 0
         sel_α, sel_ω = extrema(keys(tbl.select))
