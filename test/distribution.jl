@@ -15,22 +15,35 @@
 
         # test whole ages with assumption argument
         for method in methods
-            @test q(soa_mort,0,1,1,method) == 0.12
+            @test survivorship(soa_mort, 0, 1, method) == 0.88
+            @test survivorship(soa_mort, 1, method) == 0.88
+            @test cumulative_decrement(soa_mort, 0, 1, method) == 0.12
+            @test cumulative_decrement(soa_mort, 1, method) == 0.12
+
+            # test floating point whole ages
+            @test cumulative_decrement(soa_mort, 0, 12 / 12, method) == 0.12
+            @test cumulative_decrement(soa_mort, 12 / 12, method) == 0.12
         end
     
         # test fractional ages
         for i = 1:length(methods)
             for (t, target) in time_targets
-                @test round(p(soa_mort, 0, 1, t, methods[i]), digits = 4) ==
+                @test round(survivorship(soa_mort, t, methods[i]), digits = 4) ==
                       target[i]
-                @test round(q(soa_mort, 0, 1, t, methods[i]), digits = 4) ==
+
+                @test round(MortalityTables.decrement_partial_year(soa_mort, 0, t, methods[i]),
+                    digits = 4) ≈  1 - target[i]
+
+                @test round(cumulative_decrement(soa_mort, t, methods[i]), digits = 4) ==
                       round(1 - target[i], digits = 4)
             end
         end
 
         # test time zero when given distribution of deaths
-        @test q(soa_mort,0,1,0,Uniform()) == 0.0
-        @test p(soa_mort,0,1,0,Uniform()) == 1.0
+        for m in methods
+            @test cumulative_decrement(soa_mort, 0, m) == 0.0
+            @test survivorship(soa_mort, 0, m) == 1.0
+        end
     end
     @testset "Multi-year examples" begin
         mort = UltimateMortality([0.20, 0.50])
@@ -46,16 +59,17 @@
         
         # test whole ages with assumption argument
         for method in methods
-            @test q(mort,0,1,1,method) ≈ 0.20
-            @test q(mort,1,1,1,method) ≈ 0.50
+            @test cumulative_decrement(mort, 1, method) ≈ 0.20
+            @test cumulative_decrement(mort, 2, method) ≈ 0.20 + 0.8 * 0.5
+            @test cumulative_decrement(mort, 1, 2, method) ≈ 0.50
         end
     
         # test fractional ages
         for i = 1:length(methods)
             for (t, target) in time_targets
-                @test round(p(mort, 0, 1, t, methods[i]), digits = 4) ==
+                @test round(survivorship(mort, t, methods[i]), digits = 4) ==
                       target[i]
-                @test round(q(mort, 0, 1, t, methods[i]), digits = 4) ==
+                @test round(cumulative_decrement(mort, t, methods[i]), digits = 4) ==
                       round(1 - target[i], digits = 4)
             end
         end
@@ -63,7 +77,8 @@
 
     @testset "Error when asking for a fractional without assumption" begin
         mort = UltimateMortality([0.20, 0.50])
-        @test_throws ArgumentError q(mort, 0, 1, 1.5)
-        @test_throws ArgumentError p(mort, 0, 1, 1.5)
+        @test_throws MethodError cumulative_decrement(mort, 0, 1, 1.5)
+        @test_throws MethodError survivorship(mort, 0, 1, 1.5)
     end
 end
+

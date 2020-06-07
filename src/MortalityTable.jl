@@ -1,113 +1,120 @@
-include("MetaData.jl")
-
-
 """
+    UltimateMortality(vector; start_age=0)
+
+Given a vector of rates, returns an `OffsetArray` that is indexed by attained age. 
+
+Give the optional keyword argument to start the indexing at an age other than zero.
+
+# Examples
+```julia-repl
+julia> m = UltimateMortality([0.1,0.3,0.6,1]);
+
+julia> m[0]
+0.1
+
+julia> m = UltimateMortality([0.1,0.3,0.6,1], start_age = 18);
+
+julia> m[18]
+0.1
+
+```
 """
-
-abstract type MortalityDict end
-
-struct SelectMortality <: MortalityDict
-    v
-end
-
-struct UltimateMortality <: MortalityDict
-    v
-end
-
-"""
-Given an ultimate vector, will create a dictionary that is
-indexed by issue age and will return `missing` `if the age is
-not available.
-"""
-function UltimateMortality(v::Array{<:Real,1}, start_age = 0)
-    d = DefaultDict(missing)
-    for (i, q) in enumerate(v)
-        d[start_age+i-1] = v[i:end]
-    end
-    return UltimateMortality(d)
+function UltimateMortality(v::Array{<:Real,1}; start_age = 0)
+    return OffsetArray(v, start_age - 1)
 end
 
 """
-Given an 2D array, will create a dictionary that is
-indexed by issue age and will return `missing` `if the age is
-not available.
-"""
-function SelectMortality(select, ultimate::UltimateMortality, start_age = 0)
-    d = DefaultDict(missing)
-    last_select_age = size(select, 2) - 1 + size(select, 1) - 1 + start_age
+    SelectMortality(select, ultimate; start_age=0)
 
-    # get the end of the table that would apply to the last select attained age
-    last_ult_age = ω(ultimate, start_age + size(select, 1) - 1)
+Given a matrix rates, where the first row represents the select rates for a risk, will create a an `OffsetArray` that is indexed by issue age, containing a vector of rate indexed by attained age. The ultimate mortality vector is used for rates in the post-select period.
+
+Give the optional keyword argument to start the indexing at an age other than zero.
+
+# Examples
+``` 
+julia> ult = UltimateMortality([x / 100 for x in 0:100]);
+
+julia> matrix = rand(50,10); # represents random(!) mortality rates with a select period of 10 years
+
+julia> sel = SelectMortality(matrix,ult,start_age=0);
+
+julia> sel[0] # the mortality vector for a select life with issue age 0
+ 0.12858960119349439
+ 0.1172480189376135
+ 0.8237661916705163
+ ⋮
+ 0.98
+ 0.99
+ 1.0
+
+julia> sel[0][95] # the mortality rate for a life age 95, that was issued at age 0
+0.95
+```
+"""
+function SelectMortality(select, ultimate; start_age = 0)
 
     # iterate down the rows (issue ages)
-    for i = 1:size(select, 1)
-        iss_age = start_age + i - 1
-        ult_age_start = length(select[i, 1:end]) + iss_age
-        select_qs = select[i, 1:end]
-
-        if ult_age_start >= maximum(keys(ultimate.v))
-            d[iss_age] = select_qs 
-
-        else # use ultimate rates if available
-            last_age = ω(ultimate, ult_age_start)
-            last_dur = last_age - ult_age_start + 1
-            start_dur = 1
-            ult_qs = q(ultimate, ult_age_start, start_dur:last_dur)
-            d[iss_age] = vcat(select_qs, ult_qs)
-        end
-
-
+    vs = map(enumerate(eachrow(select))) do (i, r)
+        end_age = start_age + (i - 1) + (length(r) - 1)
+        OffsetArray([r ; ultimate[end_age + 1:end]], (start_age - 1) + (i - 1))
     end
 
-    # fill in "select table" for ages past the select issue ages
-    # but ultimate rates are available
-    for iss_age = (maximum(keys(d))+1):last_ult_age
-        last_age = ω(ultimate, iss_age)
-        last_dur = last_age - iss_age + 1
-        start_dur = 1
-        ult_qs = q(ultimate, iss_age, start_dur:last_dur)
-        d[iss_age] = ult_qs
-    end
-
-    return SelectMortality(d)
+    return OffsetArray(vs, start_age - 1)
 end
 
 
 
 """
-    MortalityTable
+    MortalityTable(ultimate)
+    MortalityTable(select, ultimate)
+    MortalityTable(select, ultimate; metadata::MetaData)
 
-    A struct that holds a select (two-dimensional) and ultimate (vector) rates,
-        along with MetaData associated with the table.
+Constructs a container object which can hold either:
+    - ultimate-only rates (an `UltimateTable`)
+    - select and ultimate rates (a `SelectUltimateTable`)
+
+Also pass a keyword argument `metadata=MetaData(...)` to store relevant information (source, notes, etc) about the table itself.
+
+# Examples
+```julia
+# first construct the underlying data
+ult = UltimateMortality([x / 100 for x in 0:100]); # first ma
+matrix = rand(10,50); # represents random mortality rates with a select period of 10 years
+sel = SelectMortality(matrix,ult,start_age=0);
+
+table = MortalityTable(sel,ult)
+
+# can now get rates, indexed by attained age:
+
+table.select[10] # the vector of rates for a risk issued select at age 10 
+
+table.ultimate[99] # 0.99
+
+```
 """
 abstract type MortalityTable end
 
-struct SelectUltimateMortalityTable <: MortalityTable
-    select::SelectMortality
-    ultimate::UltimateMortality
+struct SelectUltimateTable{S,U} <: MortalityTable
+    select::S
+    ultimate::U
     d::TableMetaData
 end
 
-struct UltimateMortalityTable <: MortalityTable
-    ultimate::UltimateMortality
+struct UltimateTable{U} <: MortalityTable
+    ultimate::U
     d::TableMetaData
 end
-function MortalityTable(
-    select::SelectMortality,
-    ultimate::UltimateMortality,
-    d::TableMetaData,
-)
-    return SelectUltimateMortalityTable(select, ultimate, d)
+
+Base.getindex(u::UltimateTable,x) = u.ultimate[x]
+Base.lastindex(u::UltimateTable) = lastindex(u.ultimate)
+
+
+function MortalityTable(select, ultimate; metadata = TableMetaData())
+    return SelectUltimateTable(select, ultimate, metadata)
 end
 
-function MortalityTable(ultimate::UltimateMortality, d::TableMetaData)
-    # sel_α, sel_ω = extrema(keys(ultimate.v))
-    # create a dummy select table which has the ultimate rate for the first
-    # duration. From there, the normal SelectMortality constructor can take over
-
-    # select = [q(ultimate,age,1) for age in sel_α:sel_ω ]
-    # select = SelectMortality(select,ultimate,sel_α)
-    return UltimateMortalityTable(ultimate, d)
+function MortalityTable(ultimate; metadata = TableMetaData())
+    return UltimateTable(ultimate, metadata)
 end
 
 
@@ -129,122 +136,170 @@ Base.show(io::IO, ::MIME"text/plain", mt::MortalityTable) = print(
 )
 
 
-##################################
-### Basic Single Life Mortality ##
-##################################
-
-@doc raw"""
-The probability that a life with given `issue_age` and currently in its nth
-`duration`dies survives to at least `duration` + `time`. If given select
-mortality, will be based on select rates.
-
-Equivalant actuarial notation:
-``$_tp_{(x)+s}$``, or the probability that a life aged `x + s` who was select
-at age `x` survives to at least age `x+s+t`
 """
-function p(table::MortalityDict, issue_age, duration, time::Int)
-    if time == 0 
+    survivorship(mortality_vector,to_age)
+    survivorship(mortality_vector,from_age,to_age)
+
+Returns the survivorship through attained age `to_age`. The start of the calculation is either the start of the vector, or attained_age `from_age`. `from_age` and `to_age` need to be Integers. Add a DeathDistribution as the last argument to handle floating point and non-whole ages:
+
+    survivorship(mortality_vector,to_age,::DeathDistribution)
+    survivorship(mortality_vector,from_age,to_age,::DeathDistribution)
+
+If given a negative `to_age`, it will return `1.0`. Aside from simplifying the code, this makes sense as for something to exist in order to decrement in the first place, it must have existed and surived to the point of  being able to be decremented.
+
+# Examples
+```julia-repl
+julia> qs = UltimateMortality([0.1,0.3,0.6,1]);
+    
+julia> survivorship(qs,0)
+1.0
+julia> survivorship(qs,1)
+0.9
+
+julia> survivorship(qs,1,1)
+1.0
+julia> survivorship(qs,1,2)
+0.7
+
+julia> survivorship(qs,0.5,Uniform())
+0.95
+```
+"""
+function survivorship(v, to_age)
+    return survivorship(v, firstindex(v), to_age)
+end
+function survivorship(v, to_age, dd::DeathDistribution)
+    return survivorship(v, firstindex(v), to_age, dd)
+end
+
+function survivorship(v::T, from_age::Int, to_age::Int) where {T <: AbstractArray}
+    if from_age == to_age
         return 1.0
     else
-        reduce(*,1.0 .- q(table, issue_age, duration:(duration+time-1)))
+        return reduce(*,
+            1 .- v[from_age:(to_age - 1)],
+            init = 1.0
+            )
     end
 end
 
-function p(table::MortalityDict, issue_age, duration, time)
-    throw(ArgumentError("time: $time - If you use non-integer time, you need to specify a \n
-          distribution of deaths assumption (e.g. `Balducci()`, \n
-          `Constant()`, or `Uniform()` as the last argument to your \n
-          function call."))
+function survivorship(v::T, from_age, to_age, dd::DeathDistribution) where {T <: AbstractArray}
+    # calculate the survivorship for the rounded ages, and then the high and low high_residual
+    age_low = ceil(Int, from_age)
+    age_high = floor(Int, to_age)
+
+    if age_low == from_age
+        low_residual = 1.0
+    else
+        low_residual = 1 - decrement_partial_year(v, from_age, age_low, dd)
+    end
+
+    if age_high == to_age
+        high_residual = 1.0
+    else
+        high_residual = 1 - decrement_partial_year(v, age_high, to_age, dd)
+    end
+
+    if from_age == to_age
+        return 1.0
+    else
+         
+        whole = reduce(*,
+            1 .- v[age_low:(age_high - 1)],
+            init = 1.0
+            )
+
+        return whole * low_residual * high_residual
+    end
 end
 
-@doc raw"""
-the probability that a life aged `issue_age` + `duration` - 1
-survives one additional timepoint
+# Reference: Experience Study Calculations, 2016, Society of Actuaries
+# https://www.soa.org/globalassets/assets/Files/Research/2016-10-experience-study-calculations.pdf
 
-Equivalent actuarial notation:
-``$p_x$`` , or
+function decrement_partial_year(v, from_age::Int, to_age, dd::Uniform)
+    return v[from_age] * (to_age - from_age)
+end
+
+function decrement_partial_year(v, from_age, to_age::Int, dd::Uniform)
+    return v[to_age - 1] * (to_age - from_age)
+end
+
+function decrement_partial_year(v, from_age::Int, to_age, dd::Constant)
+    return 1 - (1 - v[from_age])^(to_age - from_age)
+end
+
+function decrement_partial_year(v, from_age, to_age::Int, dd::Constant)
+    return 1 - (1 - v[to_age - 1])^(to_age - from_age)
+end
+
+function decrement_partial_year(v, from_age::Int, to_age, dd::Balducci)
+    q′ = v[from_age]
+    frac = (to_age - from_age)
+    return 1 - (1 - q′) / (1 - (1 - frac) * q′)
+end
+
+function decrement_partial_year(v, from_age, to_age::Int, dd::Balducci)
+    q′ = v[to_age - 1]
+    frac = (to_age - from_age)
+    return 1 - (1 - q′) / (1 - (1 - frac) * q′)
+end
+
 """
-function p(table::MortalityDict, issue_age, duration)
-    return 1.0 .- q(table, issue_age, duration)
-end
+    cumulative_decrement(mortality_vector,to_age)
+    cumulative_decrement(mortality_vector,from_age,to_age)
 
-function p(table::UltimateMortalityTable, issue_age, duration::Int)
-    return p(table.ultimate, issue_age, duration)
-end
+Returns the cumulative decrement through attained age `to_age`. The start of the calculation is either the start of the vector, or attained_age `from_age`. `from_age` and `to_age` need to be Integers. Add a DeathDistribution as the last argument to handle floating point and non-whole ages:
 
-function p(table::UltimateMortalityTable, issue_age, duration)
-    throw(ArgumentError("time: $time - If you use non-integer time, you need to specify a distribution of deaths assumption (e.g. `Balducci()`, Constant()`, or `Uniform()` as the last argument to your function call."))
-end
+    cumulative_decrement(mortality_vector,to_age,::DeathDistribution)
+    cumulative_decrement(mortality_vector,from_age,to_age,::DeathDistribution)
 
-@doc raw"""
-The probability that a life with given `issue_age` and currently in its nth
-`duration`dies by at least `duration` + `time`. If given select mortality,
-will be based on select rates.
+# Examples
+```julia-repl
+julia> qs = UltimateMortality([0.1,0.3,0.6,1]);
+    
+julia> cumulative_decrement(qs,0)
+0.0
+julia> cumulative_decrement(qs,1)
+0.1
 
-Equivalent actuarial notation:
-``$p_{(x)+s}$``  or the probability that a life aged `x + s` who was select
-at age `x` dies by least age `x+s+t`
+julia> cumulative_decrement(qs,1,1)
+0.0
+julia> cumulative_decrement(qs,1,2)
+0.3
+
+julia> cumulative_decrement(qs,0.5,Uniform())
+0.05
+```
 """
-function q(table::MortalityDict, issue_age, duration, time::Int)
-    1.0 - p(table::MortalityDict, issue_age, duration, time)
-end
-function q(table::MortalityDict, issue_age, duration, time)
-    throw(ArgumentError("time: $time - If you use non-integer time, you need to specify a distribution of deaths assumption (e.g. `Balducci()`, `Constant()`, or `Uniform()` as the last argument to your \n
-          function call."))
-
-end
-
-function q(table::UltimateMortalityTable, issue_age, duration, time::Int)
-    return q(table.ultimate, issue_age, duration, time)
-end
-
-function q(table::UltimateMortalityTable, issue_age, duration, time)
-    throw(ArgumentError("time: $time - If you use non-integer time, you need to specify a distribution of deaths assumption (e.g. `Balducci()`, `Constant()`, or `Uniform()` as the last argument to your 
-          function call."))
-end
+cumulative_decrement(v,to_age) = 1 .- survivorship(v, to_age)
+cumulative_decrement(v,to_age,dd::DeathDistribution) = 1 .- survivorship(v, to_age, dd)  
+cumulative_decrement(v,from_age,to_age) = 1 .- survivorship(v, from_age, to_age) 
+cumulative_decrement(v,from_age,to_age,dd::DeathDistribution) = 1 .- survivorship(v, from_age, to_age, dd) 
 
 
-function q(m::MortalityDict, issue_age::Int, duration)
-    mv = m.v[issue_age]
-    if ismissing(mv)
-        return mv
-    else
-        return mv[duration]
-    end
-end
+"""
+    omega(x)
+    ω(x)
 
-function q(m::UltimateMortality, issue_age::Int)
-    mv = m.v[issue_age]
-    if ismissing(mv)
-        return mv
-    else
-        return mv[1]
-    end
-end
+Returns the last index of the given vector. For mortality vectors this means the last attained age for which a rate is defined.
 
-function q(m::UltimateMortalityTable, issue_age, duration)
-    return q(m.ultimate, issue_age, duration)
-end
+ω is aliased to omega, but unexported. To use, do `using MortalityTables: ω` when importing or call `MortalityTables.ω()`
 
-function q(m::MortalityDict, issue_age::AbstractArray, duration)
-    return [q(m, ia, dur) for ia in issue_age, dur in duration]
-end
+# Examples
 
-function q(m::UltimateMortalityTable, issue_age::AbstractArray, duration)
-    return q(m.ultimate, issue_age, duration)
-end
+```julia-repl
+julia> qs = UltimateMortality([0.1,0.3,0.6,1]);
+julia> omega(qs)
+3
 
-function omega(m::MortalityDict, issue_age)
-    mv = m.v[issue_age]
-    if ismissing(mv)
-        return mv
-    else
-        return issue_age + length(m.v[issue_age]) - 1
-    end
-end
+julia> qs = UltimateMortality([0.1,0.3,0.6,1],start_age=10);
+julia> omega(qs)
+13
 
-function omega(m::UltimateMortalityTable, issue_age)
-    return omega(m.ultimate, issue_age)
+```
+"""
+function omega(x)
+    return lastindex(x)
 end
 
 ω = omega

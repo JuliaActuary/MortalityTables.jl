@@ -1,37 +1,75 @@
 
-@testset "basic `Ultimate` MortalityTable" begin
+@testset "basic MortalityTable" begin
 
-    u1 = UltimateMortality([i for i = 1:20], 0)
-    @test q(u1, 0, 1) == 1
-    @test q(u1, 0, 2) == 2
-    @test q(u1, 0, 1:2) == [1, 2]
-    @test q(u1, 1, 1) == 2
-    @test ω(u1, 0) == 19
+    q1 = UltimateMortality([i for i = 0:19], start_age = 0)
+    @test q1[0] == 0
+    @test q1[1] == 1
+    @test q1[0:1] == [0, 1]
+    @test omega(q1) == 19
+    @test_throws BoundsError q1[omega(q1) + 1]
 
-    u2 = UltimateMortality([i for i = 1:10], 5)
-    @test ismissing(q(u2, 4, 1))
-    @test q(u2, 5, 1) == 1
+    # non-zero start age
+    q2 = UltimateMortality([i for i = 0:9], start_age = 5)
+    @test_throws BoundsError q2[4]
+    @test q2[5] == 0
 
-    s = [ia + d for ia = 0:5, d = 1:5]
+    # select strucutre
+    s = [ia + d for ia = 0:5, d = 0:4]
 
-    s1 = SelectMortality(s, u1, 0)
-    @test q(s1, 0, 1) == 1
-    @test q(s1, 0, 1:2) == [1, 2]
-    @test ω(s1, 0) == 19
-    @test q(s1, 0, 20) == 20
+    q3 = SelectMortality(s, q1, start_age = 0)
+    @test q3[0][0] == 0
+    @test q3[0][0:1] == [0, 1]
+    @test omega(q3[0]) == 19
+    @test_throws BoundsError q3[omega(q3[0]) + 1]
+    @test q3[0][19] == 19
+    
+    @test q3[5][5] == 5
 
-    t = q(s1,0:2,1:3)
-    target = [1 2 3; 2 3 4; 3 4 5]
-    for i in 1:length(t)
-        @test t[i] == target[i]
+
+    mt1 = MortalityTable(q3, q1)
+
+    @test mt1.select[0][1] == 1
+    @test mt1.ultimate[1] == 1
+
+    mt2 = MortalityTable(q1)
+
+    @test mt2.ultimate[0] == 0
+    @test mt2[0] == 0
+
+    # test time zero accumlated force
+
+    q4 = UltimateMortality([0.1,0.3,0.6,1])
+    
+    @test survivorship(q4, 0) ≈ 1
+    @test cumulative_decrement(q4, 0) ≈ 0
+
+    @test survivorship(q4, 1) ≈ 0.9
+    @test cumulative_decrement(q4, 1) ≈ 0.1
+
+    @test survivorship(q4, 1, 1) ≈ 1.0
+    @test survivorship(q4, 1, 2) ≈ 0.7
+    @test cumulative_decrement(q4, 1, 1) ≈ 0.0
+    @test cumulative_decrement(q4, 1, 2) ≈ 0.3
+    
+    @test survivorship(q4, 1, 4) ≈ 0.0
+    @test cumulative_decrement(q4, 1, 4) ≈ 1.0
+
+    
+    @test survivorship(q4, -1) ≈ 1.0
+    @test survivorship(q4, 4, -1) ≈ 1.0
+    @test cumulative_decrement(q4, -1) ≈ 0.0
+    @test cumulative_decrement(q4, 4, -1) ≈ 0.0
+
+
+    @testset "Metadata" begin
+        d = TableMetaData()
+
+        @test isnothing(d.name)
+        
+        d = TableMetaData(name = "test")
+        @test d.name == "test"
     end
 
-    mt1 = MortalityTable(s1, u1, TableMetaData())
-
-    @test q(mt1.select, 0, 1) == 1
-    @test q(mt1.ultimate, 0, 1) == 1
-
-    @test q(mt1.ultimate,0,1,0) == 0
-    @test p(mt1.ultimate,0,1,0) == 1
+    
 
 end
