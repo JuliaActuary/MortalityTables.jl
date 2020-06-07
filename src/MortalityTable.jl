@@ -176,7 +176,7 @@ function survivorship(v::T, from_age::Int, to_age::Int) where {T <: AbstractArra
     if from_age == to_age
         return 1.0
     else
-        return reduce(*,
+        return @views reduce(*,
             1 .- v[from_age:(to_age - 1)],
             init = 1.0
             )
@@ -204,7 +204,7 @@ function survivorship(v::T, from_age, to_age, dd::DeathDistribution) where {T <:
         return 1.0
     else
          
-        whole = reduce(*,
+        whole = @views reduce(*,
             1 .- v[age_low:(age_high - 1)],
             init = 1.0
             )
