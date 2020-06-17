@@ -188,6 +188,11 @@ function survivorship(v::T, from_age, to_age, dd::DeathDistribution) where {T <:
     age_low = ceil(Int, from_age)
     age_high = floor(Int, to_age)
 
+    #if from_age and to_age are fractional parts of the same attained age, then age_high will round down to 
+    # be below the rounded-up age_low. This line will short circuit the rest and just return the fractional year survivorship
+    age_high < age_low && return 1 - decrement_partial_year(v, from_age, to_age, dd)
+    
+    
     if age_low == from_age
         low_residual = 1.0
     else
@@ -215,31 +220,16 @@ end
 
 # Reference: Experience Study Calculations, 2016, Society of Actuaries
 # https://www.soa.org/globalassets/assets/Files/Research/2016-10-experience-study-calculations.pdf
-
-function decrement_partial_year(v, from_age::Int, to_age, dd::Uniform)
-    return v[from_age] * (to_age - from_age)
+function decrement_partial_year(v, from_age, to_age, dd::Uniform)
+    return v[floor(Int,from_age)] * (to_age - from_age)
 end
 
-function decrement_partial_year(v, from_age, to_age::Int, dd::Uniform)
-    return v[to_age - 1] * (to_age - from_age)
+function decrement_partial_year(v, from_age, to_age, dd::Constant)
+    return 1 - (1 - v[floor(Int,from_age)])^(to_age - from_age)
 end
 
-function decrement_partial_year(v, from_age::Int, to_age, dd::Constant)
-    return 1 - (1 - v[from_age])^(to_age - from_age)
-end
-
-function decrement_partial_year(v, from_age, to_age::Int, dd::Constant)
-    return 1 - (1 - v[to_age - 1])^(to_age - from_age)
-end
-
-function decrement_partial_year(v, from_age::Int, to_age, dd::Balducci)
-    q′ = v[from_age]
-    frac = (to_age - from_age)
-    return 1 - (1 - q′) / (1 - (1 - frac) * q′)
-end
-
-function decrement_partial_year(v, from_age, to_age::Int, dd::Balducci)
-    q′ = v[to_age - 1]
+function decrement_partial_year(v, from_age, to_age, dd::Balducci)
+    q′ = v[floor(Int,from_age)]
     frac = (to_age - from_age)
     return 1 - (1 - q′) / (1 - (1 - frac) * q′)
 end
