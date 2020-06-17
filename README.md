@@ -6,6 +6,7 @@
 [![codecov](https://codecov.io/gh/JuliaActuary/MortalityTables.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaActuary/MortalityTables.jl)
 
 A Julia package for working with MortalityTables. Has:
+
 - First-class support for missing values.
 - Lots of bundled SOA mort.soa.org tables
 - `survivorship` and `cumualtive_decrement` functions to calculate decrements over period of time
@@ -13,9 +14,11 @@ A Julia package for working with MortalityTables. Has:
 - Friendly syntax and flexible usage
 
 ## Examples
+
 ### Quickstart
 
 Loading the package and bundled tables:
+
 ```julia
 julia> using MortalityTables
 
@@ -25,7 +28,9 @@ Dict{String,MortalityTable} with 266 entries:
   "2017 Loaded CSO Preferred Structure Nonsmoker Preferred Female ANB"        => SelectUltimateTable{OffsetArray{OffsetArray{Float64,1,Array{Float64,1}},1,Array{OffsetArray{F…  
   ⋮                                                                            => ⋮
 ```
+
 Get information about a particular table:
+
 ```julia
 julia> vbt2001 = tables["2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB"]
 MortalityTable:
@@ -42,6 +47,7 @@ MortalityTable:
 ```
 
 The package revolves around easy-to-access vectors which are indexed by attained age:
+
 ```julia
 julia> vbt2001.select[35] # vector of rates for issue age 35
  0.00036
@@ -56,6 +62,7 @@ julia> vbt2001.ultimate[95]  # ultimate vectors only need to be called with the 
 ```
 
 Calculate the force of mortality or survivorship over a range of time:
+
 ```julia
 julia> survivorship(vbt2001.ultimate,30,40) # the survivorship between ages 30 and 40
 0.9894404665434904
@@ -65,12 +72,14 @@ julia> cumulative_decrement(vbt2001.ultimate,30,40) # the survivorship between a
 ```
 
 Non-whole periods of time are supported when you specify the assumption (`Constant()`, `Uniform()`, or `Balducci()`) for fractional periods:
-```
+
+```julia
 julia> survivorship(vbt2001.ultimate,30,40.5,Uniform()) # the survivorship between ages 30 and 40.5
 0.9887676470262408
 ```
 
 ### Example: Quickly access and compare tables
+
 ```julia
 using MortalityTables, Plots
 
@@ -92,6 +101,7 @@ plot(
    title = "Comparison of 2107 and 2001 CSO \n for SuperPref NS 27-year-old male",
    xlabel="duration")
 ```
+
 ![Comparison of 1980 and 2001 CSO \n for 27-year-old male](https://user-images.githubusercontent.com/711879/83955217-1c8d7180-a816-11ea-9406-d98ed360d5c8.png)
 
 Easily extend the analysis to move up the [ladder of abstraction](http://worrydream.com/LadderOfAbstraction/):
@@ -120,9 +130,21 @@ contour(durations,
 
 ![heatmap comparison of 2017 CSO and 2001 CSO Mortality Table](https://user-images.githubusercontent.com/711879/83955100-11861180-a815-11ea-9a22-c85bacceb4bc.png)
 
+### Example: Scaling and capping a table
 
+Say that you want to take a given mortality table, scale it by `130%`, and cap it at `1.0`. You can do this easliy by [broadcasting](https://docs.julialang.org/en/v1/manual/arrays/index.html#Broadcasting-1) over the underlying rates (which is really just a vector of numbers at the end of the day):
 
-#### Fractional Years
+```julia
+issue_age = 30
+m = cso_2001.select[issue_age]
+
+scaled_m = min.(cso_2001.select[issue_age] .* 1.3, 1.0) # 130% and capped at 1.0 version of `m`
+```
+
+Note that `min.(cso_2001.select .* 1.3, 1.0)` won't work because `cso_2001.select` is still a vector-of-vectors (a vector for each issue age). You need to drill down to a given issue age or use an `ulitmate` table to manipulate the rates in this way.
+
+## Fractional Years
+
 When evaluating survival over partial years when you are given full year mortality
 rates, you must make an assumption over how those deaths are distributed throughout
 the year. Three assumptions are provided as options and are based on formulas
@@ -135,8 +157,7 @@ The three assumptions are:
 - `Balducci()` which assumes a decreasing force of mortality over the year. It seems [to
 be for](https://www.soa.org/globalassets/assets/library/research/actuarial-research-clearing-house/1978-89/1988/arch-1/arch88v17.pdf) making it easier to calculate successive months by hand.
 
-
-### Some Batteries Included
+## Some Batteries Included
 
 Comes with some tables built in via [mort.SOA.org](https://mort.soa.org) and by using [you agree to their terms](https://mort.soa.org/TermsOfUse.aspx).
 
@@ -144,7 +165,8 @@ Not all tables have been tested that they work by default, though no issues have
 been reported with any of the the VBT/CSO/other common tables.
 
 Sample of some of the included table sets:
-```
+
+```plaintext
 2017 Loaded CSO
 2015 VBT
 2001 VBT
@@ -155,14 +177,15 @@ Sample of some of the included table sets:
 
 [Click here to see the full list of tables included.](BundledTables.md)
 
-#### Parameterized Models
+## Parameterized Models
+
 Makeham and Gompertz's Law is included. Use like so:
 
 ```julia
 a = 0.00022
 b = 2.7e-6
 c = 1.124
-m = Makeham(a,b,c) 
+m = Makeham(a,b,c)
 g = Gompertz(b,c)
 ```
 
@@ -200,13 +223,13 @@ t = tables["Australian Life Tables 1891-1900 Female"]
 t[0]  # returns the attained age 0 rate of 0.10139
 ```
 
-
 ### Constructing Dynamically
 
 Say you have an ultimate vector and select matrix, and you want to leverage the MortalityTables package.
 
 Here's an example, where we first construct the `UlitmateMortality` and then combine
 it with the select rates to get a `SelectMortality` table.
+
 ```julia
 using MortalityTables
 
@@ -216,10 +239,13 @@ ult = UltimateMortality(ult_vec,start_age = 15)
 ```
 
 We can now use this the ulitmate rates all by itself:
+
 ```julia
 q(ult,15,1) # 0.005
 ```
+
 And join with the select rates, which for our example will start at age 0:
+
 ```julia
 # attained age going down the column, duration across
 select_matrix = [ 0.001 0.002 ... 0.010;
@@ -244,8 +270,6 @@ my_table = MortalityTable(
               )
 ```
 
-
-
 ### Load with bundled tables
 
 To add more tables for your use when loading with all of the other bundled tables, download the `.xml` [aka the (`XTbML` format)](https://mort.soa.org/About.aspx) version of the table from [mort.SOA.org](https://mort.soa.org) and place it in the directory the package is installed in. This is usually `~user/.julia/packages/MortalityTables/[changing hash value]/src/tables/`.
@@ -254,16 +278,16 @@ To add more tables for your use when loading with all of the other bundled table
 
 After placing packages in the folder above, restart Julia and the should be discoverable when you run `mt.Tables()`
 
-
 ### Getting more tables bundled with the package
 
 If you would like more tables added by default, please open a GitHub issue with the request.
 
-
 ## References
+
 - [SOA Mortality Tables](https://mort.soa.org/)
 - [Actuarial Mathematics for Life Contingent Risks, 2nd ed](https://www.cambridge.org/vi/academic/subjects/statistics-probability/statistics-econometrics-finance-and-insurance/actuarial-mathematics-life-contingent-risks-2nd-edition?format=HB)
 - [Experience Study Calculations, SOA](https://www.soa.org/globalassets/assets/Files/Research/2016-10-experience-study-calculations.pdf)
 
 ## Similar Projects
- - [Pyliferisk, a Python package](https://github.com/franciscogarate/pyliferisk)
+
+- [Pyliferisk, a Python package](https://github.com/franciscogarate/pyliferisk)
