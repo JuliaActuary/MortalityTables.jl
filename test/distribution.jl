@@ -80,5 +80,18 @@
         @test_throws MethodError cumulative_decrement(mort, 0, 1, 1.5)
         @test_throws MethodError survivorship(mort, 0, 1, 1.5)
     end
+
+    @testset "Issue #60 - starting with non-integer ages" begin
+        m = UltimateMortality([0.5 for i in 1:8])
+        
+        @test survivorship(m,1,2) ≈ 0.5
+        @test survivorship(m,1.5,2.5,Constant()) ≈ 0.5
+        @test survivorship(m,1.5,3.5,Constant()) ≈ 0.25
+        @test survivorship(m,1.5,1.5 + eps(),Constant()) ≈ 1.0
+        @test survivorship(m,1,1 + eps(),Constant()) ≈ 1.0
+
+    end
+
+ 
 end
 
