@@ -54,9 +54,9 @@ julia> sel[0][95] # the mortality rate for a life age 95, that was issued at age
 function SelectMortality(select, ultimate; start_age = 0)
 
     # iterate down the rows (issue ages)
-    vs = map(enumerate(eachrow(select))) do (i, r)
-        end_age = start_age + (i - 1) + (length(r) - 1)
-        OffsetArray([r ; ultimate[end_age + 1:end]], (start_age - 1) + (i - 1))
+    vs = map(enumerate(eachrow(select))) do (row_num, row)
+        end_age = start_age + (row_num - 1) + (length(row) - 1)
+        OffsetArray([row ; ultimate[end_age + 1:end]], (start_age - 1) + (row_num - 1))
     end
 
     return OffsetArray(vs, start_age - 1)
