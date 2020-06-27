@@ -5,6 +5,7 @@
 [![CI](https://github.com/JuliaActuary/MortalityTables.jl/workflows/CI/badge.svg)](https://github.com/JuliaActuary/MortalityTables.jl/actions?query=workflow%3ACI)
 [![codecov](https://codecov.io/gh/JuliaActuary/MortalityTables.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaActuary/MortalityTables.jl)
 [![lifecycle](https://img.shields.io/badge/LifeCycle-Maturing-blue)](https://www.tidyverse.org/lifecycle/)
+
 A Julia package for working with MortalityTables. Has:
 
 - First-class support for missing values.
