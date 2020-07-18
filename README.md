@@ -68,7 +68,7 @@ Calculate the force of mortality or survivorship over a range of time:
 julia> survivorship(vbt2001.ultimate,30,40) # the survivorship between ages 30 and 40
 0.9894404665434904
 
-julia> cumulative_decrement(vbt2001.ultimate,30,40) # the survivorship between ages 30 and 40
+julia> cumulative_decrement(vbt2001.ultimate,30,40) # the decrement between ages 30 and 40
 0.010559533456509618
 ```
 
