@@ -38,7 +38,6 @@ function get_SOA_table!(dict, id::Int)
     r = HTTP.request("GET", path)
 
     # Why skip the first three bytes of the response?
-
     # From https://docs.python.org/3/library/codecs.html
     # To increase the reliability with which a UTF-8 encoding can be detected,
     # Microsoft invented a variant of UTF-8 (that Python 2.5 calls "utf-8-sig")
@@ -47,6 +46,6 @@ function get_SOA_table!(dict, id::Int)
     # 0xef, 0xbb, 0xbf) is written.
     xml = getXML(String(r.body[4:end]))
     tbl = XTbML_Table_To_MortalityTable(parseXTbMLTable(xml, path))
-    merge!(dict, Dict(tbl.d.name => tbl))
+    merge!(dict, Dict(tbl.metadata.name => tbl))
 
 end

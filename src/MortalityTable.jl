@@ -97,12 +97,12 @@ abstract type MortalityTable end
 struct SelectUltimateTable{S,U} <: MortalityTable
     select::S
     ultimate::U
-    d::TableMetaData
+    metadata::TableMetaData
 end
 
 struct UltimateTable{U} <: MortalityTable
     ultimate::U
-    d::TableMetaData
+    metadata::TableMetaData
 end
 
 Base.getindex(u::UltimateTable,x) = u.ultimate[x]
@@ -121,17 +121,19 @@ end
 Base.show(io::IO, ::MIME"text/plain", mt::MortalityTable) = print(
     io,
     """
-    MortalityTable:
+    MortalityTable ($(mt.metadata.content_type)):
        Name:
-           $(mt.d.name)
+           $(mt.metadata.name)
+       Fields: 
+           $(fieldnames(typeof(mt)))
        Provider:
-           $(mt.d.provider)
+           $(mt.metadata.provider)
        mort.SOA.org ID:
-           $(mt.d.id)
+           $(mt.metadata.id)
        mort.SOA.org link:
-           https://mort.soa.org/ViewTable.aspx?&TableIdentity=$(mt.d.id)
+           https://mort.soa.org/ViewTable.aspx?&TableIdentity=$(mt.metadata.id)
        Description:
-           $(mt.d.description)
+           $(mt.metadata.description)
     """,
 )
 

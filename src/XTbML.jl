@@ -34,6 +34,7 @@ end
 function parseXTbMLTable(x, path)
     md = x["XTbML"]["ContentClassification"]
     name = get(md, "TableName", nothing) |> strip
+    content_type = get(get(md,"ContentType",nothing),"",nothing) |> strip
     id = get(md, "TableIdentity", nothing) |> strip
     provider = get(md, "ProviderName", nothing) |> strip
     reference = get(md, "TableReference", nothing) |> strip
@@ -45,6 +46,7 @@ function parseXTbMLTable(x, path)
         id = id,
         provider = provider,
         reference = reference,
+        content_type = content_type,
         description = description,
         comments = comments,
         source_path = source_path,
@@ -147,5 +149,5 @@ function tables(dir = nothing)
         tables = tcopy(transducer, files)
     end
     # return tables
-    return Dict(tbl.d.name => tbl for tbl in tables if ~isnothing(tbl))
+    return Dict(tbl.metadata.name => tbl for tbl in tables if ~isnothing(tbl))
 end

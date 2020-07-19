@@ -1,0 +1,156 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<XTbML>
+  <ContentClassification>
+    <TableIdentity>2585</TableIdentity>
+    <ProviderDomain>soa.org</ProviderDomain>
+    <ProviderName>Susie Lee</ProviderName>
+    <TableReference>Life Experience Subcommittee, “2012 Individual Annuity Reserving Table”, Report from the Joint American Academy of Actuaries/Society of Actuaries Payout Annuity Table Team, (2011) Exhibit I. Accessed: December 2013 from http://www.actuary.org/files/publications/Payout_Annuity_Report_09-28-11.pdf.</TableReference>
+    <ContentType tc="78">Annuitant Mortality</ContentType>
+    <TableName>2012 IAM Period Table – Male, ANB</TableName>
+    <TableDescription>2012 Individual Annuity Mortality Period Table – Male. Basis: Age Nearest Birthday. Minimum Age: 0. Maximum Age: 120</TableDescription>
+    <Comments>Study Data: The 2012 IAM Period Table is the 2012 IAM Basic Table (See SOA Table Identities 2581 and 2582) with the margins as determined by NAIC’s Life Actuarial Task Force (LATF), but without future projection. Methodology: The approach used in determining the margin used in developing the a2000 Table was analyzed and there was found no compelling reason to vary from it. LATF agreed no changes in the approach or level of margin were required. Thus, the resulting margin recommended by LATF is 10% for all ages up to and including 100. The margin then grades down 1% per year for ages 100 until the ultimate mortality cap of 0.40000 is invoked. This results in a margin of zero beginning at age 106 for males and 108 for females. The table omega is 120 where the mortality rate is set to 1.00000. It was determined there was no need to smoothly grade from 0.40000 to 1.00000 as there was little difference on the impact of reserves. Data Transcription Errors: None. Data Certified: 12/2013</Comments>
+    <KeyWord>Aggregate</KeyWord>
+    <KeyWord>Annuitant Mortality</KeyWord>
+    <KeyWord>United States of America</KeyWord>
+  </ContentClassification>
+  <Table>
+    <MetaData>
+      <ScalingFactor>0</ScalingFactor>
+      <DataType tc="2">Floating Point</DataType>
+      <Nation tc="1">United States of America</Nation>
+      <TableDescription>2012 Individual Annuity Mortality Period Table – Male. Basis: Age Nearest Birthday. Minimum Age: 0. Maximum Age: 120</TableDescription>
+      <AxisDef id="Age">
+        <ScaleType tc="3">Age</ScaleType>
+        <AxisName>Age</AxisName>
+        <MinScaleValue>0</MinScaleValue>
+        <MaxScaleValue>120</MaxScaleValue>
+        <Increment>1</Increment>
+      </AxisDef>
+    </MetaData>
+    <Values>
+      <Axis>
+        <Y t="0">0.001605</Y>
+        <Y t="1">0.000401</Y>
+        <Y t="2">0.000275</Y>
+        <Y t="3">0.000229</Y>
+        <Y t="4">0.000174</Y>
+        <Y t="5">0.000168</Y>
+        <Y t="6">0.000165</Y>
+        <Y t="7">0.000159</Y>
+        <Y t="8">0.000143</Y>
+        <Y t="9">0.000129</Y>
+        <Y t="10">0.000113</Y>
+        <Y t="11">0.000111</Y>
+        <Y t="12">0.000132</Y>
+        <Y t="13">0.000169</Y>
+        <Y t="14">0.000213</Y>
+        <Y t="15">0.000254</Y>
+        <Y t="16">0.000293</Y>
+        <Y t="17">0.000328</Y>
+        <Y t="18">0.000359</Y>
+        <Y t="19">0.000387</Y>
+        <Y t="20">0.000414</Y>
+        <Y t="21">0.000443</Y>
+        <Y t="22">0.000473</Y>
+        <Y t="23">0.000513</Y>
+        <Y t="24">0.000554</Y>
+        <Y t="25">0.000602</Y>
+        <Y t="26">0.000655</Y>
+        <Y t="27">0.000688</Y>
+        <Y t="28">0.00071</Y>
+        <Y t="29">0.000727</Y>
+        <Y t="30">0.000741</Y>
+        <Y t="31">0.000751</Y>
+        <Y t="32">0.000754</Y>
+        <Y t="33">0.000756</Y>
+        <Y t="34">0.000756</Y>
+        <Y t="35">0.000756</Y>
+        <Y t="36">0.000756</Y>
+        <Y t="37">0.000756</Y>
+        <Y t="38">0.000756</Y>
+        <Y t="39">0.0008</Y>
+        <Y t="40">0.000859</Y>
+        <Y t="41">0.000926</Y>
+        <Y t="42">0.000999</Y>
+        <Y t="43">0.001069</Y>
+        <Y t="44">0.001142</Y>
+        <Y t="45">0.001219</Y>
+        <Y t="46">0.001318</Y>
+        <Y t="47">0.001454</Y>
+        <Y t="48">0.001627</Y>
+        <Y t="49">0.001829</Y>
+        <Y t="50">0.002057</Y>
+        <Y t="51">0.002302</Y>
+        <Y t="52">0.002545</Y>
+        <Y t="53">0.002779</Y>
+        <Y t="54">0.003011</Y>
+        <Y t="55">0.003254</Y>
+        <Y t="56">0.003529</Y>
+        <Y t="57">0.003845</Y>
+        <Y t="58">0.004213</Y>
+        <Y t="59">0.004631</Y>
+        <Y t="60">0.005096</Y>
+        <Y t="61">0.005614</Y>
+        <Y t="62">0.006169</Y>
+        <Y t="63">0.006759</Y>
+        <Y t="64">0.007398</Y>
+        <Y t="65">0.008106</Y>
+        <Y t="66">0.008548</Y>
+        <Y t="67">0.009076</Y>
+        <Y t="68">0.009708</Y>
+        <Y t="69">0.010463</Y>
+        <Y t="70">0.011357</Y>
+        <Y t="71">0.012418</Y>
+        <Y t="72">0.013675</Y>
+        <Y t="73">0.01515</Y>
+        <Y t="74">0.01686</Y>
+        <Y t="75">0.018815</Y>
+        <Y t="76">0.021031</Y>
+        <Y t="77">0.02354</Y>
+        <Y t="78">0.026375</Y>
+        <Y t="79">0.029572</Y>
+        <Y t="80">0.033234</Y>
+        <Y t="81">0.037533</Y>
+        <Y t="82">0.042261</Y>
+        <Y t="83">0.047441</Y>
+        <Y t="84">0.053233</Y>
+        <Y t="85">0.059855</Y>
+        <Y t="86">0.067514</Y>
+        <Y t="87">0.07634</Y>
+        <Y t="88">0.086388</Y>
+        <Y t="89">0.097634</Y>
+        <Y t="90">0.109993</Y>
+        <Y t="91">0.123119</Y>
+        <Y t="92">0.137168</Y>
+        <Y t="93">0.152171</Y>
+        <Y t="94">0.168194</Y>
+        <Y t="95">0.18526</Y>
+        <Y t="96">0.197322</Y>
+        <Y t="97">0.214751</Y>
+        <Y t="98">0.232507</Y>
+        <Y t="99">0.250397</Y>
+        <Y t="100">0.268607</Y>
+        <Y t="101">0.290016</Y>
+        <Y t="102">0.311849</Y>
+        <Y t="103">0.333962</Y>
+        <Y t="104">0.356207</Y>
+        <Y t="105">0.38</Y>
+        <Y t="106">0.4</Y>
+        <Y t="107">0.4</Y>
+        <Y t="108">0.4</Y>
+        <Y t="109">0.4</Y>
+        <Y t="110">0.4</Y>
+        <Y t="111">0.4</Y>
+        <Y t="112">0.4</Y>
+        <Y t="113">0.4</Y>
+        <Y t="114">0.4</Y>
+        <Y t="115">0.4</Y>
+        <Y t="116">0.4</Y>
+        <Y t="117">0.4</Y>
+        <Y t="118">0.4</Y>
+        <Y t="119">0.4</Y>
+        <Y t="120">1</Y>
+      </Axis>
+    </Values>
+  </Table>
+</XTbML>

@@ -34,9 +34,11 @@ Get information about a particular table:
 
 ```julia
 julia> vbt2001 = tables["2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB"]
-MortalityTable:
+MortalityTable (Insured Lives Mortality):
    Name:
        2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB
+   Fields:
+       (:select, :ultimate, :metadata)
    Provider:
        Society of Actuaries
    mort.SOA.org ID:
