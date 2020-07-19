@@ -46,7 +46,12 @@ MortalityTable (Insured Lives Mortality):
    mort.SOA.org link:
        https://mort.soa.org/ViewTable.aspx?&TableIdentity=1118
    Description:
-       2001 Valuation Basic Table (VBT) Residual Standard Select and Ultimate Table -  Male Nonsmoker. Basis: Age Nearest Birthday. Minimum Select Age: 0. Maximum Select Age: 99. Minimum Ultimate Age: 25. Maximum Ultimate Age: 120
+       2001 Valuation Basic Table (VBT) Residual Standard Select and Ultimate Table -  Male Nonsmoker.
+       Basis: Age Nearest Birthday. 
+       Minimum Select Age: 0. 
+       Maximum Select Age: 99. 
+       Minimum Ultimate Age: 25. 
+       Maximum Ultimate Age: 120
 ```
 
 The package revolves around easy-to-access vectors which are indexed by attained age:
