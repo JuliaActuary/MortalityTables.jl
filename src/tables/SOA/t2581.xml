@@ -1,0 +1,156 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<XTbML>
+  <ContentClassification>
+    <TableIdentity>2581</TableIdentity>
+    <ProviderDomain>soa.org</ProviderDomain>
+    <ProviderName>Susie Lee</ProviderName>
+    <TableReference>Life Experience Subcommittee, “2012 Individual Annuity Reserving Table”, Report from the Joint American Academy of Actuaries/Society of Actuaries Payout Annuity Table Team, (2011) Exhibit I. Accessed: December 2013 from http://www.actuary.org/files/publications/Payout_Annuity_Report_09-28-11.pdf.</TableReference>
+    <ContentType tc="78">Annuitant Mortality</ContentType>
+    <TableName>2012 IAM Basic Table – Male, ANB</TableName>
+    <TableDescription>2012 Individual Annuity Mortality Basic Table – Male. Basis: Age Nearest Birthday. Minimum Age: 0. Maximum Age: 120</TableDescription>
+    <Comments>Study Data: Data and information from the mortality experience analysis, as described in the Society of Actuaries 2000-2004 Individual Payout Annuity Experience Report, dated April 2009 was relied upon. The 2000-2004 Payout Annuity Mortality Experience Study includes experience for immediate annuities, annuitizations and life settlement options of individual life insurance and annuity death claims. The experience analyzed excluded substandard annuities, structured settlement annuities and variable payout annuities. The experience represented 16 companies over the exposure period. Methodology: Preliminary table developed using confidence intervals by applying the P-Spline methodology, the computer model for which was provided by the Continuous Mortality Investigation Bureau. Data smoothing was provided by means of the penalized splines and the log mean values of qx within the fitted region generated. The P-Spline application breaks down as data becomes limited and less credible, which was the case with the underlying younger and older age experience. In order to develop values for ages below 50, the 1994 GAM table (See SOA Table Identities 832-835) was projected to 2002 using projection Scale AA (See SOA Table Identities 923 and 924) for ages 1 through 45, and graded to the graduated (experience-based) rates at age 65. The grading was done such that the mortality rates have a constant percentage increase from age 50 to age 65. Age 0 was set equal to four times the age 1 rate, which was consistent with the approach taken for developing the age 0 mortality for the 2008 VBT (See SOA Table Identities 996-1004).  For the higher ages, graduated experience data rates up to age 95 were used and then Kannisto extrapolated rates for ages 96 and above. The result of these efforts was a 2002 experience table. The next step was to project this table with improvement factors to 2012 (See SOA Table Identities 2583 and 2584). Mortality at the oldest ages capped at rate of 0.400 rather than the 0.450 used in the 2008 VBT. The decision to use 0.400 rather than 0.450 was based on information presented at the Society of Actuaries 2011 Living to 100 Symposium. The table that was thus produced represented a 2002 experience table. The next step was to project this with improvement factors to 2012. The new improvement scale developed was Projection Scale G2 (See SOA Table Identities 2583 and 2584). Data Transcription Errors: None. Data Certified: 01/2013</Comments>
+    <KeyWord>Aggregate</KeyWord>
+    <KeyWord>Annuitant Mortality</KeyWord>
+    <KeyWord>United States of America</KeyWord>
+  </ContentClassification>
+  <Table>
+    <MetaData>
+      <ScalingFactor>0</ScalingFactor>
+      <DataType tc="2">Floating Point</DataType>
+      <Nation tc="1">United States of America</Nation>
+      <TableDescription>2012 Individual Annuity Mortality Basic Table – Male. Basis: Age Nearest Birthday. Minimum Age: 0. Maximum Age: 120</TableDescription>
+      <AxisDef id="Age">
+        <ScaleType tc="3">Age</ScaleType>
+        <AxisName>Age</AxisName>
+        <MinScaleValue>0</MinScaleValue>
+        <MaxScaleValue>120</MaxScaleValue>
+        <Increment>1</Increment>
+      </AxisDef>
+    </MetaData>
+    <Values>
+      <Axis>
+        <Y t="0">0.001783</Y>
+        <Y t="1">0.000446</Y>
+        <Y t="2">0.000306</Y>
+        <Y t="3">0.000254</Y>
+        <Y t="4">0.000193</Y>
+        <Y t="5">0.000186</Y>
+        <Y t="6">0.000184</Y>
+        <Y t="7">0.000177</Y>
+        <Y t="8">0.000159</Y>
+        <Y t="9">0.000143</Y>
+        <Y t="10">0.000126</Y>
+        <Y t="11">0.000123</Y>
+        <Y t="12">0.000147</Y>
+        <Y t="13">0.000188</Y>
+        <Y t="14">0.000236</Y>
+        <Y t="15">0.000282</Y>
+        <Y t="16">0.000325</Y>
+        <Y t="17">0.000364</Y>
+        <Y t="18">0.000399</Y>
+        <Y t="19">0.00043</Y>
+        <Y t="20">0.000459</Y>
+        <Y t="21">0.000492</Y>
+        <Y t="22">0.000526</Y>
+        <Y t="23">0.000569</Y>
+        <Y t="24">0.000616</Y>
+        <Y t="25">0.000669</Y>
+        <Y t="26">0.000728</Y>
+        <Y t="27">0.000764</Y>
+        <Y t="28">0.000789</Y>
+        <Y t="29">0.000808</Y>
+        <Y t="30">0.000824</Y>
+        <Y t="31">0.000834</Y>
+        <Y t="32">0.000838</Y>
+        <Y t="33">0.000828</Y>
+        <Y t="34">0.000808</Y>
+        <Y t="35">0.000789</Y>
+        <Y t="36">0.000783</Y>
+        <Y t="37">0.0008</Y>
+        <Y t="38">0.000837</Y>
+        <Y t="39">0.000889</Y>
+        <Y t="40">0.000955</Y>
+        <Y t="41">0.001029</Y>
+        <Y t="42">0.00111</Y>
+        <Y t="43">0.001188</Y>
+        <Y t="44">0.001268</Y>
+        <Y t="45">0.001355</Y>
+        <Y t="46">0.001464</Y>
+        <Y t="47">0.001615</Y>
+        <Y t="48">0.001808</Y>
+        <Y t="49">0.002032</Y>
+        <Y t="50">0.002285</Y>
+        <Y t="51">0.002557</Y>
+        <Y t="52">0.002828</Y>
+        <Y t="53">0.003088</Y>
+        <Y t="54">0.003345</Y>
+        <Y t="55">0.003616</Y>
+        <Y t="56">0.003922</Y>
+        <Y t="57">0.004272</Y>
+        <Y t="58">0.004681</Y>
+        <Y t="59">0.005146</Y>
+        <Y t="60">0.005662</Y>
+        <Y t="61">0.006237</Y>
+        <Y t="62">0.006854</Y>
+        <Y t="63">0.00751</Y>
+        <Y t="64">0.00822</Y>
+        <Y t="65">0.009007</Y>
+        <Y t="66">0.009497</Y>
+        <Y t="67">0.010085</Y>
+        <Y t="68">0.010787</Y>
+        <Y t="69">0.011625</Y>
+        <Y t="70">0.012619</Y>
+        <Y t="71">0.013798</Y>
+        <Y t="72">0.015195</Y>
+        <Y t="73">0.016834</Y>
+        <Y t="74">0.018733</Y>
+        <Y t="75">0.020905</Y>
+        <Y t="76">0.023367</Y>
+        <Y t="77">0.026155</Y>
+        <Y t="78">0.029306</Y>
+        <Y t="79">0.032858</Y>
+        <Y t="80">0.036927</Y>
+        <Y t="81">0.041703</Y>
+        <Y t="82">0.046957</Y>
+        <Y t="83">0.052713</Y>
+        <Y t="84">0.059148</Y>
+        <Y t="85">0.066505</Y>
+        <Y t="86">0.075015</Y>
+        <Y t="87">0.084823</Y>
+        <Y t="88">0.095987</Y>
+        <Y t="89">0.108482</Y>
+        <Y t="90">0.122214</Y>
+        <Y t="91">0.136799</Y>
+        <Y t="92">0.152409</Y>
+        <Y t="93">0.169078</Y>
+        <Y t="94">0.186882</Y>
+        <Y t="95">0.205844</Y>
+        <Y t="96">0.219247</Y>
+        <Y t="97">0.238612</Y>
+        <Y t="98">0.258341</Y>
+        <Y t="99">0.278219</Y>
+        <Y t="100">0.298452</Y>
+        <Y t="101">0.32361</Y>
+        <Y t="102">0.344191</Y>
+        <Y t="103">0.364633</Y>
+        <Y t="104">0.384783</Y>
+        <Y t="105">0.4</Y>
+        <Y t="106">0.4</Y>
+        <Y t="107">0.4</Y>
+        <Y t="108">0.4</Y>
+        <Y t="109">0.4</Y>
+        <Y t="110">0.4</Y>
+        <Y t="111">0.4</Y>
+        <Y t="112">0.4</Y>
+        <Y t="113">0.4</Y>
+        <Y t="114">0.4</Y>
+        <Y t="115">0.4</Y>
+        <Y t="116">0.4</Y>
+        <Y t="117">0.4</Y>
+        <Y t="118">0.4</Y>
+        <Y t="119">0.4</Y>
+        <Y t="120">0.4</Y>
+      </Axis>
+    </Values>
+  </Table>
+</XTbML>
