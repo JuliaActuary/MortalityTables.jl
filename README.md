@@ -8,7 +8,6 @@
 
 A Julia package for working with MortalityTables. Has:
 
-- First-class support for missing values.
 - Lots of bundled SOA mort.soa.org tables
 - `survivorship` and `cumualtive_decrement` functions to calculate decrements over period of time
 - Partial year mortality calculations (Uniform, Constant, Balducci)
