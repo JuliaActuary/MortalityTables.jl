@@ -145,8 +145,8 @@ function tables(dir = nothing)
     tables = []
     @info "Loading built-in Mortality Tables..."
     for (root, dirs, files) in walkdir(table_dir)
-        transducer = Filter(x->basename(x)[end - 3:end] == ".xml") |> Map(x->readXTbML(joinpath(root, x)))
-        tables = tcopy(transducer, files)
+        transducer = opcompose(Filter(x->basename(x)[end - 3:end] == ".xml"), Map(x->readXTbML(joinpath(root, x))))
+        tables = files |> transducer |> tcopy
     end
     # return tables
     return Dict(tbl.metadata.name => tbl for tbl in tables if ~isnothing(tbl))
