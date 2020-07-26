@@ -85,6 +85,15 @@
         @test d.name == "test"
     end
 
-    
+    @testset "mortality_vector" begin
+        v = [i for i in 3:10]
+        q = mortality_vector(v,start_age=3)
+        @test q[3] == 3
+        @test q[10] == 10
+
+        q = mortality_vector(collect(0:5))
+        @test q[0] == 0
+        @test q[5] == 5
+    end
 
 end
