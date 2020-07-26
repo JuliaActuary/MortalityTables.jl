@@ -295,3 +295,18 @@ function omega(x)
 end
 
 ω = omega
+
+
+"""
+    mortality_vector(vec; start_age=0)
+
+A convienience constructor to create an OffsetArray which has the array indexed by attained age rather than always starting from `1`. The package and JuliaActuary ecosystem assume that the rates are indexed by attained age and this allows transformation of tables without a direct dependency on **OffsetArrays.jl**.
+
+Equivalent to doing:
+```
+using OffsetArrays
+OffsetArray(vec,start_age-1)
+```
+"""
+
+mortality_vector(vec; start_age=0) = return OffsetArray(vec,start_age-1)
