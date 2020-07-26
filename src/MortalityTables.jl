@@ -14,7 +14,7 @@ include("parameterized_models.jl")
 
 export MortalityTable,
     survivorship,
-    cumulative_decrement,
+    decrement,
     omega,
     TableMetaData,
     SelectMortality,

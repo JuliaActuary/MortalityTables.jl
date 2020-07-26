@@ -9,9 +9,9 @@
         @test m(20) == MortalityTables.μ(m, 20)
         
         # vs manually calculated (via QuadGK) integrals
-        @test cumulative_decrement(m, 20, 25) ≈ 0.0012891622754368504
+        @test decrement(m, 20, 25) ≈ 0.0012891622754368504
         @test survivorship(m, 20, 25) ≈ 1 - 0.0012891622754368504
-        @test cumulative_decrement(m, 25) ≈ 0.005888764668801838
+        @test decrement(m, 25) ≈ 0.005888764668801838
         @test survivorship(m, 25) ≈ 1 - 0.005888764668801838
 
         # these values come from the 'Standard Select and Ultimate Survival Model'

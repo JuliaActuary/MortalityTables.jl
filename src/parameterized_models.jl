@@ -49,8 +49,8 @@ function survivorship(m::Makeham, from_age, to_age)
 end
 survivorship(m::Makeham,to_age) = survivorship(m::Makeham, 0, to_age)
 
-cumulative_decrement(m::Makeham,from_age,to_age) = 1 - survivorship(m, from_age, to_age)
-cumulative_decrement(m::Makeham,to_age) = 1 - survivorship(m, to_age)
+decrement(m::Makeham,from_age,to_age) = 1 - survivorship(m, from_age, to_age)
+decrement(m::Makeham,to_age) = 1 - survivorship(m, to_age)
 
 (m::ParametricMortality)(x) = μ(m, x)
 Base.getindex(m::ParametricMortality,x) = m(x)

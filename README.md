@@ -74,7 +74,7 @@ Calculate the force of mortality or survivorship over a range of time:
 julia> survivorship(vbt2001.ultimate,30,40) # the survivorship between ages 30 and 40
 0.9894404665434904
 
-julia> cumulative_decrement(vbt2001.ultimate,30,40) # the decrement between ages 30 and 40
+julia> decrement(vbt2001.ultimate,30,40) # the decrement between ages 30 and 40
 0.010559533456509618
 ```
 
@@ -201,7 +201,7 @@ Now some examples with `m`, but could use `g` interchangably:
 ```julia
 age = 20
 m[20] # the mortality rate at age 20
-cumulative_decrement(m,20,25) # the five year cumulative mortality rate
+decrement(m,20,25) # the five year cumulative mortality rate
 survivorship(m,20,25) # the five year survivorship rate
 ```
 

@@ -237,36 +237,36 @@ function decrement_partial_year(v, from_age, to_age, dd::Balducci)
 end
 
 """
-    cumulative_decrement(mortality_vector,to_age)
-    cumulative_decrement(mortality_vector,from_age,to_age)
+    decrement(mortality_vector,to_age)
+    decrement(mortality_vector,from_age,to_age)
 
 Returns the cumulative decrement through attained age `to_age`. The start of the calculation is either the start of the vector, or attained_age `from_age`. `from_age` and `to_age` need to be Integers. Add a DeathDistribution as the last argument to handle floating point and non-whole ages:
 
-    cumulative_decrement(mortality_vector,to_age,::DeathDistribution)
-    cumulative_decrement(mortality_vector,from_age,to_age,::DeathDistribution)
+    decrement(mortality_vector,to_age,::DeathDistribution)
+    decrement(mortality_vector,from_age,to_age,::DeathDistribution)
 
 # Examples
 ```julia-repl
 julia> qs = UltimateMortality([0.1,0.3,0.6,1]);
     
-julia> cumulative_decrement(qs,0)
+julia> decrement(qs,0)
 0.0
-julia> cumulative_decrement(qs,1)
+julia> decrement(qs,1)
 0.1
 
-julia> cumulative_decrement(qs,1,1)
+julia> decrement(qs,1,1)
 0.0
-julia> cumulative_decrement(qs,1,2)
+julia> decrement(qs,1,2)
 0.3
 
-julia> cumulative_decrement(qs,0.5,Uniform())
+julia> decrement(qs,0.5,Uniform())
 0.05
 ```
 """
-cumulative_decrement(v,to_age) = 1 .- survivorship(v, to_age)
-cumulative_decrement(v,to_age,dd::DeathDistribution) = 1 .- survivorship(v, to_age, dd)  
-cumulative_decrement(v,from_age,to_age) = 1 .- survivorship(v, from_age, to_age) 
-cumulative_decrement(v,from_age,to_age,dd::DeathDistribution) = 1 .- survivorship(v, from_age, to_age, dd) 
+decrement(v,to_age) = 1 .- survivorship(v, to_age)
+decrement(v,to_age,dd::DeathDistribution) = 1 .- survivorship(v, to_age, dd)  
+decrement(v,from_age,to_age) = 1 .- survivorship(v, from_age, to_age) 
+decrement(v,from_age,to_age,dd::DeathDistribution) = 1 .- survivorship(v, from_age, to_age, dd) 
 
 
 """
