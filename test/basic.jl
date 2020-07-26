@@ -56,24 +56,24 @@
         q4 = UltimateMortality([0.1,0.3,0.6,1])
         
         @test survivorship(q4, 0) ≈ 1
-        @test cumulative_decrement(q4, 0) ≈ 0
+        @test decrement(q4, 0) ≈ 0
 
         @test survivorship(q4, 1) ≈ 0.9
-        @test cumulative_decrement(q4, 1) ≈ 0.1
+        @test decrement(q4, 1) ≈ 0.1
 
         @test survivorship(q4, 1, 1) ≈ 1.0
         @test survivorship(q4, 1, 2) ≈ 0.7
-        @test cumulative_decrement(q4, 1, 1) ≈ 0.0
-        @test cumulative_decrement(q4, 1, 2) ≈ 0.3
+        @test decrement(q4, 1, 1) ≈ 0.0
+        @test decrement(q4, 1, 2) ≈ 0.3
         
         @test survivorship(q4, 1, 4) ≈ 0.0
-        @test cumulative_decrement(q4, 1, 4) ≈ 1.0
+        @test decrement(q4, 1, 4) ≈ 1.0
 
         
         @test survivorship(q4, -1) ≈ 1.0
         @test survivorship(q4, 4, -1) ≈ 1.0
-        @test cumulative_decrement(q4, -1) ≈ 0.0
-        @test cumulative_decrement(q4, 4, -1) ≈ 0.0
+        @test decrement(q4, -1) ≈ 0.0
+        @test decrement(q4, 4, -1) ≈ 0.0
     end
 
     @testset "Metadata" begin
