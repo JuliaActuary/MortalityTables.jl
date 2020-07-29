@@ -53,10 +53,11 @@
             @test cso2001.ultimate[95] ≈ 0.26719
             @test cso2001.ultimate[120] ≈ 1.0
             @test cso2001.select[85][120] ≈ 1.0
-            @test ismissing(cso2001.select[15][15])
+            @test ismissing(cso2001.select[15][15]) # age before table defines rates
             @test_throws BoundsError cso2001.select[150]
             @test_throws BoundsError cso2001.select[70][150]
             @test omega(cso2001.select[16]) == 120
+            @test omega(cso2001.select[98]) == 120 # issue #71
             @test omega(cso2001.ultimate) == 120
 
             @testset "duration ranges" begin
