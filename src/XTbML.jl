@@ -93,20 +93,17 @@ function XTbML_Table_To_MortalityTable(tbl::XTbMLTable)
             )
 
     if !isnothing(tbl.select)
-        rate_matrix = map(tbl.select) do row
-            map(row.rates) do val
-                val.rate
+        sel = map(tbl.select) do (issue_age,rates)
+                     mortality_vector([x.rate for x in rates],start_age= issue_age)
             end
-        end 
 
-        rate_matrix = hcat(rate_matrix...)'
-
-        tbl.select[1].issue_age
-        sel = SelectMortality(
-                    rate_matrix,
-                    ult, 
-                    start_age = tbl.select[1].issue_age
-                )
+        # remove trailing missings (issue #71)
+        for (ia,vec) in pairs(sel)
+            while ismissing(vec[end])
+                pop!(vec)
+            end
+        end
+        sel = OffsetArray(sel,tbl.select[1].issue_age - 1)
 
         return MortalityTable(sel, ult, metadata = tbl.d)
     else
