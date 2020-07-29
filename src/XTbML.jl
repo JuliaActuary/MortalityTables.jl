@@ -56,9 +56,10 @@ function parseXTbMLTable(x, path)
         # for a select and ultimate table, will have multiple tables
         # parsed into a vector of tables
         sel = map(x["XTbML"]["Table"][1]["Values"]["Axis"]) do ai
-            (issue_age = parse(Int, ai[:t]), rates = map(ai["Axis"]["Y"]) do aj
-                (duration = parse(Int, aj[:t]), rate = get_and_parse(aj, ""),)
-            end)
+            (
+                issue_age = parse(Int, ai[:t]),
+                rates = [(duration =parse(Int, aj[:t]),rate =get_and_parse(aj, "")) for aj in ai["Axis"]["Y"] if !ismissing(get_and_parse(aj,""))]
+            )
         end
 
         ult = map(x["XTbML"]["Table"][2]["Values"]["Axis"]["Y"]) do ai 
@@ -92,16 +93,25 @@ function XTbML_Table_To_MortalityTable(tbl::XTbMLTable)
                 start_age = tbl.ultimate[1].age
             )
 
-    if !isnothing(tbl.select)
-        sel = map(tbl.select) do (issue_age,rates)
-                     mortality_vector([x.rate for x in rates],start_age= issue_age)
-            end
+    ult_omega = lastindex(ult)
 
-        # remove trailing missings (issue #71)
-        for (ia,vec) in pairs(sel)
-            while ismissing(vec[end])
-                pop!(vec)
-            end
+    if !isnothing(tbl.select)
+        sel =   map(tbl.select) do (issue_age,rates)
+            last_sel_age = issue_age + rates[end].duration - 1
+            first_defined_select_age =  issue_age + rates[1].duration - 1
+            last_age = max(last_sel_age,ult_omega)
+            vec = map(issue_age:last_age) do attained_age
+                if attained_age < first_defined_select_age
+                    return missing
+                else
+                    if attained_age <= last_sel_age
+                        return rates[attained_age - first_defined_select_age + 1].rate
+                    else
+                        return ult[attained_age]
+                    end
+                end
+            end 
+            return mortality_vector(vec ,start_age=issue_age)
         end
         sel = OffsetArray(sel,tbl.select[1].issue_age - 1)
 
