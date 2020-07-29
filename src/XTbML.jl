@@ -56,16 +56,13 @@ function parseXTbMLTable(x, path)
         # for a select and ultimate table, will have multiple tables
         # parsed into a vector of tables
         sel = map(x["XTbML"]["Table"][1]["Values"]["Axis"]) do ai
-            (issue_age = parse(Int, ai[:t]),
-                rates = map(ai["Axis"]["Y"]) do aj
-                (duration = parse(Int, aj[:t]),
-                        rate = get_and_parse(aj, ""),)
+            (issue_age = parse(Int, ai[:t]), rates = map(ai["Axis"]["Y"]) do aj
+                (duration = parse(Int, aj[:t]), rate = get_and_parse(aj, ""),)
             end)
         end
 
         ult = map(x["XTbML"]["Table"][2]["Values"]["Axis"]["Y"]) do ai 
-            (age  = parse(Int, ai[:t]),
-                rate = get_and_parse(ai, ""),)
+            (age  = parse(Int, ai[:t]), rate = get_and_parse(ai, ""),)
         end
 
     else
