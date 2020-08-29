@@ -63,9 +63,9 @@ julia> vbt2001.select[35] # vector of rates for issue age 35
  0.94729
  1.0
 julia> vbt2001.select[35][35] #issue age 35, attained age 35
-
+ 0.00036
 julia> vbt2001.ultimate[95]  # ultimate vectors only need to be called with the attained age
-0.24298
+ 0.24298
 ```
 
 Calculate the force of mortality or survivorship over a range of time:
