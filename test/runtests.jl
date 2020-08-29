@@ -10,6 +10,7 @@ include("distribution.jl")
 tables = MortalityTables.tables()
 @test length(tables) > 0
 
+include("reverse_lookup.jl")
 include("projection_scale.jl")
 include("MortalityTables.jl")
 include("get_SOA_tables.jl")

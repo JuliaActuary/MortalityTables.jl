@@ -310,3 +310,41 @@ OffsetArray(vec,start_age-1)
 """
 
 mortality_vector(vec; start_age=0) = return OffsetArray(vec,start_age-1)
+
+"""
+    reverse_lookup(table_dict,attained_age,rate;comparison)
+
+Checks every table in the `key=>table` dictionary passed as `table_dict` for the given `rate` at `attained_age`. Will return a sorted array of tuples: 
+
+- The key of the pair is the key of the table
+
+- The first value of the tuple is the result of the comparison (for `isequals` will be `true` or `false`)
+- The second value of the tuple is whether the table was a select or ultimate structure, if any
+- The third value of the tuple is the issue_age, if table was select
+"""
+function reverse_lookup(tables,attained_age,rate;comparison=isequal)
+    for (k1,v1) in tables
+        reverse_lookup(table,attained_age,rate;comparison=comparison)
+    end
+end
+
+function reverse_lookup(table::SelectUltimateTable{S,U},attained_age,rate;comparison=comparison) where {S,U}
+    return (result=true,select=true,issue_age=4)
+end
+
+function reverse_lookup(table::UltimateTable{U},attained_age,rate;comparison=comparison) where {U}
+    try
+        return (result = comparison(rate,table.ultimate[attained_age]), select=false,issue_age=nothing)
+    catch
+        return nothing
+    end
+end
+
+function reverse_lookup(vec::AbstractArray,attained_age,rate;comparison=comparison) where {U}
+    try 
+        result = comparison(rate,vec[attained_age])
+    catch e
+        result = nothing
+    end
+    return (result=result,select=nothing,issue_age=nothing)
+end
