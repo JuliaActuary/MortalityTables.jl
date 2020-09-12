@@ -21,27 +21,6 @@ cumhazard(m::Makeham,age) = m.a / m.b * (exp(m.b*age) - 1) + age * m.c
 survivorship(m::Makeham,age) = exp(-cumhazard(m,age))
 survivorship(m::Makeham,from,to) = survivorship(m::Makeham,to) / survivorship(m::Makeham,from)
 
-
-
-function μ(m::ParametricMortality, age) 
-    return hazard(m,age)
-end
-
-"""
-GompertzMakeham(a,b,c)
-
-Construct a mortality model following the full version of GompertzMakeham's law. 
-"""
-struct GompertzMakeham <: ParametricMortality
-    a
-    b
-    c
-end
-
-function μ(m::GompertzMakeham, age) 
-    (a * exp(b *age) + c) * exp(-c*x - a/b * (exp(b*x - 1)))
-end
-
 """
 Gompertz(b,c)
 
@@ -55,6 +34,11 @@ Calling this will create a `Makeham` model.
 function Gompertz(a, b) 
     return Makeham(a, b, 0)
 end
+
+function μ(m::ParametricMortality, age) 
+    return hazard(m,age)
+end
+
 
 # use the integral to calculate the one-year survival
 function survivorship(m::ParametricMortality, from_age, to_age) 
