@@ -2,7 +2,7 @@
 
     @testset "Makeham" begin
 
-        g = Gompertz(0.0002,.13)
+        g = Gompertz(a=0.0002,b=.13)
 
         @test survivorship(g,45) ≈ 0.5870365016720939
         @test survivorship(g,45,46) ≈ 0.9285202788707242
@@ -10,7 +10,7 @@
         @test hazard(g,45) ≈ 0.06944687609574696
 
         @testset "AMLCR" begin
-            m = Makeham(2.7e-6,log(1.124), 0.00022)
+            m = Makeham(a=2.7e-6,b=log(1.124), c= 0.00022)
 
             @test MortalityTables.μ(m, 20) == 0.00022 + 2.7e-6 * 1.124^20
             @test m[20] == MortalityTables.μ(m, 20)
@@ -40,12 +40,13 @@
     @testset "Gompertz and Makeham equality" begin
 
         # Gompertz is Makeham's where c = 0
-        m = Makeham( 2.7e-6, 1.124,0.0)
-        g = Gompertz(2.7e-6, 1.124)
+        m = Makeham( a=2.7e-6,b= 1.124,c=0.0)
+        g = Gompertz(a=2.7e-6,b= 1.124)
 
         for age ∈ 20:100
             @test survivorship(m, age) == survivorship(g, age)
             @test survivorship(m, age, 1) == survivorship(g, age, 1)
         end
     end
+
 end
