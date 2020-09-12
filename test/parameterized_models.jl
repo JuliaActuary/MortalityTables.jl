@@ -37,15 +37,15 @@
 
     end
 
-    # @testset "Gompertz" begin
+    @testset "Gompertz and Makeham equality" begin
 
-    #     # Gompertz is Makeham's where a = 0
-    #     m = Makeham( 2.7e-6, 1.124,0.0)
-    #     g = Gompertz(2.7e-6, 1.124)
+        # Gompertz is Makeham's where c = 0
+        m = Makeham( 2.7e-6, 1.124,0.0)
+        g = Gompertz(2.7e-6, 1.124)
 
-    #     for age ∈ 20:100
-    #         @test survivorship(m, age) == survivorship(g, age)
-    #         @test survivorship(m, age, 1) == survivorship(g, age, 1)
-    #     end
-    # end
+        for age ∈ 20:100
+            @test survivorship(m, age) == survivorship(g, age)
+            @test survivorship(m, age, 1) == survivorship(g, age, 1)
+        end
+    end
 end
