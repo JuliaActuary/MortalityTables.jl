@@ -298,3 +298,4 @@ If you would like more tables added by default, please open a GitHub issue with 
 ## Similar Projects
 
 - [Pyliferisk, a Python package](https://github.com/franciscogarate/pyliferisk)
+- [MortalityLaws, an R package](https://github.com/mpascariu/MortalityLaws)
