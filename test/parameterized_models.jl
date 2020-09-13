@@ -67,7 +67,7 @@
                         (rmodel="quadratic",juliamodel=MortalityTables.Quadratic(),test=true),
                         (rmodel="beard",juliamodel=MortalityTables.Beard(),test=true),
                         (rmodel="beard_makeham",juliamodel=MortalityTables.MakehamBeard(),test=true),
-                        # (rmodel="ggompertz",juliamodel=MortalityTables.nothing,test=false),
+                        (rmodel="ggompertz",juliamodel=MortalityTables.GammaGompertz(),test=false),
                         # (rmodel="siler",juliamodel=MortalityTables.nothing,test=false),
                         # (rmodel="HP",juliamodel=MortalityTables.nothing,test=false),
                         # (rmodel="HP2",juliamodel=MortalityTables.nothing,test=false),

@@ -374,6 +374,27 @@ function hazard(m::Quadratic,age)
     return  m.a + m.b * age + m.c * age^2
 end
 
+"""
+    GammaGompertz(a,b,k)
+
+Construct a mortality model following GammaGompertz law of mortality.
+
+Default args:
+
+    a = 0.002
+    b = 0.13
+    γ = 1
+"""
+Base.@kwdef struct GammaGompertz <: ParametricMortality
+    a = 0.002
+    b = 0.13
+    γ = 1
+end
+
+function hazard(m::GammaGompertz,age) 
+    return  (m.a * exp(m.b * age)) / (1 + ( m.a * m.γ / m.b) * (exp(m.b * age) - 1))
+end
+
 ### Generic Functions
 
 """
