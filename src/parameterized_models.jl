@@ -733,7 +733,7 @@ end
 
 
 """
-    KannistoMakeham(a,b)
+    KannistoMakeham(a,b,c)
 
 Construct a mortality model following KannistoMakeham's law of mortality.
 
