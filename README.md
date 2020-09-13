@@ -221,11 +221,11 @@ Use like so:
 a = 0.0002
 b = 0.13
 c = 0.001
-m = Makeham(a=a,b=b,c=c)
-g = Gompertz(b=b,c=c)
+m = MortalityTables.Makeham(a=a,b=b,c=c)
+g = MortalityTables.Gompertz(a=a,b=b)
 ```
 
-Now some examples with `m`, but could use `g` interchangably:
+Now some examples with `m`, but could use `g` interchangeably:
 
 ```julia
 age = 20
@@ -234,6 +234,14 @@ decrement(m,20,25) # the five year cumulative mortality rate
 survivorship(m,20,25) # the five year survivorship rate
 ```
 
+Because of the large number of parameters and the likelihood for confusion, these models:
+
+- Are not exported from the package, so you need to call them by prefixing with `MortalityTables`. 
+  - e.g. : `MortalityTables.Kostaki()`
+- Are keyword arguments rather than positional, like this: `MortalityTables.Gompertz(a=0.01,b=0.2)`
+- Have default values for the arguments, so they can be called without args like this: `MortalityTables.Gompertz()`.
+  - See the help text for what the default values are.
+  
 ## Adding more tables
 
 ### Getting tables from [mort.SOA.org](https://mort.soa.org)
