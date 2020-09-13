@@ -554,6 +554,40 @@ function hazard(m::HeligmanPollard4,age)
     return age == 0 ?  μ₁ :  μ₁ + μ₂
 end
 
+"""
+    RogersPlanck(a₀, a₁, a₂, a₃, a, b, c, d, u)
+
+Construct a mortality model following RogersPlanck law of mortality.
+
+Default args:
+
+    a₀ = 0.0001
+    a₁ = 0.02
+    a₂ = 0.001
+    a₃ = 0.0001
+    a  = 2.
+    b  = 0.001
+    c  = 100.
+    d  = 0.1
+    u  = 0.33
+
+"""
+Base.@kwdef struct RogersPlanck <: ParametricMortality
+    a₀ = 0.0001
+    a₁ = 0.02
+    a₂ = 0.001
+    a₃ = 0.0001
+    a  = 2.
+    b  = 0.001
+    c  = 100.
+    d  = 0.1
+    u  = 0.33
+end
+
+function hazard(m::RogersPlanck,age) 
+    return  m.a₀ + m.a₁ * exp(-m.a * age) + m.a₂ * exp(m.b*(age - m.u) - exp(-m.c*(age - m.u))) + m.a₃*exp(m.d*age)
+end
+
 
 ### Generic Functions
 
