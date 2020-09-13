@@ -65,6 +65,7 @@
                         (rmodel="vandermaen2",juliamodel=MortalityTables.VanderMaen2(),test=true),
                         # (rmodel="strehler_mildvan",juliamodel=MortalityTables.StrehlerMildva(),test=true)n,
                         # (rmodel="quadratic",juliamodel=MortalityTables.Quadratic(),test=true),
+                        (rmodel="quadratic",juliamodel=MortalityTables.Quadratic(),test=true),
                         (rmodel="beard",juliamodel=MortalityTables.Beard(),test=true),
                         (rmodel="beard_makeham",juliamodel=MortalityTables.MakehamBeard(),test=true),
                         # (rmodel="ggompertz",juliamodel=MortalityTables.nothing,test=false),

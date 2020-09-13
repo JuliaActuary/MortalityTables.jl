@@ -353,6 +353,27 @@ function hazard(m::MakehamBeard,age)
     return  m.a * exp(m.b*age) / (1 + m.k * m.a * exp(m.b*age)) + m.c
 end
 
+"""
+    Quadratic(a,b,k)
+
+Construct a mortality model following Quadratic law of mortality.
+
+Default args:
+
+    a = 0.01
+    b = 1.
+    c = 0.01
+"""
+Base.@kwdef struct Quadratic <: ParametricMortality
+    a = 0.01
+    b = 1.
+    c = 0.01
+end
+
+function hazard(m::Quadratic,age) 
+    return  m.a + m.b * age + m.c * age^2
+end
+
 ### Generic Functions
 
 """
