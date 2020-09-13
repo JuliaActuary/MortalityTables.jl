@@ -76,10 +76,11 @@
                         (rmodel="rogersplanck",juliamodel=MortalityTables.RogersPlanck()),
                         (rmodel="martinelle",juliamodel=MortalityTables.Martinelle()),
                         (rmodel="kostaki",juliamodel=MortalityTables.Kostaki()),
+                        (rmodel="kannisto",juliamodel=MortalityTables.Kannisto()),
+                        (rmodel="kannisto_makeham",juliamodel=MortalityTables.KannistoMakeham())
+                        # the next two requre adding an autodiff dependency:
                         # (rmodel="carriere1",juliamodel=MortalityTables.Carriere()),
                         # (rmodel="carriere2",juliamodel=MortalityTables.Carriere2()),
-                        # (rmodel="kannisto",juliamodel=MortalityTables.Kannisto()),
-                        # (rmodel="kannisto_makeham",juliamodel=MortalityTables.KannistoMakeham())
                     ]
 
 

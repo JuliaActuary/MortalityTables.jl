@@ -702,6 +702,57 @@ function hazard(m::Kostaki,age)
     return η / (1+η)
 end
 
+"""
+    Kannisto(a,b)
+
+Construct a mortality model following Kannisto's law of mortality.
+
+Default args:
+
+    a = 0.5
+    b = 0.13
+"""
+Base.@kwdef struct Kannisto <: ParametricMortality
+    a = 0.5
+    b = 0.13
+end
+
+function hazard(m::Kannisto,age)
+    @unpack a,b = m
+    return  a * exp(b * age) / (1 + a * exp(b*age))
+end
+
+function cumhazard(m::Kannisto,age)
+    @unpack a,b = m
+    return  1/a * log((1 + b*exp(b*age)) / (1 + a))
+end
+
+function  survivorship(m::Kannisto,age)
+    return exp(-cumhazard(m,age))
+end
+
+
+"""
+    KannistoMakeham(a,b)
+
+Construct a mortality model following KannistoMakeham's law of mortality.
+
+Default args:
+
+    a = 0.5
+    b = 0.13
+    c = 0.001
+"""
+Base.@kwdef struct KannistoMakeham <: ParametricMortality
+    a = 0.5
+    b = 0.13
+    c = 0.001
+end
+
+function hazard(m::KannistoMakeham,age)
+    @unpack a,b,c = m
+    return  a * exp(b * age) / (1 + a * exp(b*age)) + c
+end
 
 ### Generic Functions
 
