@@ -186,14 +186,43 @@ Sample of some of the included table sets:
 
 ## Parameterized Models
 
-Makeham and Gompertz's Law is included. Use like so:
+The following parametric models are available:
+
+    Gompertz
+    InverseGompertz
+    Makeham
+    Opperman
+    Thiele
+    Wittstein
+    Perks
+    Weibull
+    InverseWeibull
+    VanderMaen
+    VanderMaen2
+    StrehlerMildvan
+    Quadratic
+    Beard
+    MakehamBeard
+    GammaGompertz
+    nothing
+    HeligmanPollard
+    HeligmanPollard2
+    HeligmanPollard3
+    HeligmanPollard4
+    RogersPlanck
+    Martinelle
+    Kostaki
+    Kannisto
+    KannistoMakeham
+
+Use like so:
 
 ```julia
-a = 0.00022
-b = 2.7e-6
-c = 1.124
-m = Makeham(a,b,c)
-g = Gompertz(b,c)
+a = 0.0002
+b = 0.13
+c = 0.001
+m = Makeham(a=a,b=b,c=c)
+g = Gompertz(b=b,c=c)
 ```
 
 Now some examples with `m`, but could use `g` interchangably:
