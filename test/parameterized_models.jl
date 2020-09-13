@@ -50,36 +50,36 @@
     end
 
     @testset "MortalityLaws R package" begin
-        model_tests = [(rmodel="gompertz",juliamodel=MortalityTables.Gompertz(),test=true),
-                        (rmodel="gompertz0",juliamodel=MortalityTables.nothing,test=false),
-                        (rmodel="invgompertz",juliamodel=MortalityTables.InverseGompertz(),test=true),
-                        (rmodel="makeham",juliamodel=MortalityTables.Makeham(),test=true),
-                        (rmodel="makeham0",juliamodel=MortalityTables.nothing,test=false),
-                        (rmodel="opperman",juliamodel=MortalityTables.Opperman(),test=true),
-                        (rmodel="thiele",juliamodel=MortalityTables.Thiele(),test=true),
-                        (rmodel="wittstein",juliamodel=MortalityTables.Wittstein(),test=true),
-                        (rmodel="perks",juliamodel=MortalityTables.Perks(),test=true),
-                        (rmodel="weibull",juliamodel=MortalityTables.Weibull(),test=true),
-                        (rmodel="invweibull",juliamodel=MortalityTables.InverseWeibull(),test=true),
-                        (rmodel="vandermaen",juliamodel=MortalityTables.VanderMaen(),test=true),
-                        (rmodel="vandermaen2",juliamodel=MortalityTables.VanderMaen2(),test=true),
-                        (rmodel="strehler_mildvan",juliamodel=MortalityTables.StrehlerMildvan(),test=true),
-                        (rmodel="quadratic",juliamodel=MortalityTables.Quadratic(),test=true),
-                        (rmodel="beard",juliamodel=MortalityTables.Beard(),test=true),
-                        (rmodel="beard_makeham",juliamodel=MortalityTables.MakehamBeard(),test=true),
-                        (rmodel="ggompertz",juliamodel=MortalityTables.GammaGompertz(),test=false),
-                        (rmodel="siler",juliamodel=MortalityTables.nothing,test=false),
-                        (rmodel="HP",juliamodel=MortalityTables.HeligmanPollard(),test=false),
-                        (rmodel="HP2",juliamodel=MortalityTables.HeligmanPollard2(),test=false),
-                        (rmodel="HP3",juliamodel=MortalityTables.HeligmanPollard3(),test=false),
-                        (rmodel="HP4",juliamodel=MortalityTables.HeligmanPollard4(),test=false),
-                        (rmodel="rogersplanck",juliamodel=MortalityTables.RogersPlanck(),test=false),
-                        (rmodel="martinelle",juliamodel=MortalityTables.Martinelle(),test=false),
-                        # (rmodel="kostaki",juliamodel=MortalityTables.Kostaki(),test=false),
-                        # (rmodel="carriere1",juliamodel=MortalityTables.Carriere(),test=false),
-                        # (rmodel="carriere2",juliamodel=MortalityTables.Carriere2(),test=false),
-                        # (rmodel="kannisto",juliamodel=MortalityTables.Kannisto(),test=false),
-                        # (rmodel="kannisto_makeham",juliamodel=MortalityTables.KannistoMakeham(),test=false)
+        model_tests = [(rmodel="gompertz",juliamodel=MortalityTables.Gompertz()),
+                        # (rmodel="gompertz0",juliamodel=MortalityTables.nothing),
+                        (rmodel="invgompertz",juliamodel=MortalityTables.InverseGompertz()),
+                        (rmodel="makeham",juliamodel=MortalityTables.Makeham()),
+                        # (rmodel="makeham0",juliamodel=MortalityTables.nothing),
+                        (rmodel="opperman",juliamodel=MortalityTables.Opperman()),
+                        (rmodel="thiele",juliamodel=MortalityTables.Thiele()),
+                        (rmodel="wittstein",juliamodel=MortalityTables.Wittstein()),
+                        (rmodel="perks",juliamodel=MortalityTables.Perks()),
+                        (rmodel="weibull",juliamodel=MortalityTables.Weibull()),
+                        (rmodel="invweibull",juliamodel=MortalityTables.InverseWeibull()),
+                        (rmodel="vandermaen",juliamodel=MortalityTables.VanderMaen()),
+                        (rmodel="vandermaen2",juliamodel=MortalityTables.VanderMaen2()),
+                        (rmodel="strehler_mildvan",juliamodel=MortalityTables.StrehlerMildvan()),
+                        (rmodel="quadratic",juliamodel=MortalityTables.Quadratic()),
+                        (rmodel="beard",juliamodel=MortalityTables.Beard()),
+                        (rmodel="beard_makeham",juliamodel=MortalityTables.MakehamBeard()),
+                        (rmodel="ggompertz",juliamodel=MortalityTables.GammaGompertz()),
+                        # (rmodel="siler",juliamodel=MortalityTables.nothing),
+                        (rmodel="HP",juliamodel=MortalityTables.HeligmanPollard()),
+                        (rmodel="HP2",juliamodel=MortalityTables.HeligmanPollard2()),
+                        (rmodel="HP3",juliamodel=MortalityTables.HeligmanPollard3()),
+                        (rmodel="HP4",juliamodel=MortalityTables.HeligmanPollard4()),
+                        (rmodel="rogersplanck",juliamodel=MortalityTables.RogersPlanck()),
+                        (rmodel="martinelle",juliamodel=MortalityTables.Martinelle()),
+                        # (rmodel="kostaki",juliamodel=MortalityTables.Kostaki()),
+                        # (rmodel="carriere1",juliamodel=MortalityTables.Carriere()),
+                        # (rmodel="carriere2",juliamodel=MortalityTables.Carriere2()),
+                        # (rmodel="kannisto",juliamodel=MortalityTables.Kannisto()),
+                        # (rmodel="kannisto_makeham",juliamodel=MortalityTables.KannistoMakeham())
                     ]
 
 
@@ -99,32 +99,30 @@
         # compare values
         ages = 20:100
         @testset "Model: $(model.rmodel)" for model in model_tests
-            if model.test || ~isnothing(model.juliamodel)
-                rmodel = rmodels[model.rmodel]
-                # test hazard
-                if "hx" in keys(rmodel)
-                    for (i,age) in enumerate(ages)
-                        @test hazard(model.juliamodel,age) ≈ rmodel["hx"][i] 
-                    end
+            rmodel = rmodels[model.rmodel]
+            # test hazard
+            if "hx" in keys(rmodel)
+                for (i,age) in enumerate(ages)
+                    @test hazard(model.juliamodel,age) ≈ rmodel["hx"][i] 
                 end
-
-                # test cumulative hazard
-
-                if "Hx" in keys(rmodel)
-                    for (i,age) in enumerate(ages)
-                        @test cumhazard(model.juliamodel,age) ≈ rmodel["Hx"][i] 
-                    end
-                end
-                
-                #test Survival
-                if "Sx" in keys(rmodel)
-                    for (i,age) in enumerate(ages)
-                        @test survivorship(model.juliamodel,age) ≈ rmodel["Sx"][i] 
-                    end
-                end
-
-
             end
+
+            # test cumulative hazard
+
+            if "Hx" in keys(rmodel)
+                for (i,age) in enumerate(ages)
+                    @test cumhazard(model.juliamodel,age) ≈ rmodel["Hx"][i] 
+                end
+            end
+            
+            #test Survival
+            if "Sx" in keys(rmodel)
+                for (i,age) in enumerate(ages)
+                    @test survivorship(model.juliamodel,age) ≈ rmodel["Sx"][i] 
+                end
+            end
+
+
         end
 
     end
