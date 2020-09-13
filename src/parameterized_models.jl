@@ -108,20 +108,20 @@ Construct a mortality model following Wittstein's law of mortality.
 Default args:
 
     a = 1.5
-    b = 1
-    m = 0.5
-    n = 100
+    b = 1.
+    n = 0.5
+    m = 100
 
 """
 Base.@kwdef struct Wittstein <: ParametricMortality
     a = 1.5
-    b = 1
-    m = 0.5
-    n = 100
+    b = 1.
+    n = 0.5
+    m = 100
 end
 
 function hazard(m::Wittstein,age) 
-    return (1 / m.b) * m.a ^ -((m.b * age)^m.n) + m.a ^ -(m.m-age)^m.n
+    return (1 / m.b) * m.a ^ -((m.b * age) ^ m.n) + m.a ^ -((m.m -  age) ^ m.n) 
 end
 
 """
@@ -329,7 +329,7 @@ Base.@kwdef struct MakehamBeard <: ParametricMortality
 end
 
 function hazard(m::MakehamBeard,age) 
-    return  m.a * exp(m.b*age) / (1 + m.k * m.a * exp(m.b*age) + m.c)
+    return  m.a * exp(m.b*age) / (1 + m.k * m.a * exp(m.b*age)) + m.c
 end
 
 ### Generic Functions

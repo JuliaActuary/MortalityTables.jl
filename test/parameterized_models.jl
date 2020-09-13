@@ -49,4 +49,74 @@
         end
     end
 
+    @testset "MortalityLaws R package" begin
+        model_tests = [(rmodel="gompertz",juliamodel=MortalityTables.Gompertz(),test=true),
+                        (rmodel="gompertz0",juliamodel=MortalityTables.nothing,test=false),
+                        # (rmodel="invgompertz",juliamodel=MortalityTables.InverseGompertz(),test=true),
+                        (rmodel="makeham",juliamodel=MortalityTables.Makeham(),test=true),
+                        (rmodel="makeham0",juliamodel=MortalityTables.nothing,test=false),
+                        (rmodel="opperman",juliamodel=MortalityTables.Opperman(),test=true),
+                        (rmodel="thiele",juliamodel=MortalityTables.Thiele(),test=true),
+                        (rmodel="wittstein",juliamodel=MortalityTables.Wittstein(),test=true),
+                        (rmodel="perks",juliamodel=MortalityTables.Perks(),test=true),
+                        (rmodel="weibull",juliamodel=MortalityTables.Weibull(),test=true),
+                        (rmodel="invweibull",juliamodel=MortalityTables.InverseWeibull(),test=true),
+                        (rmodel="vandermaen",juliamodel=MortalityTables.VanderMaen(),test=true),
+                        (rmodel="vandermaen2",juliamodel=MortalityTables.VanderMaen2(),test=true),
+                        # (rmodel="strehler_mildvan",juliamodel=MortalityTables.StrehlerMildva(),test=true)n,
+                        # (rmodel="quadratic",juliamodel=MortalityTables.Quadratic(),test=true),
+                        (rmodel="beard",juliamodel=MortalityTables.Beard(),test=true),
+                        (rmodel="beard_makeham",juliamodel=MortalityTables.MakehamBeard(),test=true),
+                        # (rmodel="ggompertz",juliamodel=MortalityTables.nothing,test=false),
+                        # (rmodel="siler",juliamodel=MortalityTables.nothing,test=false),
+                        # (rmodel="HP",juliamodel=MortalityTables.nothing,test=false),
+                        # (rmodel="HP2",juliamodel=MortalityTables.nothing,test=false),
+                        # (rmodel="HP3",juliamodel=MortalityTables.nothing,test=false),
+                        # (rmodel="HP4",juliamodel=MortalityTables.nothing,test=false),
+                        # (rmodel="rogersplanck",juliamodel=MortalityTables.RogersPlanck(),test=false),
+                        # (rmodel="martinelle",juliamodel=MortalityTables.Martinelle(),test=false),
+                        # (rmodel="kostaki",juliamodel=MortalityTables.Kostaki(),test=false),
+                        # (rmodel="carriere1",juliamodel=MortalityTables.Carriere(),test=false),
+                        # (rmodel="carriere2",juliamodel=MortalityTables.Carriere2(),test=false),
+                        # (rmodel="kannisto",juliamodel=MortalityTables.Kannisto(),test=false),
+                        # (rmodel="kannisto_makeham",juliamodel=MortalityTables.KannistoMakeham(),test=false)
+                    ]
+
+
+        # load test targets from data
+        dir = joinpath(pwd(),"data","parametric")
+
+        rmodels = Dict()
+        for (root, dirs, files) in walkdir(dir)
+            for file in files
+                if file[end-3:end] == "json"
+                    json = JSON.parse(MortalityTables.open_and_read(joinpath(root, file)))
+                    rmodels[json["modelname"][1]] = json
+                end
+            end
+        end
+
+        # compare values
+        ages = 20:100
+        for model in model_tests
+            if model.test || ~isnothing(model.juliamodel)
+                @show model.rmodel
+                rmodel = rmodels[model.rmodel]
+                # test hazard
+                if "hx" in keys(rmodel)
+                    for (i,age) in enumerate(ages)
+                        @test hazard(model.juliamodel,age) ≈ rmodel["hx"][i] 
+                    end
+                end
+
+                # test cumulative hazard
+                
+                #test Survival
+
+
+            end
+        end
+
+    end
+
 end
