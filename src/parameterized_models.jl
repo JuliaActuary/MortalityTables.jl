@@ -331,7 +331,7 @@ function hazard(m::Beard,age)
 end
 
 """
-    MakehamBeard(a,b,k)
+    MakehamBeard(a,b,c,k)
 
 Construct a mortality model following MakehamBeard's law of mortality.
 
@@ -354,7 +354,7 @@ function hazard(m::MakehamBeard,age)
 end
 
 """
-    Quadratic(a,b,k)
+    Quadratic(a,b,c)
 
 Construct a mortality model following Quadratic law of mortality.
 
@@ -375,7 +375,7 @@ function hazard(m::Quadratic,age)
 end
 
 """
-    GammaGompertz(a,b,k)
+    GammaGompertz(a,b,γ)
 
 Construct a mortality model following GammaGompertz law of mortality.
 
@@ -396,7 +396,7 @@ function hazard(m::GammaGompertz,age)
 end
 
 """
-    Siler(a,b,k)
+    Siler(a,b,c,d,e)
 
 Construct a mortality model following Siler law of mortality.
 
@@ -421,7 +421,7 @@ function hazard(m::Siler,age)
 end
 
 """
-    HeligmanPollard(a,b,k)
+    HeligmanPollard(a,b,c,d,e,f,g,h)
 
 Construct a mortality model following HeligmanPollard law of mortality with 8 parameters.
 
@@ -452,7 +452,7 @@ function hazard(m::HeligmanPollard,age)
 end
 
 """
-    HeligmanPollard2(a,b,k)
+    HeligmanPollard2(a,b,c,d,e,f,g,h)
 
 Construct a mortality model following HeligmanPollard (alternate) law of mortality with 8 parameters.
 
@@ -485,7 +485,7 @@ function hazard(m::HeligmanPollard2,age)
 end
 
 """
-    HeligmanPollard3(a,b,k)
+    HeligmanPollard3(a,b,c,d,e,f,g,h,k)
 
 Construct a mortality model following HeligmanPollard (alternate) law of mortality with 9 parameters.
 
@@ -520,7 +520,7 @@ function hazard(m::HeligmanPollard3,age)
 end
 
 """
-    HeligmanPollard4(a,b,k)
+    HeligmanPollard4(a,b,c,d,e,f,g,h,k)
 
 Construct a mortality model following HeligmanPollard (alternate) law of mortality with 9 parameters.
 
