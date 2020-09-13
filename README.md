@@ -188,17 +188,46 @@ Sample of some of the included table sets:
 
 ## Parameterized Models
 
-Makeham and Gompertz's Law is included. Use like so:
+The following parametric models are available:
+
+    Gompertz
+    InverseGompertz
+    Makeham
+    Opperman
+    Thiele
+    Wittstein
+    Perks
+    Weibull
+    InverseWeibull
+    VanderMaen
+    VanderMaen2
+    StrehlerMildvan
+    Quadratic
+    Beard
+    MakehamBeard
+    GammaGompertz
+    Siler
+    HeligmanPollard
+    HeligmanPollard2
+    HeligmanPollard3
+    HeligmanPollard4
+    RogersPlanck
+    Martinelle
+    Kostaki
+    Kannisto
+    KannistoMakeham
+
+Use like so:
 
 ```julia
-a = 0.00022
-b = 2.7e-6
-c = 1.124
-m = Makeham(a,b,c)
-g = Gompertz(b,c)
+a = 0.0002
+b = 0.13
+c = 0.001
+m = MortalityTables.Makeham(a=a,b=b,c=c)
+g = MortalityTables.Gompertz(a=a,b=b)
 ```
 
-Now some examples with `m`, but could use `g` interchangably:
+Now some examples with `m`, but could use `g` interchangeably:
 
 ```julia
 age = 20
@@ -206,6 +235,14 @@ m[20] # the mortality rate at age 20
 decrement(m,20,25) # the five year cumulative mortality rate
 survivorship(m,20,25) # the five year survivorship rate
 ```
+
+Because of the large number of parameters and the likelihood for confusion, these models:
+
+- Are not exported from the package, so you need to call them by prefixing with `MortalityTables`. 
+  - e.g. : `MortalityTables.Kostaki()`
+- Are keyword arguments rather than positional, like this: `MortalityTables.Gompertz(a=0.01,b=0.2)`
+- Have default values for the arguments, so they can be called without args like this: `MortalityTables.Gompertz()`.
+  - See the help text for what the default values are.
 
 ## Adding more tables
 
@@ -296,6 +333,7 @@ If you would like more tables added by default, please open a GitHub issue with 
 - [SOA Mortality Tables](https://mort.soa.org/)
 - [Actuarial Mathematics for Life Contingent Risks, 2nd ed](https://www.cambridge.org/vi/academic/subjects/statistics-probability/statistics-econometrics-finance-and-insurance/actuarial-mathematics-life-contingent-risks-2nd-edition?format=HB)
 - [Experience Study Calculations, SOA](https://www.soa.org/globalassets/assets/Files/Research/2016-10-experience-study-calculations.pdf)
+- Parametric models were adapted from the [MortalityLaws ](https://github.com/mpascariu/MortalityLaws) R package
 
 ## Similar Projects
 

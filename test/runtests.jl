@@ -1,5 +1,6 @@
 using MortalityTables
 using Test
+using JSON
 
 include("basic.jl")
 include("XTbML.jl")

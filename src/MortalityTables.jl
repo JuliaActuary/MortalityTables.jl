@@ -3,6 +3,7 @@ using HTTP
 using Transducers
 using OffsetArrays
 using QuadGK
+using UnPack
 using XMLDict
 
 include("MetaData.jl")
@@ -25,6 +26,7 @@ export MortalityTable,
     DeathDistribution,
     get_SOA_table,
     get_SOA_table!,
-    Makeham, Gompertz,
+    Makeham, Gompertz, MakehamGompertz,
+    hazard,cumhazard,
     mortality_vector
 end # module
