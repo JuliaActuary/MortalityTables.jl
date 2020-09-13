@@ -45,6 +45,27 @@ function Gompertz(;a=0.0002, b=0.13)
 end
 
 """
+    InverseGompertz(;a,b,c)
+
+Construct a mortality model following InverseGompertz's law.
+
+Default args:
+    
+    m = 49
+    σ = 7.7
+
+"""
+Base.@kwdef struct InverseGompertz <: ParametricMortality
+    m = 49
+    σ = 7.7
+end
+
+
+hazard(m::InverseGompertz,age) = 1 / m.σ * exp(-(age - m.m)/m.σ) / (exp(exp(-(age - m.m)/m.σ)) - 1)
+cumhazard(m::InverseGompertz,age) = -log(survivorship(m,age))
+survivorship(m::InverseGompertz,age) = (1 - exp(-exp(-(age - m.m)/m.σ))) / (1 - exp(-exp(m.m/m.σ)))
+
+"""
     Opperman(a,b,c)
 
 Construct a mortality model following Opperman's law of mortality.

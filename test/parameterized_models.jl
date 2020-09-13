@@ -52,7 +52,7 @@
     @testset "MortalityLaws R package" begin
         model_tests = [(rmodel="gompertz",juliamodel=MortalityTables.Gompertz(),test=true),
                         (rmodel="gompertz0",juliamodel=MortalityTables.nothing,test=false),
-                        # (rmodel="invgompertz",juliamodel=MortalityTables.InverseGompertz(),test=true),
+                        (rmodel="invgompertz",juliamodel=MortalityTables.InverseGompertz(),test=true),
                         (rmodel="makeham",juliamodel=MortalityTables.Makeham(),test=true),
                         (rmodel="makeham0",juliamodel=MortalityTables.nothing,test=false),
                         (rmodel="opperman",juliamodel=MortalityTables.Opperman(),test=true),
