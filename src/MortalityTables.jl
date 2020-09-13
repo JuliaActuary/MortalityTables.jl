@@ -3,6 +3,7 @@ using HTTP
 using Transducers
 using OffsetArrays
 using QuadGK
+using UnPack
 using XMLDict
 
 include("MetaData.jl")
