@@ -68,7 +68,7 @@
                         (rmodel="beard",juliamodel=MortalityTables.Beard()),
                         (rmodel="beard_makeham",juliamodel=MortalityTables.MakehamBeard()),
                         (rmodel="ggompertz",juliamodel=MortalityTables.GammaGompertz()),
-                        # (rmodel="siler",juliamodel=MortalityTables.nothing),
+                        (rmodel="siler",juliamodel=MortalityTables.Siler()),
                         (rmodel="HP",juliamodel=MortalityTables.HeligmanPollard()),
                         (rmodel="HP2",juliamodel=MortalityTables.HeligmanPollard2()),
                         (rmodel="HP3",juliamodel=MortalityTables.HeligmanPollard3()),

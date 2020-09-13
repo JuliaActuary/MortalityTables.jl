@@ -204,6 +204,7 @@ The following parametric models are available:
     Beard
     MakehamBeard
     GammaGompertz
+    Siler
     HeligmanPollard
     HeligmanPollard2
     HeligmanPollard3
