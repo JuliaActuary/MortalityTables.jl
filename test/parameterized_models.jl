@@ -98,9 +98,8 @@
 
         # compare values
         ages = 20:100
-        for model in model_tests
+        @testset "Model: $(model.rmodel)" for model in model_tests
             if model.test || ~isnothing(model.juliamodel)
-                @show model.rmodel
                 rmodel = rmodels[model.rmodel]
                 # test hazard
                 if "hx" in keys(rmodel)
@@ -110,8 +109,19 @@
                 end
 
                 # test cumulative hazard
+
+                if "Hx" in keys(rmodel)
+                    for (i,age) in enumerate(ages)
+                        @test cumhazard(model.juliamodel,age) ≈ rmodel["Hx"][i] 
+                    end
+                end
                 
                 #test Survival
+                if "Sx" in keys(rmodel)
+                    for (i,age) in enumerate(ages)
+                        @test survivorship(model.juliamodel,age) ≈ rmodel["Sx"][i] 
+                    end
+                end
 
 
             end
