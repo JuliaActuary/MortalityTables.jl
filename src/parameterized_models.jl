@@ -395,6 +395,31 @@ function hazard(m::GammaGompertz,age)
     return  (m.a * exp(m.b * age)) / (1 + ( m.a * m.γ / m.b) * (exp(m.b * age) - 1))
 end
 
+"""
+    Siler(a,b,k)
+
+Construct a mortality model following Siler law of mortality.
+
+Default args:
+
+    a = 0.0002
+    b = 0.13
+    c = 0.001
+    d = 0.001
+    e = 0.013
+"""
+Base.@kwdef struct Siler <: ParametricMortality
+    a = 0.0002
+    b = 0.13
+    c = 0.001
+    d = 0.001
+    e = 0.013
+end
+
+function hazard(m::Siler,age) 
+    return  m.a * exp(-m.b* age) + m.c + m.d * exp(m.e * age)
+end
+
 ### Generic Functions
 
 """
