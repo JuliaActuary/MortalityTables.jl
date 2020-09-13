@@ -204,7 +204,6 @@ The following parametric models are available:
     Beard
     MakehamBeard
     GammaGompertz
-    nothing
     HeligmanPollard
     HeligmanPollard2
     HeligmanPollard3
@@ -241,7 +240,7 @@ Because of the large number of parameters and the likelihood for confusion, thes
 - Are keyword arguments rather than positional, like this: `MortalityTables.Gompertz(a=0.01,b=0.2)`
 - Have default values for the arguments, so they can be called without args like this: `MortalityTables.Gompertz()`.
   - See the help text for what the default values are.
-  
+
 ## Adding more tables
 
 ### Getting tables from [mort.SOA.org](https://mort.soa.org)
