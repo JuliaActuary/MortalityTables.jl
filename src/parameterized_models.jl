@@ -590,16 +590,17 @@ end
 
 
 """
-    Martinelle(a,b,c,k)
+    Martinelle(a,b,c,d,k)
 
 Construct a mortality model following Martinelle's law of mortality.
 
 Default args:
 
-    a = 0.002
+    a = 0.001
     b = 0.13
-    c = 0.01
-    k = 1.
+    c = 0.001
+    d = 0.1
+    k = 0.001
 """
 Base.@kwdef struct Martinelle <: ParametricMortality
     a = 0.001
