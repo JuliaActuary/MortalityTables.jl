@@ -132,7 +132,8 @@
             else
                 @test survivorship(model.juliamodel,50,51) < 1.0
             end
-
+            
+            @test model.juliamodel[20] >= 0
 
         end
 
