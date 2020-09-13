@@ -420,6 +420,141 @@ function hazard(m::Siler,age)
     return  m.a * exp(-m.b* age) + m.c + m.d * exp(m.e * age)
 end
 
+"""
+    HeligmanPollard(a,b,k)
+
+Construct a mortality model following HeligmanPollard law of mortality with 8 parameters.
+
+Default args:
+
+    a = 0.0002
+    b = 0.13
+    c = 0.001
+    d = 0.001
+    e = 0.013
+"""
+Base.@kwdef struct HeligmanPollard <: ParametricMortality
+    a = .0005
+    b = .004
+    c = .08
+    d = .001
+    e = 10
+    f = 17
+    g = .00005
+    h = 1.1
+end
+
+function hazard(m::HeligmanPollard,age)
+    μ₁ = m.a^((age + m.b)^m.c) + m.g * m.h^age
+    μ₂ = m.d * exp(-m.e * (log(age/m.f))^2)
+    η = age == 0 ?  μ₁ :  μ₁ + μ₂
+    return  η / (1 + η)
+end
+
+"""
+    HeligmanPollard2(a,b,k)
+
+Construct a mortality model following HeligmanPollard (alternate) law of mortality with 8 parameters.
+
+Default args:
+
+    a = .0005
+    b = .004
+    c = .08
+    d = .001
+    e = 10
+    f = 17
+    g = .00005
+    h = 1.1
+"""
+Base.@kwdef struct HeligmanPollard2 <: ParametricMortality
+    a = 0.0005
+    b = 0.004
+    c = 0.08
+    d = 0.001
+    e = 10.
+    f = 17.
+    g = 0.00005
+    h = 1.1
+end
+
+function hazard(m::HeligmanPollard2,age)
+    μ₁ = m.a^((age + m.b)^m.c) + (m.g * m.h^age) / (1 + m.g * m.h ^ age)
+    μ₂ = m.d * exp(-m.e * (log(age/m.f))^2)
+    return age == 0 ?  μ₁ :  μ₁ + μ₂
+end
+
+"""
+    HeligmanPollard3(a,b,k)
+
+Construct a mortality model following HeligmanPollard (alternate) law of mortality with 9 parameters.
+
+Default args:
+
+    a = .0005
+    b = .004
+    c = .08
+    d = .001
+    e = 10
+    f = 17
+    g = .00005
+    h = 1.1
+    k= 1.
+"""
+Base.@kwdef struct HeligmanPollard3 <: ParametricMortality
+    a = .0005
+    b = .004
+    c = .08
+    d = .001
+    e = 10
+    f = 17
+    g = .00005
+    h = 1.1
+    k = 1.
+end
+
+function hazard(m::HeligmanPollard3,age)
+    μ₁ = m.a^((age + m.b)^m.c) + (m.g * m.h^age) / (1 + m.k * m.g * m.h ^ age)
+    μ₂ = m.d * exp(-m.e * (log(age/m.f))^2)
+    return age == 0 ?  μ₁ :  μ₁ + μ₂
+end
+
+"""
+    HeligmanPollard4(a,b,k)
+
+Construct a mortality model following HeligmanPollard (alternate) law of mortality with 9 parameters.
+
+Default args:
+
+    a = .0005
+    b = .004
+    c = .08
+    d = .001
+    e = 10
+    f = 17
+    g = .00005
+    h = 1.1
+    k= 1.
+"""
+Base.@kwdef struct HeligmanPollard4 <: ParametricMortality
+    a = .0005
+    b = .004
+    c = .08
+    d = .001
+    e = 10
+    f = 17
+    g = .00005
+    h = 1.1
+    k = 1.
+end
+
+function hazard(m::HeligmanPollard4,age)
+    μ₁ = m.a^((age + m.b)^m.c) + (m.g * m.h^(age ^ m.k)) / (1 + m.g * m.h ^ (age ^ m.k))
+    μ₂ = m.d * exp(-m.e * (log(age/m.f))^2)
+    return age == 0 ?  μ₁ :  μ₁ + μ₂
+end
+
+
 ### Generic Functions
 
 """
