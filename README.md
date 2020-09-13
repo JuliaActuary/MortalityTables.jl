@@ -294,8 +294,8 @@ If you would like more tables added by default, please open a GitHub issue with 
 - [SOA Mortality Tables](https://mort.soa.org/)
 - [Actuarial Mathematics for Life Contingent Risks, 2nd ed](https://www.cambridge.org/vi/academic/subjects/statistics-probability/statistics-econometrics-finance-and-insurance/actuarial-mathematics-life-contingent-risks-2nd-edition?format=HB)
 - [Experience Study Calculations, SOA](https://www.soa.org/globalassets/assets/Files/Research/2016-10-experience-study-calculations.pdf)
+- Parametric models were adapted from the [MortalityLaws ](https://github.com/mpascariu/MortalityLaws) R package
 
 ## Similar Projects
 
 - [Pyliferisk, a Python package](https://github.com/franciscogarate/pyliferisk)
-- [MortalityLaws, an R package](https://github.com/mpascariu/MortalityLaws)
