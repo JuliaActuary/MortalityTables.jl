@@ -725,7 +725,7 @@ end
 # end
 # survivorship(m::ParametricMortality,to_age) = survivorship(m, 0, to_age)
 
-survivorship(m::ParametricMortality,age) = exp(-quadgk(age->μ(m, age), 0, to_age)[1])
+survivorship(m::ParametricMortality,to_age) = exp(-quadgk(age->μ(m, age), 0, to_age)[1])
 survivorship(m,from,to) = survivorship(m,to) / survivorship(m,from)
 decrement(m::ParametricMortality,from_age,to_age) = 1 - survivorship(m, from_age, to_age)
 decrement(m::ParametricMortality,to_age) = 1 - survivorship(m, to_age)

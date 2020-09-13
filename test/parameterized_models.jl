@@ -122,6 +122,16 @@
                 end
             end
 
+            # test other characteristics
+
+            @test survivorship(model.juliamodel,20,20) == 1.0
+            if model.rmodel in ["quadratic","perks","vandermaen","vandermaen2"]
+                # the default params create a crazy hazard function 
+                @test_broken survivorship(model.juliamodel,50,51) < 1.0
+            else
+                @test survivorship(model.juliamodel,50,51) < 1.0
+            end
+
 
         end
 
