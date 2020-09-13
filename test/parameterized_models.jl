@@ -75,7 +75,7 @@
                         (rmodel="HP4",juliamodel=MortalityTables.HeligmanPollard4()),
                         (rmodel="rogersplanck",juliamodel=MortalityTables.RogersPlanck()),
                         (rmodel="martinelle",juliamodel=MortalityTables.Martinelle()),
-                        # (rmodel="kostaki",juliamodel=MortalityTables.Kostaki()),
+                        (rmodel="kostaki",juliamodel=MortalityTables.Kostaki()),
                         # (rmodel="carriere1",juliamodel=MortalityTables.Carriere()),
                         # (rmodel="carriere2",juliamodel=MortalityTables.Carriere2()),
                         # (rmodel="kannisto",juliamodel=MortalityTables.Kannisto()),

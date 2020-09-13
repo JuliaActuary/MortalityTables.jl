@@ -654,6 +654,55 @@ function hazard(m::Martinelle,age)
     return  (a*exp(b*age) + c) / (1 + d*exp(b * age)) + k*exp(b * age)
 end
 
+
+"""
+    Kostaki(a,b,c,d,e1,e2,f,g,h)
+
+Construct a mortality model following Kostaki's law of mortality. A nine-parameter adaptation of `HeligmanPollard`.
+
+ > Kostaki, A. (1992). A nine‐parameter version of the Heligman‐Pollard formula. Mathematical Population Studies, 3(4), 277–288. doi:10.1080/08898489209525346 
+
+Default args:
+
+    a = 0.0005
+    b = 0.01
+    c = 0.10
+    d = 0.001
+    e1 = 3.
+    e2 = 0.1
+    f = 25.
+    g = .00005
+    h = 1.1
+
+
+"""
+Base.@kwdef struct Kostaki <: ParametricMortality
+    a = 0.0005
+    b = 0.01
+    c = 0.10
+    d = 0.001
+    e1 = 3.
+    e2 = 0.1
+    f = 25.
+    g = .00005
+    h = 1.1
+end
+
+function hazard(m::Kostaki,age) 
+    @unpack a,b,c,d,e1,e2,f,g,h = m
+    μ₁ = a^((age + b)^c) + g*h^age 
+    if age <= f
+        μ₂ =d *exp(-(e1*log(age/f))^2)
+    else
+        μ₂ =d *exp(-(e2*log(age/f))^2)
+    end
+    
+    η = age == 0 ? μ₁ : μ₁ + μ₂
+
+    return η / (1+η)
+end
+
+
 ### Generic Functions
 
 """
