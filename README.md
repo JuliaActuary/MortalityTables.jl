@@ -12,6 +12,8 @@ A Julia package for working with MortalityTables. Has:
 - `survivorship` and `decrement` functions to calculate decrements over period of time
 - Partial year mortality calculations (Uniform, Constant, Balducci)
 - Friendly syntax and flexible usage
+- Extensive set of parametric mortality models.
+
 
 ## Examples
 
