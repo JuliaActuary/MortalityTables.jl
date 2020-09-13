@@ -589,6 +589,30 @@ function hazard(m::RogersPlanck,age)
 end
 
 
+"""
+    Martinelle(a,b,c,k)
+
+Construct a mortality model following Martinelle's law of mortality.
+
+Default args:
+
+    a = 0.002
+    b = 0.13
+    c = 0.01
+    k = 1.
+"""
+Base.@kwdef struct Martinelle <: ParametricMortality
+    a = 0.001
+    b = 0.13
+    c = 0.001
+    d = 0.1
+    k = 0.001
+end
+
+function hazard(m::Martinelle,age) 
+    return  (m.a*exp(m.b*age) + m.c) / (1 + m.d*exp(m.b * age)) + m.k*exp(m.b * age)
+end
+
 ### Generic Functions
 
 """

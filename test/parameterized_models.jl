@@ -74,7 +74,7 @@
                         (rmodel="HP3",juliamodel=MortalityTables.HeligmanPollard3(),test=false),
                         (rmodel="HP4",juliamodel=MortalityTables.HeligmanPollard4(),test=false),
                         (rmodel="rogersplanck",juliamodel=MortalityTables.RogersPlanck(),test=false),
-                        # (rmodel="martinelle",juliamodel=MortalityTables.Martinelle(),test=false),
+                        (rmodel="martinelle",juliamodel=MortalityTables.Martinelle(),test=false),
                         # (rmodel="kostaki",juliamodel=MortalityTables.Kostaki(),test=false),
                         # (rmodel="carriere1",juliamodel=MortalityTables.Carriere(),test=false),
                         # (rmodel="carriere2",juliamodel=MortalityTables.Carriere2(),test=false),
