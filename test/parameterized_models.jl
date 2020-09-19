@@ -4,8 +4,8 @@
 
         g = Gompertz(a=0.0002,b=.13)
 
-        @test survivorship(g,45) ≈ 0.5870365016720939
-        @test survivorship(g,45,46) ≈ 0.9285202788707242
+        @test survival(g,45) ≈ 0.5870365016720939
+        @test survival(g,45,46) ≈ 0.9285202788707242
         @test decrement(g,45,46) ≈ 1 - 0.9285202788707242
         @test hazard(g,45) ≈ 0.06944687609574696
 
@@ -18,15 +18,15 @@
             
             # vs manually calculated (via QuadGK) integrals
             @test decrement(m, 20, 25) ≈ 0.0012891622754368504
-            @test survivorship(m, 20, 25) ≈ 1 - 0.0012891622754368504
+            @test survival(m, 20, 25) ≈ 1 - 0.0012891622754368504
             @test decrement(m, 25) ≈ 0.005888764668801838
-            @test survivorship(m, 25) ≈ 1 - 0.005888764668801838
+            @test survival(m, 25) ≈ 1 - 0.005888764668801838
 
             # these values come from the 'Standard Select and Ultimate Survival Model'
             # from Actuarial Mathematics for Life Contingent Risks, 2nd end
 
             ℓ = 100_000
-            ℓs = [survivorship(m, 20, age) for age in 21:100] .* ℓ
+            ℓs = [survival(m, 20, age) for age in 21:100] .* ℓ
 
             ℓ_age(x) = ℓs[x - 20]
             @test isapprox(ℓ_age(21),  99975.04, atol = 0.01)
@@ -44,8 +44,8 @@
         g = Gompertz(a=2.7e-6,b= 1.124)
 
         for age ∈ 20:100
-            @test survivorship(m, age) == survivorship(g, age)
-            @test survivorship(m, age, 1) == survivorship(g, age, 1)
+            @test survival(m, age) == survival(g, age)
+            @test survival(m, age, 1) == survival(g, age, 1)
         end
     end
 
@@ -119,18 +119,18 @@
             #test Survival
             if "Sx" in keys(rmodel)
                 for (i,age) in enumerate(ages)
-                    @test survivorship(model.juliamodel,age) ≈ rmodel["Sx"][i] 
+                    @test survival(model.juliamodel,age) ≈ rmodel["Sx"][i] 
                 end
             end
 
             # test other characteristics
 
-            @test survivorship(model.juliamodel,20,20) == 1.0
+            @test survival(model.juliamodel,20,20) == 1.0
             if model.rmodel in ["quadratic","perks","vandermaen","vandermaen2"]
                 # the default params create a crazy hazard function 
-                @test_broken survivorship(model.juliamodel,50,51) < 1.0
+                @test_broken survival(model.juliamodel,50,51) < 1.0
             else
-                @test survivorship(model.juliamodel,50,51) < 1.0
+                @test survival(model.juliamodel,50,51) < 1.0
             end
             
             @test model.juliamodel[20] >= 0

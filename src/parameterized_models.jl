@@ -32,7 +32,7 @@ function cumhazard(m::Makeham,age)
     return a / b * (exp(b*age) - 1) + age * c
 end
 
-survivorship(m::Makeham,age) = exp(-cumhazard(m,age))
+survival(m::Makeham,age) = exp(-cumhazard(m,age))
 
 
 """
@@ -74,9 +74,9 @@ function hazard(m::InverseGompertz,age)
     return 1 / σ * exp(-(age - m)/σ) / (exp(exp(-(age - m)/σ)) - 1)
 end
 
-cumhazard(m::InverseGompertz,age) = -log(survivorship(m,age))
+cumhazard(m::InverseGompertz,age) = -log(survival(m,age))
 
-function survivorship(m::InverseGompertz,age) 
+function survival(m::InverseGompertz,age) 
     @unpack m,σ = m 
     return (1 - exp(-exp(-(age - m)/σ))) / (1 - exp(-exp(m/σ)))
 end
@@ -200,7 +200,7 @@ function cumhazard(m::Weibull,age)
     return (age / m) ^ (m / σ)
 end
 
-function survivorship(m::Weibull,age) 
+function survival(m::Weibull,age) 
     return exp(-cumhazard(m,age))
 end
 
@@ -234,7 +234,7 @@ function cumhazard(m::InverseWeibull,age)
     return -log(1 - exp(-(age/m)^(-m/σ)))
 end
 
-function survivorship(m::InverseWeibull,age) 
+function survival(m::InverseWeibull,age) 
     return exp(-cumhazard(m,age))
 end
 
@@ -727,7 +727,7 @@ function cumhazard(m::Kannisto,age)
     return  1/a * log((1 + b*exp(b*age)) / (1 + a))
 end
 
-function  survivorship(m::Kannisto,age)
+function  survival(m::Kannisto,age)
     return exp(-cumhazard(m,age))
 end
 
@@ -767,19 +767,19 @@ end
 
 
 # # use the integral to calculate the one-year survival
-# function survivorship(m::ParametricMortality, from_age, to_age) 
+# function survival(m::ParametricMortality, from_age, to_age) 
 #     if from_age == to_age
 #         return 1.0
 #     else
 #         return exp(-quadgk(age->μ(m, age), from_age, to_age)[1])
 #     end
 # end
-# survivorship(m::ParametricMortality,to_age) = survivorship(m, 0, to_age)
+# survival(m::ParametricMortality,to_age) = survival(m, 0, to_age)
 
-survivorship(m::ParametricMortality,to_age) = exp(-quadgk(age->μ(m, age), 0, to_age)[1])
-survivorship(m,from,to) = survivorship(m,to) / survivorship(m,from)
-decrement(m::ParametricMortality,from_age,to_age) = 1 - survivorship(m, from_age, to_age)
-decrement(m::ParametricMortality,to_age) = 1 - survivorship(m, to_age)
+survival(m::ParametricMortality,to_age) = exp(-quadgk(age->μ(m, age), 0, to_age)[1])
+survival(m,from,to) = survival(m,to) / survival(m,from)
+decrement(m::ParametricMortality,from_age,to_age) = 1 - survival(m, from_age, to_age)
+decrement(m::ParametricMortality,to_age) = 1 - survival(m, to_age)
 
 (m::ParametricMortality)(x) = μ(m, x)
 Base.getindex(m::ParametricMortality,x) = m(x)

@@ -9,7 +9,7 @@
 A Julia package for working with MortalityTables. Has:
 
 - Lots of bundled SOA mort.soa.org tables
-- `survivorship` and `decrement` functions to calculate decrements over period of time
+- `survival` and `decrement` functions to calculate decrements over period of time
 - Partial year mortality calculations (Uniform, Constant, Balducci)
 - Friendly syntax and flexible usage
 - Extensive set of parametric mortality models.
@@ -72,10 +72,10 @@ julia> vbt2001.ultimate[95]  # ultimate vectors only need to be called with the 
  0.24298
 ```
 
-Calculate the force of mortality or survivorship over a range of time:
+Calculate the force of mortality or survival over a range of time:
 
 ```julia
-julia> survivorship(vbt2001.ultimate,30,40) # the survivorship between ages 30 and 40
+julia> survival(vbt2001.ultimate,30,40) # the survival between ages 30 and 40
 0.9894404665434904
 
 julia> decrement(vbt2001.ultimate,30,40) # the decrement between ages 30 and 40
@@ -85,7 +85,7 @@ julia> decrement(vbt2001.ultimate,30,40) # the decrement between ages 30 and 40
 Non-whole periods of time are supported when you specify the assumption (`Constant()`, `Uniform()`, or `Balducci()`) for fractional periods:
 
 ```julia
-julia> survivorship(vbt2001.ultimate,30,40.5,Uniform()) # the survivorship between ages 30 and 40.5
+julia> survival(vbt2001.ultimate,30,40.5,Uniform()) # the survival between ages 30 and 40.5
 0.9887676470262408
 ```
 
@@ -235,7 +235,7 @@ Now some examples with `m`, but could use `g` interchangeably:
 age = 20
 m[20]                 # the mortality rate at age 20
 decrement(m,20,25)    # the five year cumulative mortality rate
-survivorship(m,20,25) # the five year survivorship rate
+survival(m,20,25) # the five year survival rate
 ```
 
 Because of the large number of parameters and the likelihood for confusion, these models:

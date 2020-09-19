@@ -14,7 +14,7 @@ include("get_SOA_table.jl")
 include("parameterized_models.jl")
 
 export MortalityTable,
-    survivorship,
+    survival,
     decrement,
     omega,
     TableMetaData,
