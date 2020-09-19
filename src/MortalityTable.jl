@@ -139,13 +139,13 @@ Base.show(io::IO, ::MIME"text/plain", mt::MortalityTable) = print(
 
 
 """
-    survivorship(mortality_vector,to_age)
-    survivorship(mortality_vector,from_age,to_age)
+    survival(mortality_vector,to_age)
+    survival(mortality_vector,from_age,to_age)
 
-Returns the survivorship through attained age `to_age`. The start of the calculation is either the start of the vector, or attained_age `from_age`. `from_age` and `to_age` need to be Integers. Add a DeathDistribution as the last argument to handle floating point and non-whole ages:
+Returns the survival through attained age `to_age`. The start of the calculation is either the start of the vector, or attained_age `from_age`. `from_age` and `to_age` need to be Integers. Add a DeathDistribution as the last argument to handle floating point and non-whole ages:
 
-    survivorship(mortality_vector,to_age,::DeathDistribution)
-    survivorship(mortality_vector,from_age,to_age,::DeathDistribution)
+    survival(mortality_vector,to_age,::DeathDistribution)
+    survival(mortality_vector,from_age,to_age,::DeathDistribution)
 
 If given a negative `to_age`, it will return `1.0`. Aside from simplifying the code, this makes sense as for something to exist in order to decrement in the first place, it must have existed and surived to the point of  being able to be decremented.
 
@@ -153,28 +153,28 @@ If given a negative `to_age`, it will return `1.0`. Aside from simplifying the c
 ```julia-repl
 julia> qs = UltimateMortality([0.1,0.3,0.6,1]);
     
-julia> survivorship(qs,0)
+julia> survival(qs,0)
 1.0
-julia> survivorship(qs,1)
+julia> survival(qs,1)
 0.9
 
-julia> survivorship(qs,1,1)
+julia> survival(qs,1,1)
 1.0
-julia> survivorship(qs,1,2)
+julia> survival(qs,1,2)
 0.7
 
-julia> survivorship(qs,0.5,Uniform())
+julia> survival(qs,0.5,Uniform())
 0.95
 ```
 """
-function survivorship(v, to_age)
-    return survivorship(v, firstindex(v), to_age)
+function survival(v, to_age)
+    return survival(v, firstindex(v), to_age)
 end
-function survivorship(v, to_age, dd::DeathDistribution)
-    return survivorship(v, firstindex(v), to_age, dd)
+function survival(v, to_age, dd::DeathDistribution)
+    return survival(v, firstindex(v), to_age, dd)
 end
 
-function survivorship(v::T, from_age::Int, to_age::Int) where {T <: AbstractArray}
+function survival(v::T, from_age::Int, to_age::Int) where {T <: AbstractArray}
     if from_age == to_age
         return 1.0
     else
@@ -185,13 +185,13 @@ function survivorship(v::T, from_age::Int, to_age::Int) where {T <: AbstractArra
     end
 end
 
-function survivorship(v::T, from_age, to_age, dd::DeathDistribution) where {T <: AbstractArray}
-    # calculate the survivorship for the rounded ages, and then the high and low high_residual
+function survival(v::T, from_age, to_age, dd::DeathDistribution) where {T <: AbstractArray}
+    # calculate the survival for the rounded ages, and then the high and low high_residual
     age_low = ceil(Int, from_age)
     age_high = floor(Int, to_age)
 
     #if from_age and to_age are fractional parts of the same attained age, then age_high will round down to 
-    # be below the rounded-up age_low. This line will short circuit the rest and just return the fractional year survivorship
+    # be below the rounded-up age_low. This line will short circuit the rest and just return the fractional year survival
     age_high < age_low && return 1 - decrement_partial_year(v, from_age, to_age, dd)
     
     
@@ -263,10 +263,10 @@ julia> decrement(qs,0.5,Uniform())
 0.05
 ```
 """
-decrement(v,to_age) = 1 .- survivorship(v, to_age)
-decrement(v,to_age,dd::DeathDistribution) = 1 .- survivorship(v, to_age, dd)  
-decrement(v,from_age,to_age) = 1 .- survivorship(v, from_age, to_age) 
-decrement(v,from_age,to_age,dd::DeathDistribution) = 1 .- survivorship(v, from_age, to_age, dd) 
+decrement(v,to_age) = 1 .- survival(v, to_age)
+decrement(v,to_age,dd::DeathDistribution) = 1 .- survival(v, to_age, dd)  
+decrement(v,from_age,to_age) = 1 .- survival(v, from_age, to_age) 
+decrement(v,from_age,to_age,dd::DeathDistribution) = 1 .- survival(v, from_age, to_age, dd) 
 
 
 """

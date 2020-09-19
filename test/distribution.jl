@@ -15,8 +15,8 @@
 
         # test whole ages with assumption argument
         for method in methods
-            @test survivorship(soa_mort, 0, 1, method) == 0.88
-            @test survivorship(soa_mort, 1, method) == 0.88
+            @test survival(soa_mort, 0, 1, method) == 0.88
+            @test survival(soa_mort, 1, method) == 0.88
             @test decrement(soa_mort, 0, 1, method) == 0.12
             @test decrement(soa_mort, 1, method) == 0.12
 
@@ -28,7 +28,7 @@
         # test fractional ages
         for i = 1:length(methods)
             for (t, target) in time_targets
-                @test round(survivorship(soa_mort, t, methods[i]), digits = 4) ==
+                @test round(survival(soa_mort, t, methods[i]), digits = 4) ==
                       target[i]
 
                 @test round(MortalityTables.decrement_partial_year(soa_mort, 0, t, methods[i]),
@@ -42,7 +42,7 @@
         # test time zero when given distribution of deaths
         for m in methods
             @test decrement(soa_mort, 0, m) == 0.0
-            @test survivorship(soa_mort, 0, m) == 1.0
+            @test survival(soa_mort, 0, m) == 1.0
         end
     end
     @testset "Multi-year examples" begin
@@ -67,7 +67,7 @@
         # test fractional ages
         for i = 1:length(methods)
             for (t, target) in time_targets
-                @test round(survivorship(mort, t, methods[i]), digits = 4) ==
+                @test round(survival(mort, t, methods[i]), digits = 4) ==
                       target[i]
                 @test round(decrement(mort, t, methods[i]), digits = 4) ==
                       round(1 - target[i], digits = 4)
@@ -78,17 +78,17 @@
     @testset "Error when asking for a fractional without assumption" begin
         mort = UltimateMortality([0.20, 0.50])
         @test_throws MethodError decrement(mort, 0, 1, 1.5)
-        @test_throws MethodError survivorship(mort, 0, 1, 1.5)
+        @test_throws MethodError survival(mort, 0, 1, 1.5)
     end
 
     @testset "Issue #60 - starting with non-integer ages" begin
         m = UltimateMortality([0.5 for i in 1:8])
         
-        @test survivorship(m,1,2) ≈ 0.5
-        @test survivorship(m,1.5,2.5,Constant()) ≈ 0.5
-        @test survivorship(m,1.5,3.5,Constant()) ≈ 0.25
-        @test survivorship(m,1.5,1.5 + eps(),Constant()) ≈ 1.0
-        @test survivorship(m,1,1 + eps(),Constant()) ≈ 1.0
+        @test survival(m,1,2) ≈ 0.5
+        @test survival(m,1.5,2.5,Constant()) ≈ 0.5
+        @test survival(m,1.5,3.5,Constant()) ≈ 0.25
+        @test survival(m,1.5,1.5 + eps(),Constant()) ≈ 1.0
+        @test survival(m,1,1 + eps(),Constant()) ≈ 1.0
 
     end
 
