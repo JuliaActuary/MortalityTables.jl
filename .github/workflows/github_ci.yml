@@ -19,7 +19,7 @@ jobs:
           - x64
         include:
           - version: 'nightly'
-            julia-arch: x64
+            arch: x64
             os: ubuntu-latest
             experimental: true
     steps:
