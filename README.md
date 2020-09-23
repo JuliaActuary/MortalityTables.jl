@@ -166,7 +166,7 @@ The three assumptions are:
 - `Uniform()` which assumes an increasing force of mortality throughout the year.
 - `Constant()` which assumes a level force of mortality throughout the year.
 - `Balducci()` which assumes a decreasing force of mortality over the year. It seems [to
-be for](https://www.soa.org/globalassets/assets/library/research/actuarial-research-clearing-house/1978-89/1988/arch-1/arch88v17.pdf) making it easier to calculate successive months by hand.
+be for making it easier](https://www.soa.org/globalassets/assets/library/research/actuarial-research-clearing-house/1978-89/1988/arch-1/arch88v17.pdf) to calculate successive months by hand rather than any theoretical basis.
 
 ## Some Batteries Included
 
@@ -238,13 +238,12 @@ decrement(m,20,25)    # the five year cumulative mortality rate
 survival(m,20,25) # the five year survival rate
 ```
 
-Because of the large number of parameters and the likelihood for confusion, these models:
-
-- Are not exported from the package, so you need to call them by prefixing with `MortalityTables`. 
+### Some notes:
+- Because of the large number of models and the likelihood for overlap with other things (e.g. `Quadratic` or `Weibull` would be expected to be found in other contexts as well), these models Are not exported from the package, so you need to call them by prefixing with `MortalityTables`. 
   - e.g. : `MortalityTables.Kostaki()`
-- Are keyword arguments rather than positional, like this: `MortalityTables.Gompertz(a=0.01,b=0.2)`
-- Have default values for the arguments, so they can be called without args like this: `MortalityTables.Gompertz()`.
-  - See the help text for what the default values are.
+- Because of the large number of parameters for the models, the arguments are keyword rather than positional: `MortalityTables.Gompertz(a=0.01,b=0.2)`
+- The models have default values, so they can be called without args like this: `MortalityTables.Gompertz()`.
+  - See the help text for what the default values are: `?Gompertz`
 
 ## Adding more tables
 
