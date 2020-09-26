@@ -1,8 +1,9 @@
 using MortalityTables
 using Test
 using JSON
+using CSV
 
-include("CSVs.jl")
+include("CSV.jl")
 include("basic.jl")
 include("XTbML.jl")
 include("parameterized_models.jl")

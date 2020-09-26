@@ -1,12 +1,14 @@
 """ 
-    readcsv(path)
+    MortalityTable(CSV.File)
 
-Read and parse a CSV file in the SOA's usual CSV format. 
+Read and parse a CSV file in the SOA's usual CSV format. You must import and use CSV.jl before calling this function.
 
 # Examples
 
 ```julia-repl
-julia> readcsv("path/to/table.csv")
+julia> path = "path/to/table.csv"
+julia> file = CSV.File(path,header=false) # no real header in the file
+julia> MortalityTable(file)
 MortalityTable (Insured Lives Mortality):
    Name:
        2015 VBT Female Non-Smoker RR50 ALB
@@ -20,13 +22,28 @@ MortalityTable (Insured Lives Mortality):
        https://mort.soa.org/ViewTable.aspx?&TableIdentity=3209
    Description:
        2015 VBT Relative Risk Table - Female, 50% Non-Smoker, Age Last Birthday, Select
+```
 
-
+And in one line: 
+```julia-repl
+julia> MortalityTables.MortalityTable(CSV.File( "path/to/table.csv",header=false))
+MortalityTable (Insured Lives Mortality):
+   Name:
+       2015 VBT Female Non-Smoker RR50 ALB
+   Fields: 
+       (:select, :ultimate, :metadata)
+   Provider:
+       American Academy of Actuaries along with the Society of Actuaries
+   mort.SOA.org ID:
+       3209
+   mort.SOA.org link:
+       https://mort.soa.org/ViewTable.aspx?&TableIdentity=3209
+   Description:
+       2015 VBT Relative Risk Table - Female, 50% Non-Smoker, Age Last Birthday, Select
 ```
 
 """
-function readcsv(path)
-	lines = CSV.File(path,silencewarnings=true,header=false)
+function MortalityTable(lines::CSV.File)
 	#what lines the table starts at
 	table_starts = findall(line -> ~ismissing(line[1]) && line[1] == "Row\\Column",lines) .+ 1
 
@@ -47,7 +64,6 @@ function readcsv(path)
 		content_type = get(raw_meta,"Content Type:",nothing),
 		description = get(raw_meta,"Table Description:",nothing),
 		comments = get(raw_meta,"Comments:",nothing),
-		source_path = path,
 	)
 
 # 	scale = get(raw_meta,"Scaling Factor:",nothing)
