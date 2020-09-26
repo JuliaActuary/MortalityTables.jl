@@ -78,16 +78,40 @@ function readcsv(path)
 		end
 		
 		ult = UltimateMortality(ult_rates,start_age=Parsers.parse(Int,lines[ult_start][1]))
+
+		ult_end_age = lastindex(ult)
 		
 		
 		sel_start, sel_end = table_starts[1],table_ends[1]
-		sel_rates 	= [
-			ismissing(lines[r][c]) ? missing : lines[r][c] for r in sel_start:sel_end, c in 2:length(lines[sel_start])
-			
-			]
-		sel = SelectMortality(sel_rates,ult,start_age=Parsers.parse(Int,lines[sel_start][1]))
+
+		sel_start_age = parsemaybe(Int,lines[sel_start][1])
+		sel_rates = OffsetArray(
+			map(sel_start:sel_end) do r
+				start_age = sel_start_age + r - sel_start
+				sel_end_age = length(lines[sel_start]) + start_age - 2
+				while ismissing(lines[r][sel_end_age - start_age + 2])
+					sel_end_age -= 1
+				end
+					
+				age_range = start_age:max(ult_end_age,sel_end_age)
+				rates = map(age_range) do age
+					c = age - start_age + 2
+					if age > sel_end_age 
+						return ult[age]
+					else
+						return parsemaybe(Float64,lines[r][c])
+					end
+				end
+				
+				return OffsetArray(
+					rates,
+					start_age - 1
+				)
+			end,
+			sel_start_age - 1
+		)
 		
-		return MortalityTable(sel,ult,metadata=d)
+		return MortalityTable(sel_rates,ult,metadata=d)
 
 	end
 
@@ -97,8 +121,13 @@ end
 function last_values_line(lines,startline)
 	for i in startline:lastindex(lines)
 		if ismissing(lines[i][1])
-			return i
+			return i - 1
 		end
 	end
 	return lastindex(lines)
 end
+
+# because of the poor standardization of the CSV formatted tables from mort.SOA.org,
+# sometimes the value comes through as a string, sometimes as a number when CSV.jl parses it
+parsemaybe(t,x) = typeof(x) <: AbstractString ? Parsers.parse(t,x) : x
+
