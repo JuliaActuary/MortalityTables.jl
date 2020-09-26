@@ -142,7 +142,7 @@ Loads the [XtbML](https://mort.soa.org/About.aspx) (the SOA XML data format for 
 """
 function tables(dir = nothing)
     if isnothing(dir)
-        table_dir = joinpath(dirname(pathof(MortalityTables)), "tables", "SOA")
+        table_dir = joinpath(pkgdir(MortalityTables),"src", "tables", "SOA")
     else
         table_dir = dir
     end
