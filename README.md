@@ -24,7 +24,7 @@ A Julia package for working with MortalityTables. Has:
   - [Bundled Tables](#bundled-tables)
   - [mort.SOA.org Tables](#mortsoaorg-tables)
   - [From CSV](#from-csv)
-  - [From XTbML](#from-XTbML)\
+  - [From XTbML](#from-XTbML)
   - [Custom Tables](#custom-tables)
 - [Parameterized Models](#parameterized-models)
 
