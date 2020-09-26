@@ -26,7 +26,7 @@ MortalityTable (Insured Lives Mortality):
 
 """
 function readcsv(path)
-	lines = CSV.File(path,silencewarnings=true,select=[1,2],header=false)
+	lines = CSV.File(path,silencewarnings=true,header=false)
 	two_cols = [(x[1],x[2]) for x in lines]
 
 
@@ -69,7 +69,7 @@ function readcsv(path)
 		
 		ult = UltimateMortality(ult_rates,start_age=Parsers.parse(Int,lines[ult_start][1]))
 		
-		return MortalityTable(ult,d)
+		return MortalityTable(ult; metadata=d)
 	else 
 		# select and ultimate
 		ult_start, ult_end = table_starts[2],table_ends[2]
@@ -82,7 +82,7 @@ function readcsv(path)
 		
 		sel_start, sel_end = table_starts[1],table_ends[1]
 		sel_rates 	= [
-			ismissing(lines[r][c]) ? missing : Parsers.parse(Float64,lines[r][c]) for r in sel_start:sel_end, c in 2:length(lines[1])
+			ismissing(lines[r][c]) ? missing : lines[r][c] for r in sel_start:sel_end, c in 2:length(lines[sel_start])
 			
 			]
 		sel = SelectMortality(sel_rates,ult,start_age=Parsers.parse(Int,lines[sel_start][1]))
@@ -92,4 +92,13 @@ function readcsv(path)
 	end
 
 
+end
+
+function last_values_line(lines,startline)
+	for i in startline:lastindex(lines)
+		if ismissing(lines[i][1])
+			return i
+		end
+	end
+	return lastindex(lines)
 end
