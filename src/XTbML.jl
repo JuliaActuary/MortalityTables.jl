@@ -15,7 +15,7 @@ end
 # get potentially missing value out of dict
 function get_and_parse(dict, key)
     try
-        return val = parse(Float64, dict[key])
+        return val = Parsers.parse(Float64, dict[key])
     catch y
         if isa(y, KeyError)
             return val = missing
@@ -57,20 +57,20 @@ function parseXTbMLTable(x, path)
         # parsed into a vector of tables
         sel = map(x["XTbML"]["Table"][1]["Values"]["Axis"]) do ai
             (
-                issue_age = parse(Int, ai[:t]),
-                rates = [(duration =parse(Int, aj[:t]),rate =get_and_parse(aj, "")) for aj in ai["Axis"]["Y"] if !ismissing(get_and_parse(aj,""))]
+                issue_age = Parsers.parse(Int, ai[:t]),
+                rates = [(duration =Parsers.parse(Int, aj[:t]),rate =get_and_parse(aj, "")) for aj in ai["Axis"]["Y"] if !ismissing(get_and_parse(aj,""))]
             )
         end
 
         ult = map(x["XTbML"]["Table"][2]["Values"]["Axis"]["Y"]) do ai 
-            (age  = parse(Int, ai[:t]), rate = get_and_parse(ai, ""),)
+            (age  = Parsers.parse(Int, ai[:t]), rate = get_and_parse(ai, ""),)
         end
 
     else
         # a table without select period will just have one set of values
 
         ult = map(x["XTbML"]["Table"]["Values"]["Axis"]["Y"]) do ai
-            (age = parse(Int, ai[:t]), 
+            (age = Parsers.parse(Int, ai[:t]), 
                 rate = get_and_parse(ai, ""))
         end
 

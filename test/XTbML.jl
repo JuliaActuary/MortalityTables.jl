@@ -6,7 +6,7 @@
         @test g(d,:a) == 1.2
         @test ismissing(g(d,:b))
         @test ismissing(g(d,:b))
-        @test_throws ArgumentError g(d,:c)
+        @test_throws Exception g(d,:c)
 
     end
     
