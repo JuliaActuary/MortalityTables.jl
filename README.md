@@ -20,8 +20,12 @@ A Julia package for working with MortalityTables. Has:
   - [Quickly access and compare tables](#quickky-access-and-compare-tables)
   - [Scaling and capping rates](#scaling-and-capping-rates)
 - [Fractional Years](#fractional-years)
-- [Tables]
-  -[Bundled Tables]
+- [Tables](#Tables)
+  - [Bundled Tables](#bundled-tables)
+  - [mort.SOA.org Tables](#mortsoaorg-tables)
+  - [From CSV](#from-csv)
+  - [From XTbML](#from-XTbML)\
+  - [Custom Tables](#custom-tables)
 - [Parameterized Models](#parameterized-models)
 
 
