@@ -1,0 +1,109 @@
+Table Name:,"1980 CET - Male Nonsmoker, ALB"
+Table Identity:,31
+Provider Domain:,soa.org
+Provider Name:,"Robert J. Johansen, FSA"
+Table Reference:,"“Report of the Task Force on Smoker/Nonsmoker Mortality”, Transactions Society of Actuaries - 1982 Reports, Society of Actuaries (1982) p. 386. Accessed: February, 2013 from http://www.soa.org/library/research/transactions-reports-of-mortality-moribidity-and-experience/1980-89/1982/january/tsr8210.pdf, p. 42"
+Content Type:,CSO / CET
+Table Description:,1980 Commissioners Extended Term (CET) Table - Male Nonsmoker. Basis: Age Last Birthday. Minimum Age: 15.  Maximum Age: 99
+EffDate:,
+Comments:,"Study Data: The exposure period for the underlying data is from Society of Actuary (SOA) data submissions for 1970 through 1975 policy anniversaries. All war deaths were excluded. Unlike the 1958 Commissioners Standard Ordinary (CSO) table, policies issued on a nonmedical basis were included due to the trend in writing larger proportions of nonmedical business and to provide adequate data for a separate female table. Methodology: Derived from Smoker/Nonsmoker 1980 CET Tables on age nearest birthday basis (See SOA Table Identities 32 and 34) in the same way that the 1980 CSO age nearest birthday basis were converted to and age last birthday basis: [q(x) + (1-q(x))*q(x+1)]/[2-q(x)] . A uniform distribution of deaths is assumed. Data Transcription Errors: None. Data Certified: 02/2013. As specified in The Actuary of January 1987, page 3, there is a discrepancy between Appendix E and Appendix F rates for ANB Male Nonsmoker age 71 in the TSA 1982 Reports. This Table 31 shows the ALB rates as derived from the Appendix E rates. Differences are small: Appendix E rates are 47.37 and 52.51 while Appendix F rates are 47.75 and 52.91. NAIC has agreed that either values are acceptable."
+Keywords:,"Aggregate,CSO/CET,United States of America"
+
+Table # ,1
+Table Description:,1980 Commissioners Extended Term (CET) Table - Male Nonsmoker. Basis: Age Last Birthday. Minimum Age: 15.  Maximum Age: 99
+Nation:,United States of America
+Scaling Factor:,0
+Data Type:,Floating Point
+"Row, Column (if applicable)->id:",Age
+"Row, Column (if applicable)->ScaleType:",Age
+"Row, Column (if applicable)->AxisName:",Age
+"Row, Column (if applicable)->MinScaleValue:",15
+"Row, Column (if applicable)->MaxScaleValue:",99
+"Row, Column (if applicable)->Increment:",1
+
+Row\Column,1
+15,0.00211
+16,0.00223
+17,0.00232
+18,0.00238
+19,0.00242
+20,0.00243
+21,0.00241
+22,0.00238
+23,0.00234
+24,0.00230
+25,0.00225
+26,0.00222
+27,0.00220
+28,0.00219
+29,0.00219
+30,0.00220
+31,0.00223
+32,0.00227
+33,0.00233
+34,0.00240
+35,0.00248
+36,0.00257
+37,0.00269
+38,0.00282
+39,0.00296
+40,0.00313
+41,0.00333
+42,0.00358
+43,0.00385
+44,0.00415
+45,0.00449
+46,0.00485
+47,0.00524
+48,0.00567
+49,0.00614
+50,0.00667
+51,0.00728
+52,0.00798
+53,0.00879
+54,0.00969
+55,0.01069
+56,0.01178
+57,0.01294
+58,0.01422
+59,0.01567
+60,0.01728
+61,0.01907
+62,0.02114
+63,0.02348
+64,0.02608
+65,0.02893
+66,0.03201
+67,0.03531
+68,0.03890
+69,0.04287
+70,0.04737
+71,0.05251
+72,0.05844
+73,0.06514
+74,0.07251
+75,0.08039
+76,0.08871
+77,0.09741
+78,0.10654
+79,0.11638
+80,0.12724
+81,0.13943
+82,0.15317
+83,0.16840
+84,0.18483
+85,0.20209
+86,0.21993
+87,0.23811
+88,0.25653
+89,0.27546
+90,0.29517
+91,0.31611
+92,0.33907
+93,0.36628
+94,0.40278
+95,0.45742
+96,0.54729
+97,0.70330
+98,0.96870
+99,1.00000

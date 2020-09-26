@@ -1,0 +1,145 @@
+Table Name:,"2012 IAM Basic Table – Female, ANB"
+Table Identity:,2582
+Provider Domain:,soa.org
+Provider Name:,Susie Lee
+Table Reference:,"Life Experience Subcommittee, “2012 Individual Annuity Reserving Table”, Report from the Joint American Academy of Actuaries/Society of Actuaries Payout Annuity Table Team, (2011) Exhibit I. Accessed: December 2013 from http://www.actuary.org/files/publications/Payout_Annuity_Report_09-28-11.pdf."
+Content Type:,Annuitant Mortality
+Table Description:,2012 Individual Annuity Mortality Basic Table – Female. Basis: Age Nearest Birthday. Minimum Age: 0. Maximum Age: 120
+EffDate:,
+Comments:,"Study Data: Data and information from the mortality experience analysis, as described in the Society of Actuaries 2000-2004 Individual Payout Annuity Experience Report, dated April 2009 was relied upon. The 2000-2004 Payout Annuity Mortality Experience Study includes experience for immediate annuities, annuitizations and life settlement options of individual life insurance and annuity death claims. The experience analyzed excluded substandard annuities, structured settlement annuities and variable payout annuities. The experience represented 16 companies over the exposure period. Methodology: Preliminary table developed using confidence intervals by applying the P-Spline methodology, the computer model for which was provided by the Continuous Mortality Investigation Bureau. Data smoothing was provided by means of the penalized splines and the log mean values of qx within the fitted region generated. The P-Spline application breaks down as data becomes limited and less credible, which was the case with the underlying younger and older age experience. In order to develop values for ages below 50, the 1994 GAM table (See SOA Table Identities 832-835) was projected to 2002 using projection Scale AA (See SOA Table Identities 923 and 924) for ages 1 through 45, and graded to the graduated (experience-based) rates at age 65. The grading was done such that the mortality rates have a constant percentage increase from age 50 to age 65. Age 0 was set equal to four times the age 1 rate, which was consistent with the approach taken for developing the age 0 mortality for the 2008 VBT (See SOA Table Identities 996-1004).  For the higher ages, graduated experience data rates up to age 95 were used and then Kannisto extrapolated rates for ages 96 and above. The result of these efforts was a 2002 experience table. The next step was to project this table with improvement factors to 2012 (See SOA Table Identities 2583 and 2584). Mortality at the oldest ages capped at rate of 0.400 rather than the 0.450 used in the 2008 VBT. The decision to use 0.400 rather than 0.450 was based on information presented at the Society of Actuaries 2011 Living to 100 Symposium. The table that was thus produced represented a 2002 experience table. The next step was to project this with improvement factors to 2012. The new improvement scale developed was Projection Scale G2 (See SOA Table Identities 2583 and 2584). Data Transcription Errors: None. Data Certified: 01/2013"
+Keywords:,"Aggregate,Annuitant Mortality,United States of America"
+
+Table # ,1
+Table Description:,2012 Individual Annuity Mortality Basic Table – Female. Basis: Age Nearest Birthday. Minimum Age: 0. Maximum Age: 120
+Nation:,United States of America
+Scaling Factor:,0
+Data Type:,Floating Point
+"Row, Column (if applicable)->id:",Age
+"Row, Column (if applicable)->ScaleType:",Age
+"Row, Column (if applicable)->AxisName:",Age
+"Row, Column (if applicable)->MinScaleValue:",0
+"Row, Column (if applicable)->MaxScaleValue:",120
+"Row, Column (if applicable)->Increment:",1
+
+Row\Column,1
+0,0.001801
+1,0.00045
+2,0.000287
+3,0.000199
+4,0.000152
+5,0.000139
+6,0.00013
+7,0.000122
+8,0.000105
+9,9.8E-05
+10,9.4E-05
+11,9.6E-05
+12,0.000105
+13,0.00012
+14,0.000146
+15,0.000174
+16,0.000199
+17,0.00022
+18,0.000234
+19,0.000245
+20,0.000253
+21,0.00026
+22,0.000266
+23,0.000272
+24,0.000275
+25,0.000277
+26,0.000284
+27,0.00029
+28,0.0003
+29,0.000313
+30,0.000333
+31,0.000357
+32,0.000375
+33,0.00039
+34,0.000405
+35,0.000424
+36,0.000447
+37,0.000476
+38,0.000514
+39,0.00056
+40,0.000613
+41,0.000667
+42,0.000723
+43,0.000774
+44,0.000823
+45,0.000866
+46,0.000917
+47,0.000983
+48,0.001072
+49,0.001168
+50,0.00129
+51,0.001453
+52,0.001622
+53,0.001792
+54,0.001972
+55,0.002166
+56,0.002393
+57,0.002666
+58,0.003
+59,0.003393
+60,0.003844
+61,0.004352
+62,0.004899
+63,0.005482
+64,0.006118
+65,0.006829
+66,0.007279
+67,0.007821
+68,0.008475
+69,0.009234
+70,0.010083
+71,0.011011
+72,0.01203
+73,0.013154
+74,0.014415
+75,0.015869
+76,0.017555
+77,0.0195
+78,0.021758
+79,0.024412
+80,0.027579
+81,0.031501
+82,0.036122
+83,0.041477
+84,0.047589
+85,0.054441
+86,0.061972
+87,0.070155
+88,0.078963
+89,0.088336
+90,0.098197
+91,0.108323
+92,0.119188
+93,0.131334
+94,0.145521
+95,0.162722
+96,0.18212
+97,0.199661
+98,0.217946
+99,0.236834
+100,0.256357
+101,0.283802
+102,0.304716
+103,0.325819
+104,0.346936
+105,0.367898
+106,0.387607
+107,0.4
+108,0.4
+109,0.4
+110,0.4
+111,0.4
+112,0.4
+113,0.4
+114,0.4
+115,0.4
+116,0.4
+117,0.4
+118,0.4
+119,0.4
+120,0.4

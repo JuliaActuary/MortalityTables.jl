@@ -1,0 +1,124 @@
+Table Name:,"1980 CSO – Female, ALB"
+Table Identity:,35
+Provider Domain:,soa.org
+Provider Name:,Robert J. Johansen
+Table Reference:,"Committee to Recommend New Mortality Tables for Valuation, “1980 CSO and 1980 CET Mortality Tables on an Age Last Birthday Basis”, Transactions Society of Actuaries Vol.  XXXIII, Society of Actuaries (1981) p. 673. Accessed: February, 2013 from http://www.soa.org/Library/Research/Transactions-Of-Society-Of-Actuaries/1981/January/tsa81v3324.pdf, p. 3."
+Content Type:,CSO/CET
+Table Description:,1980 Commissioners Standard Ordinary (CSO) – Female. Basis: Age Last Birthday. Minimum Age: 0. Maximum Age: 99.
+EffDate:,
+Comments:,Study Data: Derived from corresponding age nearest birthday tables (See SOA Table Identities 36 and 42). Methodology: The following formula was employed to convert the age nearest birthday rates to an age last birthday basis:  [q(x) + (1-q(x))*q(x+1)]/[2-q(x)] . A uniform distribution of deaths is assumed. Data Transcription Errors: None. Data Certified: 02/2013.
+Keywords:,"Aggregate,CSO/CET,United States of America"
+
+Table # ,1
+Table Description:,1980 Commissioners Standard Ordinary (CSO) – Female. Basis: Age Last Birthday. Minimum Age: 0. Maximum Age: 99
+Nation:,United States of America
+Scaling Factor:,0
+Data Type:,Floating Point
+"Row, Column (if applicable)->id:",Age
+"Row, Column (if applicable)->ScaleType:",Age
+"Row, Column (if applicable)->AxisName:",Age
+"Row, Column (if applicable)->MinScaleValue:",0
+"Row, Column (if applicable)->MaxScaleValue:",99
+"Row, Column (if applicable)->Increment:",1
+
+Row\Column,1
+0,0.00188
+1,0.00084
+2,0.00080
+3,0.00078
+4,0.00077
+5,0.00075
+6,0.00073
+7,0.00071
+8,0.00070
+9,0.00069
+10,0.00068
+11,0.00070
+12,0.00073
+13,0.00077
+14,0.00082
+15,0.00087
+16,0.00092
+17,0.00096
+18,0.00100
+19,0.00103
+20,0.00106
+21,0.00108
+22,0.00110
+23,0.00112
+24,0.00115
+25,0.00117
+26,0.00120
+27,0.00124
+28,0.00128
+29,0.00132
+30,0.00137
+31,0.00142
+32,0.00147
+33,0.00154
+34,0.00161
+35,0.00170
+36,0.00182
+37,0.00196
+38,0.00213
+39,0.00232
+40,0.00253
+41,0.00275
+42,0.00298
+43,0.00320
+44,0.00344
+45,0.00368
+46,0.00392
+47,0.00419
+48,0.00448
+49,0.00479
+50,0.00513
+51,0.00550
+52,0.00592
+53,0.00638
+54,0.00685
+55,0.00733
+56,0.00780
+57,0.00825
+58,0.00870
+59,0.00920
+60,0.00980
+61,0.01054
+62,0.01149
+63,0.01263
+64,0.01392
+65,0.01529
+66,0.01671
+67,0.01813
+68,0.01959
+69,0.02123
+70,0.02316
+71,0.02553
+72,0.02847
+73,0.03199
+74,0.03605
+75,0.04056
+76,0.04545
+77,0.05068
+78,0.05632
+79,0.06257
+80,0.06967
+81,0.07783
+82,0.08725
+83,0.09790
+84,0.10962
+85,0.12229
+86,0.13582
+87,0.15018
+88,0.16538
+89,0.18154
+90,0.19885
+91,0.21768
+92,0.23869
+93,0.26341
+94,0.29523
+95,0.34102
+96,0.41388
+97,0.53724
+98,0.74396
+99,1.00000

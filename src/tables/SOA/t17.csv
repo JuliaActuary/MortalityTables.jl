@@ -1,0 +1,125 @@
+Table Name:,"1980 CSO Basic Table – Female, ANB"
+Table Identity:,17
+Provider Domain:,soa.org
+Provider Name:,Roger Scott Lumsden
+Table Reference:,"“Report of the Special Committee to Recommend New Mortality Tables For Valuation”, Transactions of the Society of Actuaries, Vol. XXXIII, Society of Actuaries. (1981) p. 632. Accessed: February, 2013 from http://www.soa.org/Library/Research/Transactions-Of-Society-Of-Actuaries/1981/January/tsa81v3323.pdf, p. 20"
+Content Type:,CSO / CET
+Table Description:,1980 Commissioners Standard Ordinary (CSO) Basic Table – Female (also referred to as Table K(F)). Basis: Age Nearest Birthday. Minimum Age: 0. Maximum Age: 100. 
+EffDate:,
+Comments:,"Study Data: Prior to this table, an age setback approach was commonly used for female mortality for valuation purposes. However, a comparison of graduated mortality rates from the 1965-70 Ultimate Basic Tables showed that a single age setback produces rates that differ substantially by age. Adequate female mortality experience was felt available, giving greater credibility to the creation of separate female tables. The exposure period for the data is from Society of Actuary (SOA) data submissions for 1970 through 1975 policy anniversaries. All war deaths were excluded. Unlike the 1958 Commissioners Standard Ordinary (CSO) table, policies issued on a nonmedical basis were included due to the trend in writing larger proportions of nonmedical business and to provide adequate data for a separate female table. Methodology: As was done for the 1958 CSO Table, the first five policy years of experience were eliminated from the data (except for ages 0-4). This was done to reduce the effect on the mortality rates of differences in intercompany underwriting rules, nonmedical limits and suicide and incontestability provisions and, more importantly, to reflect conservatism by eliminating the favorable select experience of the early policy years. Quinquennial pivotal values were developed by summing deaths and exposures. Individual age rates were then developed by a Jenkins fifth-difference modified osculatory interpolation formula with fourth differences at the endpoints set equal to zero. The rates at ages 85 and over for the Male Table and ages 84 and over for the Female Table, were adjusted to grade smoothly into a rate of 1.000 at age 100. Data for age 0 was relatively scant thus rates for that age were developed by relating them to the age 1 rates. Ratios were determined from the 1958 CSO Table of the age 0 rates to the age 1 rates. After these adjustments, rates were further modified to produce actual-to-expected ratios of 1.000 for the entire table; the corresponding adjustment factors used were 1.0077 for the Male Table and 0.9993 for the Female Table. Data Transcription Errors: None. Data Certified: 02/2013."
+Keywords:,"Aggregate,CSO/CET,United States of America"
+
+Table # ,1
+Table Description:,1980 Commissioners Standard Ordinary (CSO) Basic Table – Female. Basis: Age Nearest Birthday. Minimum Age: 0. Maximum Age: 100. 
+Nation:,United States of America
+Scaling Factor:,0
+Data Type:,Floating Point
+"Row, Column (if applicable)->id:",Age
+"Row, Column (if applicable)->ScaleType:",Age
+"Row, Column (if applicable)->AxisName:",Age
+"Row, Column (if applicable)->MinScaleValue:",0
+"Row, Column (if applicable)->MaxScaleValue:",100
+"Row, Column (if applicable)->Increment:",1
+
+Row\Column,1
+0,0.00245
+1,0.00042
+2,0.00036
+3,0.00034
+4,0.00032
+5,0.00030
+6,0.00027
+7,0.00025
+8,0.00023
+9,0.00021
+10,0.00020
+11,0.00020
+12,0.00022
+13,0.00025
+14,0.00029
+15,0.00033
+16,0.00037
+17,0.00041
+18,0.00044
+19,0.00047
+20,0.00048
+21,0.00049
+22,0.00050
+23,0.00051
+24,0.00052
+25,0.00053
+26,0.00054
+27,0.00056
+28,0.00058
+29,0.00060
+30,0.00063
+31,0.00066
+32,0.00069
+33,0.00072
+34,0.00077
+35,0.00082
+36,0.00090
+37,0.00100
+38,0.00112
+39,0.00127
+40,0.00144
+41,0.00162
+42,0.00181
+43,0.00199
+44,0.00218
+45,0.00237
+46,0.00257
+47,0.00277
+48,0.00299
+49,0.00323
+50,0.00350
+51,0.00379
+52,0.00411
+53,0.00448
+54,0.00486
+55,0.00526
+56,0.00565
+57,0.00601
+58,0.00635
+59,0.00670
+60,0.00711
+61,0.00764
+62,0.00833
+63,0.00923
+64,0.01029
+65,0.01145
+66,0.01267
+67,0.01388
+68,0.01506
+69,0.01632
+70,0.01779
+71,0.01960
+72,0.02189
+73,0.02475
+74,0.02815
+75,0.03199
+76,0.03621
+77,0.04072
+78,0.04550
+79,0.05070
+80,0.05656
+81,0.06329
+82,0.07111
+83,0.08014
+84,0.09019
+85,0.10110
+86,0.11276
+87,0.12507
+88,0.13800
+89,0.15155
+90,0.16580
+91,0.18091
+92,0.19720
+93,0.21531
+94,0.23652
+95,0.26338
+96,0.30101
+97,0.35966
+98,0.46234
+99,0.64743
+100,1.00000

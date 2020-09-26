@@ -1,0 +1,145 @@
+Table Name:,"2012 IAM Period Table – Female, ANB"
+Table Identity:,2586
+Provider Domain:,soa.org
+Provider Name:,Susie Lee
+Table Reference:,"Life Experience Subcommittee, “2012 Individual Annuity Reserving Table”, Report from the Joint American Academy of Actuaries/Society of Actuaries Payout Annuity Table Team, (2011) Exhibit I. Accessed: December 2013 from http://www.actuary.org/files/publications/Payout_Annuity_Report_09-28-11.pdf."
+Content Type:,Annuitant Mortality
+Table Description:,2012 Individual Annuity Mortality Period Table – Female. Basis: Age Nearest Birthday. Minimum Age: 0. Maximum Age: 120
+EffDate:,
+Comments:,"Study Data: The 2012 IAM Period Table is the 2012 IAM Basic Table (See SOA Table Identities 2581 and 2582) with the margins as determined by NAIC’s Life Actuarial Task Force (LATF), but without future projection. Methodology: The approach used in determining the margin used in developing the a2000 Table was analyzed and there was found no compelling reason to vary from it. LATF agreed no changes in the approach or level of margin were required. Thus, the resulting margin recommended by LATF is 10% for all ages up to and including 100. The margin then grades down 1% per year for ages 100 until the ultimate mortality cap of 0.40000 is invoked. This results in a margin of zero beginning at age 106 for males and 108 for females. The table omega is 120 where the mortality rate is set to 1.00000. It was determined there was no need to smoothly grade from 0.40000 to 1.00000 as there was little difference on the impact of reserves. Data Transcription Errors Detected: 01/2014. Data Corrected and Certified: 01/2014"
+Keywords:,"Aggregate,Annuitant Mortality,United States of America"
+
+Table # ,1
+Table Description:,2012 Individual Annuity Mortality Period Table – Female. Basis: Age Nearest Birthday. Minimum Age: 0. Maximum Age: 120
+Nation:,United States of America
+Scaling Factor:,0
+Data Type:,Floating Point
+"Row, Column (if applicable)->id:",Age
+"Row, Column (if applicable)->ScaleType:",Age
+"Row, Column (if applicable)->AxisName:",Age
+"Row, Column (if applicable)->MinScaleValue:",0
+"Row, Column (if applicable)->MaxScaleValue:",120
+"Row, Column (if applicable)->Increment:",1
+
+Row\Column,1
+0,0.001621
+1,0.000405
+2,0.000259
+3,0.000179
+4,0.000137
+5,0.000125
+6,0.000117
+7,0.00011
+8,9.5E-05
+9,8.8E-05
+10,8.5E-05
+11,8.6E-05
+12,9.4E-05
+13,0.000108
+14,0.000131
+15,0.000156
+16,0.000179
+17,0.000198
+18,0.000211
+19,0.000221
+20,0.000228
+21,0.000234
+22,0.00024
+23,0.000245
+24,0.000247
+25,0.00025
+26,0.000256
+27,0.000261
+28,0.00027
+29,0.000281
+30,0.0003
+31,0.000321
+32,0.000338
+33,0.000351
+34,0.000365
+35,0.000381
+36,0.000402
+37,0.000429
+38,0.000463
+39,0.000504
+40,0.000552
+41,0.0006
+42,0.00065
+43,0.000697
+44,0.00074
+45,0.00078
+46,0.000825
+47,0.000885
+48,0.000964
+49,0.001051
+50,0.001161
+51,0.001308
+52,0.00146
+53,0.001613
+54,0.001774
+55,0.00195
+56,0.002154
+57,0.002399
+58,0.0027
+59,0.003054
+60,0.00346
+61,0.003916
+62,0.004409
+63,0.004933
+64,0.005507
+65,0.006146
+66,0.006551
+67,0.007039
+68,0.007628
+69,0.008311
+70,0.009074
+71,0.00991
+72,0.010827
+73,0.011839
+74,0.012974
+75,0.014282
+76,0.015799
+77,0.01755
+78,0.019582
+79,0.02197
+80,0.024821
+81,0.028351
+82,0.032509
+83,0.037329
+84,0.04283
+85,0.048997
+86,0.055774
+87,0.06314
+88,0.071066
+89,0.079502
+90,0.088377
+91,0.097491
+92,0.107269
+93,0.118201
+94,0.130969
+95,0.146449
+96,0.163908
+97,0.179695
+98,0.196151
+99,0.21315
+100,0.230722
+101,0.251505
+102,0.273007
+103,0.295086
+104,0.317591
+105,0.340362
+106,0.362371
+107,0.384113
+108,0.4
+109,0.4
+110,0.4
+111,0.4
+112,0.4
+113,0.4
+114,0.4
+115,0.4
+116,0.4
+117,0.4
+118,0.4
+119,0.4
+120,1
