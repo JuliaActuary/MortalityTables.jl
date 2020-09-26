@@ -27,17 +27,17 @@ MortalityTable (Insured Lives Mortality):
 """
 function readcsv(path)
 	lines = CSV.File(path,silencewarnings=true,header=false)
-	two_cols = [(x[1],x[2]) for x in lines]
-
-
-
 	#what lines the table starts at
-	table_starts = findall(line -> ~ismissing(line[1]) && line[1] == "Row\\Column",two_cols) .+ 1
+	table_starts = findall(line -> ~ismissing(line[1]) && line[1] == "Row\\Column",lines) .+ 1
 
 	# Construct MetaData
-
-	raw_meta = Dict(lines[row][1] => lines[row][2] for row in 1:table_starts[1]-1)
-
+	raw_meta = Dict()
+	for line in lines
+		if ismissing(line[1])
+			break
+		end
+		raw_meta[line[1]] = line[2]
+	end
 	
 	d = TableMetaData(
 		name = get(raw_meta,"Table Name:",nothing),
