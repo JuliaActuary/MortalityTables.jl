@@ -7,7 +7,7 @@ Given the id of a `mort.SOA.org` table, grab it and return it as a `MortalityTab
 """
 function get_SOA_table(id::Int)
     path = "https://mort.soa.org/Export.aspx?Type=xml&TableIdentity=$id"
-    r = HTTP.request("GET", path,require_ssl_verification = false)
+    r = HTTP.request("GET", path, require_ssl_verification=false)
 
     # Why skip the first three bytes of the response?
 

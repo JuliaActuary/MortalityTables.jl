@@ -6,7 +6,7 @@
     @test tbl[0] == 0.10139
 
 
-    get_SOA_table!(tables,60029)
+    get_SOA_table!(tables, 60029)
 
     @test tables["Australian Life Tables 1891-1900 Female"] isa MortalityTable
     @test tables["Australian Life Tables 1891-1900 Female"][0] == 0.10139

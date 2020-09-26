@@ -34,7 +34,7 @@ end
 function parseXTbMLTable(x, path)
     md = x["XTbML"]["ContentClassification"]
     name = get(md, "TableName", nothing) |> strip
-    content_type = get(get(md,"ContentType",nothing),"",nothing) |> strip
+    content_type = get(get(md, "ContentType", nothing), "", nothing) |> strip
     id = get(md, "TableIdentity", nothing) |> strip
     provider = get(md, "ProviderName", nothing) |> strip
     reference = get(md, "TableReference", nothing) |> strip
@@ -42,24 +42,22 @@ function parseXTbMLTable(x, path)
     comments = get(md, "Comments", nothing) |> strip
     source_path = path
     d = TableMetaData(
-        name = name,
-        id = id,
-        provider = provider,
-        reference = reference,
-        content_type = content_type,
-        description = description,
-        comments = comments,
-        source_path = source_path,
+        name=name,
+        id=id,
+        provider=provider,
+        reference=reference,
+        content_type=content_type,
+        description=description,
+        comments=comments,
+        source_path=source_path,
     )
 
     if isa(x["XTbML"]["Table"], Vector)
         # for a select and ultimate table, will have multiple tables
         # parsed into a vector of tables
         sel = map(x["XTbML"]["Table"][1]["Values"]["Axis"]) do ai
-            (
-                issue_age = Parsers.parse(Int, ai[:t]),
-                rates = [(duration =Parsers.parse(Int, aj[:t]),rate =get_and_parse(aj, "")) for aj in ai["Axis"]["Y"] if !ismissing(get_and_parse(aj,""))]
-            )
+            (issue_age = Parsers.parse(Int, ai[:t]),
+                rates = [(duration = Parsers.parse(Int, aj[:t]), rate = get_and_parse(aj, "")) for aj in ai["Axis"]["Y"] if !ismissing(get_and_parse(aj, ""))])
         end
 
         ult = map(x["XTbML"]["Table"][2]["Values"]["Axis"]["Y"]) do ai 
@@ -90,16 +88,16 @@ end
 function XTbML_Table_To_MortalityTable(tbl::XTbMLTable)
     ult = UltimateMortality(
                 [v.rate for v in  tbl.ultimate], 
-                start_age = tbl.ultimate[1].age
+                start_age=tbl.ultimate[1].age
             )
 
     ult_omega = lastindex(ult)
 
     if !isnothing(tbl.select)
-        sel =   map(tbl.select) do (issue_age,rates)
+        sel =   map(tbl.select) do (issue_age, rates)
             last_sel_age = issue_age + rates[end].duration - 1
             first_defined_select_age =  issue_age + rates[1].duration - 1
-            last_age = max(last_sel_age,ult_omega)
+            last_age = max(last_sel_age, ult_omega)
             vec = map(issue_age:last_age) do attained_age
                 if attained_age < first_defined_select_age
                     return missing
@@ -111,13 +109,13 @@ function XTbML_Table_To_MortalityTable(tbl::XTbMLTable)
                     end
                 end
             end 
-            return mortality_vector(vec ,start_age=issue_age)
+            return mortality_vector(vec, start_age=issue_age)
         end
-        sel = OffsetArray(sel,tbl.select[1].issue_age - 1)
+        sel = OffsetArray(sel, tbl.select[1].issue_age - 1)
 
-        return MortalityTable(sel, ult, metadata = tbl.d)
+        return MortalityTable(sel, ult, metadata=tbl.d)
     else
-        return MortalityTable(ult, metadata = tbl.d)
+        return MortalityTable(ult, metadata=tbl.d)
     end
 end
 
@@ -140,16 +138,16 @@ end
 
 Loads the [XtbML](https://mort.soa.org/About.aspx) (the SOA XML data format for mortality tables) stored in the given path. If no path is specified, will load the packages in the MortalityTables package directory. To see where your system keeps packages, run `DEPOT_PATH` from a Julia REPL.
 """
-function tables(dir = nothing)
+function tables(dir=nothing)
     if isnothing(dir)
-        table_dir = joinpath(pkgdir(MortalityTables),"src", "tables", "SOA")
+        table_dir = joinpath(pkgdir(MortalityTables), "src", "tables", "SOA")
     else
         table_dir = dir
     end
     tables = []
     @info "Loading built-in Mortality Tables..."
     for (root, dirs, files) in walkdir(table_dir)
-        transducer = opcompose(Filter(x->basename(x)[end - 3:end] == ".xml"), Map(x->readXTbML(joinpath(root, x))))
+        transducer = opcompose(Filter(x -> basename(x)[end - 3:end] == ".xml"), Map(x -> readXTbML(joinpath(root, x))))
         tables = files |> transducer |> tcopy
     end
     # return tables

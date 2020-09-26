@@ -28,14 +28,14 @@
         # test fractional ages
         for i = 1:length(methods)
             for (t, target) in time_targets
-                @test round(survival(soa_mort, t, methods[i]), digits = 4) ==
+                @test round(survival(soa_mort, t, methods[i]), digits=4) ==
                       target[i]
 
                 @test round(MortalityTables.decrement_partial_year(soa_mort, 0, t, methods[i]),
-                    digits = 4) ≈  1 - target[i]
+                    digits=4) ≈  1 - target[i]
 
-                @test round(decrement(soa_mort, t, methods[i]), digits = 4) ==
-                      round(1 - target[i], digits = 4)
+                @test round(decrement(soa_mort, t, methods[i]), digits=4) ==
+                      round(1 - target[i], digits=4)
             end
         end
 
@@ -67,10 +67,10 @@
         # test fractional ages
         for i = 1:length(methods)
             for (t, target) in time_targets
-                @test round(survival(mort, t, methods[i]), digits = 4) ==
+                @test round(survival(mort, t, methods[i]), digits=4) ==
                       target[i]
-                @test round(decrement(mort, t, methods[i]), digits = 4) ==
-                      round(1 - target[i], digits = 4)
+                @test round(decrement(mort, t, methods[i]), digits=4) ==
+                      round(1 - target[i], digits=4)
             end
         end
     end
@@ -84,11 +84,11 @@
     @testset "Issue #60 - starting with non-integer ages" begin
         m = UltimateMortality([0.5 for i in 1:8])
         
-        @test survival(m,1,2) ≈ 0.5
-        @test survival(m,1.5,2.5,Constant()) ≈ 0.5
-        @test survival(m,1.5,3.5,Constant()) ≈ 0.25
-        @test survival(m,1.5,1.5 + eps(),Constant()) ≈ 1.0
-        @test survival(m,1,1 + eps(),Constant()) ≈ 1.0
+        @test survival(m, 1, 2) ≈ 0.5
+        @test survival(m, 1.5, 2.5, Constant()) ≈ 0.5
+        @test survival(m, 1.5, 3.5, Constant()) ≈ 0.25
+        @test survival(m, 1.5, 1.5 + eps(), Constant()) ≈ 1.0
+        @test survival(m, 1, 1 + eps(), Constant()) ≈ 1.0
 
     end
 
