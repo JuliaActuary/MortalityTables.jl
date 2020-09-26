@@ -1,0 +1,130 @@
+Table Name:,"Projection Scale G2 – Male, ANB"
+Table Identity:,2583
+Provider Domain:,soa.org
+Provider Name:,Susie Lee
+Table Reference:,"Life Experience Subcommittee, “2012 Individual Annuity Reserving Table”, Report from the Joint American Academy of Actuaries/Society of Actuaries Payout Annuity Table Team, (2011) Exhibit III. Accessed: December 2013 from http://www.actuary.org/files/publications/Payout_Annuity_Report_09-28-11.pdf."
+Content Type:,Projection Scale
+Table Description:,Mortality Improvement Projection Scale G2- Male.  Basis: Age Nearest Birthday. Minimum Age: 0 Maximum Age: 105
+EffDate:,
+Comments:,"Study Data: In conjunction with development of the 2012 Immediate Annuity Mortality (IAM) Tables (See SOA Table Identities 2581 and 2582), a projection scale for mortality improvement was designed. The projection scale is intended to make allowance for probable future mortality decreases apart from and in addition to safety margins included in the 2012 IAM Tables. Social Security Administration (SSA) data for the period 1990-2006 serve as the basis. Methodology: Subcommittee began with SSA improvement rates for the period 1990-2006, as well as the average improvement rates assumed by the SSA in their 2010 Trustees report for years 2012-2022.  Discussions with SSA actuaries and supported by research and emerging experience, it was determined the SSA improvement for ages 65+ to be too conservative (i.e., low) for an annuity valuation table. Therefore, an additional improvement level of 0.4% for ages 65 to 82 and 0.2% for ages 87+ was added. The adjustment to the improvement was graded from 0.4% to 0.2% between ages 82 and 87. This adjustment was the same for males and females. For younger ages, a simple 1% assumption was made. For older ages, the improvement rates grade to zero at age 105. Data Transcription Errors: None. Data Certified: 12/2013"
+Keywords:,"Aggregate,Projection scale,United States of America"
+
+Table # ,1
+Table Description:,Mortality Improvement Projection Scale G2- Male.  Basis: Age Nearest Birthday. Minimum Age: 0 Maximum Age: 105
+Nation:,United States of America
+Scaling Factor:,0
+Data Type:,Floating Point
+"Row, Column (if applicable)->id:",Age
+"Row, Column (if applicable)->ScaleType:",Age
+"Row, Column (if applicable)->AxisName:",Age
+"Row, Column (if applicable)->MinScaleValue:",0
+"Row, Column (if applicable)->MaxScaleValue:",105
+"Row, Column (if applicable)->Increment:",1
+
+Row\Column,1
+0,0.01
+1,0.01
+2,0.01
+3,0.01
+4,0.01
+5,0.01
+6,0.01
+7,0.01
+8,0.01
+9,0.01
+10,0.01
+11,0.01
+12,0.01
+13,0.01
+14,0.01
+15,0.01
+16,0.01
+17,0.01
+18,0.01
+19,0.01
+20,0.01
+21,0.01
+22,0.01
+23,0.01
+24,0.01
+25,0.01
+26,0.01
+27,0.01
+28,0.01
+29,0.01
+30,0.01
+31,0.01
+32,0.01
+33,0.01
+34,0.01
+35,0.01
+36,0.01
+37,0.01
+38,0.01
+39,0.01
+40,0.01
+41,0.01
+42,0.01
+43,0.01
+44,0.01
+45,0.01
+46,0.01
+47,0.01
+48,0.01
+49,0.01
+50,0.01
+51,0.011
+52,0.011
+53,0.012
+54,0.012
+55,0.013
+56,0.013
+57,0.014
+58,0.014
+59,0.015
+60,0.015
+61,0.015
+62,0.015
+63,0.015
+64,0.015
+65,0.015
+66,0.015
+67,0.015
+68,0.015
+69,0.015
+70,0.015
+71,0.015
+72,0.015
+73,0.015
+74,0.015
+75,0.015
+76,0.015
+77,0.015
+78,0.015
+79,0.015
+80,0.015
+81,0.014
+82,0.013
+83,0.013
+84,0.012
+85,0.011
+86,0.010
+87,0.009
+88,0.009
+89,0.008
+90,0.007
+91,0.007
+92,0.006
+93,0.005
+94,0.005
+95,0.004
+96,0.004
+97,0.003
+98,0.003
+99,0.002
+100,0.002
+101,0.002
+102,0.001
+103,0.001
+104,0.000
+105,0.000

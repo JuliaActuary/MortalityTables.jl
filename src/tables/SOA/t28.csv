@@ -1,0 +1,109 @@
+Table Name:,"1980 CET - Female Smoker, ANB"
+Table Identity:,28
+Provider Domain:,soa.org
+Provider Name:,Robert J. Johansen
+Table Reference:,"“Report of the Task Force on Smoker/Nonsmoker Mortality”, Transactions Society of Actuaries - 1982 Reports, Society of Actuaries (1982) p. 385. Accessed: February, 2013 from http://www.soa.org/library/research/transactions-reports-of-mortality-moribidity-and-experience/1980-89/1982/january/tsr8210.pdf, p. 43"
+Content Type:,CSO/CET
+Table Description:,1980 Commissioners Extended Term (CET) Table - Female Smoker. Basis: Age Nearest Birthday. Minimum Age: 15 Maximum Age: 99
+EffDate:,
+Comments:,"Study Data: The exposure period for the underlying data is from Society of Actuary (SOA) data submissions for 1970 through 1975 policy anniversaries. All war deaths were excluded. Unlike the 1958 Commissioners Standard Ordinary (CSO) table, policies issued on a nonmedical basis were included due to the trend in writing larger proportions of nonmedical business and to provide adequate data for a separate female table. Methodology: Derived from Smoker/Nonsmoker 1980 CSO Basic Tables (See SOA Table Identities 18 and 19) in the same way that the 1980 CET Basic Tables (See SOA Table Identities 24 and 30) were derived from the 1980 CSO Basic Tables (See SOA Table Identities 17 and 20). A loading of 0.75 deaths per 1,000 or 30 percent of the table mortality rates, whichever is greater, was added to the Smoker/Nonsmoker 1980 CSO Basic Tables. Data Transcription Errors: None. Data Certified: 02/2013"
+Keywords:,"Aggregate,CSO/CET,United States of America"
+
+Table # ,1
+Table Description:,1980 US CET Female Smoker Age nearest-Aggregate
+Nation:,United States of America
+Scaling Factor:,0
+Data Type:,Floating Point
+"Row, Column (if applicable)->id:",Age
+"Row, Column (if applicable)->ScaleType:",Age
+"Row, Column (if applicable)->AxisName:",Age
+"Row, Column (if applicable)->MinScaleValue:",15
+"Row, Column (if applicable)->MaxScaleValue:",99
+"Row, Column (if applicable)->Increment:",1
+
+Row\Column,1
+15,0.00169
+16,0.00174
+17,0.00179
+18,0.00184
+19,0.00188
+20,0.00191
+21,0.00193
+22,0.00196
+23,0.00198
+24,0.00202
+25,0.00204
+26,0.00209
+27,0.00213
+28,0.00217
+29,0.00223
+30,0.00230
+31,0.00236
+32,0.00243
+33,0.00250
+34,0.00261
+35,0.00269
+36,0.00284
+37,0.00303
+38,0.00324
+39,0.00355
+40,0.00390
+41,0.00433
+42,0.00473
+43,0.00515
+44,0.00556
+45,0.00599
+46,0.00644
+47,0.00690
+48,0.00738
+49,0.00790
+50,0.00850
+51,0.00910
+52,0.00978
+53,0.01057
+54,0.01138
+55,0.01222
+56,0.01307
+57,0.01387
+58,0.01463
+59,0.01541
+60,0.01626
+61,0.01737
+62,0.01871
+63,0.02051
+64,0.02253
+65,0.02479
+66,0.02703
+67,0.02935
+68,0.03146
+69,0.03383
+70,0.03634
+71,0.03959
+72,0.04362
+73,0.04853
+74,0.05426
+75,0.06063
+76,0.06750
+77,0.07470
+78,0.08220
+79,0.09023
+80,0.09914
+81,0.10920
+82,0.12069
+83,0.13373
+84,0.14905
+85,0.16435
+86,0.18173
+87,0.19847
+88,0.21740
+89,0.23539
+90,0.25611
+91,0.27820
+92,0.30230
+93,0.32962
+94,0.36310
+95,0.41252
+96,0.48846
+97,0.61746
+98,0.85261
+99,1.00000

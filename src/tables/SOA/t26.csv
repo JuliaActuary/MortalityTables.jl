@@ -1,0 +1,109 @@
+Table Name:,"1980 CET - Female Nonsmoker, ANB"
+Table Identity:,26
+Provider Domain:,soa.org
+Provider Name:,Robert J. Johansen
+Table Reference:,"“Report of the Task Force on Smoker/Nonsmoker Mortality”, Transactions Society of Actuaries - 1982 Reports, Society of Actuaries (1982) p. 385. Accessed: February, 2013 from http://www.soa.org/library/research/transactions-reports-of-mortality-moribidity-and-experience/1980-89/1982/january/tsr8210.pdf, p. 43"
+Content Type:,CSO/CET
+Table Description:,1980 Commissioners Extended Term (CET) Table - Female Nonsmoker. Basis: Age Nearest Birthday. Minimum Age: 15 Maximum Age: 99
+EffDate:,
+Comments:,"Study Data: The exposure period for the underlying data is from Society of Actuary (SOA) data submissions for 1970 through 1975 policy anniversaries. All war deaths were excluded. Unlike the 1958 Commissioners Standard Ordinary (CSO) table, policies issued on a nonmedical basis were included due to the trend in writing larger proportions of nonmedical business and to provide adequate data for a separate female table. Methodology: Derived from Smoker/Nonsmoker 1980 CSO Basic Tables (See SOA Table Identities 18 and 19) in the same way that the 1980 CET Basic Tables (See SOA Table Identities 24 and 30) were derived from the 1980 CSO Basic Tables (See SOA Table Identities 17 and 20). A loading of 0.75 deaths per 1,000 or 30 percent of the table mortality rates, whichever is greater, was added to the Smoker/Nonsmoker 1980 CSO Basic Tables. Data Transcription Errors: None. Data Certified: 02/2013"
+Keywords:,"Aggregate,CSO/CET,United States of America"
+
+Table # ,1
+Table Description:,1980 Commissioners Extended Term (CET) Table - Female Nonsmoker. Basis: Age Nearest Birthday. Minimum Age: 15 Maximum Age: 99
+Nation:,United States of America
+Scaling Factor:,0
+Data Type:,Floating Point
+"Row, Column (if applicable)->id:",Age
+"Row, Column (if applicable)->ScaleType:",Age
+"Row, Column (if applicable)->AxisName:",Age
+"Row, Column (if applicable)->MinScaleValue:",15
+"Row, Column (if applicable)->MaxScaleValue:",99
+"Row, Column (if applicable)->Increment:",1
+
+Row\Column,1
+15,0.00159
+16,0.00163
+17,0.00167
+18,0.00170
+19,0.00173
+20,0.00176
+21,0.00177
+22,0.00179
+23,0.00180
+24,0.00183
+25,0.00184
+26,0.00187
+27,0.00189
+28,0.00192
+29,0.00195
+30,0.00199
+31,0.00202
+32,0.00206
+33,0.00210
+34,0.00217
+35,0.00222
+36,0.00231
+37,0.00242
+38,0.00254
+39,0.00268
+40,0.00283
+41,0.00301
+42,0.00319
+43,0.00341
+44,0.00364
+45,0.00389
+46,0.00415
+47,0.00443
+48,0.00475
+49,0.00507
+50,0.00545
+51,0.00585
+52,0.00631
+53,0.00684
+54,0.00738
+55,0.00797
+56,0.00857
+57,0.00917
+58,0.00974
+59,0.01035
+60,0.01106
+61,0.01191
+62,0.01297
+63,0.01431
+64,0.01590
+65,0.01762
+66,0.01946
+67,0.02133
+68,0.02322
+69,0.02523
+70,0.02756
+71,0.03034
+72,0.03379
+73,0.03799
+74,0.04293
+75,0.04852
+76,0.05465
+77,0.06124
+78,0.06829
+79,0.07599
+80,0.08466
+81,0.09459
+82,0.10607
+83,0.11929
+84,0.13394
+85,0.14999
+86,0.16715
+87,0.18552
+88,0.20489
+89,0.22556
+90,0.24751
+91,0.27115
+92,0.29718
+93,0.32682
+94,0.36310
+95,0.41252
+96,0.48846
+97,0.61746
+98,0.85261
+99,1.00000

@@ -1,0 +1,124 @@
+Table Name:,"1980 CSO – Male, ALB"
+Table Identity:,41
+Provider Domain:,soa.org
+Provider Name:,Robert J. Johansen
+Table Reference:,"Committee to Recommend New Mortality Tables for Valuation, “1980 CSO and 1980 CET Mortality Tables on an Age Last Birthday Basis”, Transactions Society of Actuaries Vol.  XXXIII, Society of Actuaries (1981) p. 673. Accessed: February, 2013 from http://www.soa.org/Library/Research/Transactions-Of-Society-Of-Actuaries/1981/January/tsa81v3324.pdf, p. 3."
+Content Type:,CSO/CET
+Table Description:,1980 Commissioners Standard Ordinary (CSO) – Male. Basis: Age Last Birthday. Minimum Age: 0. Maximum Age: 99
+EffDate:,
+Comments:,Study Data: Derived from corresponding age nearest birthday tables (See SOA Table Identities 36 and 42). Methodology: The following formula was employed to convert the age nearest birthday rates to an age last birthday basis:  [q(x) + (1-q(x))*q(x+1)]/[2-q(x)] . A uniform distribution of deaths is assumed. Data Transcription Errors: None. Data Certified: 02/2013
+Keywords:,"Aggregate,CSO/CET,United States of America"
+
+Table # ,1
+Table Description:,1980 Commissioners Standard Ordinary (CSO) – Male. Basis: Age Last Birthday. Minimum Age: 0. Maximum Age: 99
+Nation:,United States of America
+Scaling Factor:,0
+Data Type:,Floating Point
+"Row, Column (if applicable)->id:",Age
+"Row, Column (if applicable)->ScaleType:",Age
+"Row, Column (if applicable)->AxisName:",Age
+"Row, Column (if applicable)->MinScaleValue:",0
+"Row, Column (if applicable)->MaxScaleValue:",99
+"Row, Column (if applicable)->Increment:",1
+
+Row\Column,1
+0,0.00263
+1,0.00103
+2,0.00099
+3,0.00097
+4,0.00093
+5,0.00088
+6,0.00083
+7,0.00078
+8,0.00075
+9,0.00074
+10,0.00075
+11,0.00081
+12,0.00092
+13,0.00107
+14,0.00124
+15,0.00142
+16,0.00159
+17,0.00172
+18,0.00182
+19,0.00188
+20,0.00190
+21,0.00190
+22,0.00188
+23,0.00184
+24,0.00180
+25,0.00175
+26,0.00172
+27,0.00171
+28,0.00170
+29,0.00172
+30,0.00175
+31,0.00180
+32,0.00187
+33,0.00195
+34,0.00205
+35,0.00217
+36,0.00232
+37,0.00249
+38,0.00268
+39,0.00290
+40,0.00315
+41,0.00342
+42,0.00371
+43,0.00403
+44,0.00437
+45,0.00473
+46,0.00512
+47,0.00553
+48,0.00597
+49,0.00646
+50,0.00700
+51,0.00763
+52,0.00833
+53,0.00913
+54,0.01001
+55,0.01096
+56,0.01197
+57,0.01304
+58,0.01418
+59,0.01542
+60,0.01680
+61,0.01836
+62,0.02012
+63,0.02209
+64,0.02427
+65,0.02662
+66,0.02913
+67,0.03179
+68,0.03465
+69,0.03781
+70,0.04137
+71,0.04543
+72,0.05008
+73,0.05534
+74,0.06110
+75,0.06725
+76,0.07370
+77,0.08037
+78,0.08732
+79,0.09476
+80,0.10294
+81,0.11209
+82,0.12241
+83,0.13384
+84,0.14612
+85,0.15898
+86,0.17221
+87,0.18573
+88,0.19953
+89,0.21369
+90,0.22843
+91,0.24411
+92,0.26143
+93,0.28213
+94,0.30997
+95,0.35186
+96,0.42099
+97,0.54100
+98,0.74515
+99,1.00000

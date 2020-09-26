@@ -1,0 +1,109 @@
+Table Name:,"1980 CSO Basic Table - Male Nonsmoker, ANB"
+Table Identity:,21
+Provider Domain:,soa.org
+Provider Name:,Roger Scott Lumsden
+Table Reference:,"“Report of the Task Force on Smoker/Nonsmoker Mortality”, Transactions Society of Actuaries - 1982 Reports, Society of Actuaries (1982) p. 372-373. Accessed: February, 2013 from http://www.soa.org/library/research/transactions-reports-of-mortality-moribidity-and-experience/1980-89/1982/january/tsr8210.pdf, p. 30-31"
+Content Type:,CSO/CET
+Table Description:,1980 Commissioners Standard Ordinary (CSO) Basic Table - Male Nonsmoker. Basis: Age Nearest Birthday. Minimum Age: 15. Maximum Age: 99
+EffDate:,
+Comments:,"Study Data: Information regarding the mortality experience of smoker and nonsmoker insured lives consists primarily of mortality experience of five companies (State Mutual, Mutual Security Life. Phoenix Mutual, Home Life, and Sun Life of Canada) who published their nonsmoker mortality experience from 1973 thru 1978 either in The Record of the Society of Actuaries or the Transactions of the Society of Actuaries (TSA). There are significant differences from company to company in the characteristics of the lives included in the ""smoker"" group. Data is limited by none of the companies having published experience beyond the fifteenth policy year. This experience was supplemented by data from the 1979 Report of the Surgeon General, which is based on general population studies. The Task Force also received some unpublished data developed by the American Cancer Society for ages 65 and above. Methodology: The procedure used by the Task Force to divide each of the 1980 CSO Basic Male and Female Tables (SOA Table Identities 17 and 20) into its smoker and nonsmoker component tables is the same as that used in the paper by Michael J. Cowell and Brian L. Hirst (“Mortality Differences Between Smokers and Nonsmokers”, TSA Vol. XXXII, 1980). The distinction between smokers and nonsmokers at ages 14 and under was considered negligible for insurance purposes. As the definition of smoker varied considerably by company, the ratio of smoker mortality to aggregate mortality was calculated for each company. An assumed proportion of smokers in each company's experience was used to combine the data and remove the effect of different definitions of “smoker”. There was inadequate data to develop ratios for females, thus an analysis of 1979 Surgeon Generals Report was relied upon. Accordingly, the excess mortality among female smokers was set equal to 0.60 times the excess mortality among male smokers at all ages. The proportions of smokers and the ratios of the level of smoker mortality to nonsmoker mortality were then applied to produce the division of the 1980 CSO Basic Tables into smoker and nonsmoker components. Data Transcription Errors: None. Data Certified: 02/2013"
+Keywords:,"Aggregate,CSO/CET,United States of America"
+
+Table # ,1
+Table Description:,1980 Commissioners Standard Ordinary (CSO) Basic Table - Male Nonsmoker. Basis: Age Nearest Birthday. Minimum Age: 15. Maximum Age: 99
+Nation:,United States of America
+Scaling Factor:,0
+Data Type:,Floating Point
+"Row, Column (if applicable)->id:",Age
+"Row, Column (if applicable)->ScaleType:",Age
+"Row, Column (if applicable)->AxisName:",Age
+"Row, Column (if applicable)->MinScaleValue:",15
+"Row, Column (if applicable)->MaxScaleValue:",99
+"Row, Column (if applicable)->Increment:",1
+
+Row\Column,1
+15,0.00073
+16,0.00086
+17,0.00096
+18,0.00101
+19,0.00105
+20,0.00106
+21,0.00104
+22,0.00100
+23,0.00095
+24,0.00090
+25,0.00083
+26,0.00077
+27,0.00073
+28,0.00069
+29,0.00067
+30,0.00065
+31,0.00065
+32,0.00066
+33,0.00068
+34,0.00071
+35,0.00076
+36,0.00081
+37,0.00089
+38,0.00097
+39,0.00107
+40,0.00118
+41,0.00131
+42,0.00145
+43,0.00161
+44,0.00177
+45,0.00196
+46,0.00217
+47,0.00240
+48,0.00264
+49,0.00291
+50,0.00321
+51,0.00356
+52,0.00398
+53,0.00446
+54,0.00501
+55,0.00563
+56,0.00632
+57,0.00706
+58,0.00785
+59,0.00875
+60,0.00976
+61,0.01089
+62,0.01218
+63,0.01367
+64,0.01536
+65,0.01723
+66,0.01925
+67,0.02143
+68,0.02376
+69,0.02631
+70,0.02919
+71,0.03247
+72,0.03629
+73,0.04069
+74,0.04565
+75,0.05096
+76,0.05661
+77,0.06252
+78,0.06861
+79,0.07506
+80,0.08211
+81,0.08998
+82,0.09888
+83,0.10894
+84,0.11994
+85,0.13158
+86,0.14361
+87,0.15587
+88,0.16806
+89,0.18033
+90,0.19280
+91,0.20561
+92,0.21907
+93,0.23360
+94,0.25072
+95,0.27302
+96,0.30992
+97,0.36746
+98,0.47080
+99,0.65670

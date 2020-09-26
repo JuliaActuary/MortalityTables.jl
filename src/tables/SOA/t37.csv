@@ -1,0 +1,109 @@
+Table Name:,"1980 CSO - Female Nonsmoker, ALB"
+Table Identity:,37
+Provider Domain:,soa.org
+Provider Name:,Robert J. Johansen
+Table Reference:,"“Report of the Task Force on Smoker/Nonsmoker Mortality”, Transactions Society of Actuaries - 1982 Reports, Society of Actuaries (1982) p. 383. Accessed: February, 2013 from http://www.soa.org/library/research/transactions-reports-of-mortality-moribidity-and-experience/1980-89/1982/january/tsr8210.pdf, p. 41"
+Content Type:,CSO/CET
+Table Description:,1980 Commissioners Standard Ordinary (CSO) - Female Nonsmoker. Basis: Age Last Birthday. Minimum Age: 15.  Maximum Age: 99
+EffDate:,
+Comments:,"Study Data: The exposure period for the underlying data is from Society of Actuary (SOA) data submissions for 1970 through 1975 policy anniversaries. All war deaths were excluded. Unlike the 1958 Commissioners Standard Ordinary (CSO) table, policies issued on a nonmedical basis were included due to the trend in writing larger proportions of nonmedical business and to provide adequate data for a separate female table. Methodology: Derived from Smoker/Nonsmoker 1980 CSO Tables on age nearest birthday basis (See SOA Table Identities 38 and 40) in the same way that the 1980 CSO age nearest birthday basis tables were converted to and age last birthday basis: [q(x) + (1-q(x))*q(x+1)]/[2-q(x)] . A uniform distribution of deaths is assumed. Data Transcription Errors: None. Data Certified: 02/2013"
+Keywords:,"Aggregate,CSO/CET,United States of America"
+
+Table # ,1
+Table Description:,1980 Commissioners Standard Ordinary (CSO) - Female Nonsmoker. Basis: Age Last Birthday. Minimum Age: 15.  Maximum Age: 99
+Nation:,United States of America
+Scaling Factor:,0
+Data Type:,Floating Point
+"Row, Column (if applicable)->id:",Age
+"Row, Column (if applicable)->ScaleType:",Age
+"Row, Column (if applicable)->AxisName:",Age
+"Row, Column (if applicable)->MinScaleValue:",15
+"Row, Column (if applicable)->MaxScaleValue:",99
+"Row, Column (if applicable)->Increment:",1
+
+Row\Column,1
+15,0.00086
+16,0.00090
+17,0.00093
+18,0.00096
+19,0.00099
+20,0.00101
+21,0.00103
+22,0.00104
+23,0.00106
+24,0.00108
+25,0.00110
+26,0.00113
+27,0.00115
+28,0.00118
+29,0.00122
+30,0.00125
+31,0.00129
+32,0.00133
+33,0.00138
+34,0.00144
+35,0.00151
+36,0.00161
+37,0.00173
+38,0.00186
+39,0.00200
+40,0.00217
+41,0.00235
+42,0.00253
+43,0.00271
+44,0.00289
+45,0.00309
+46,0.00330
+47,0.00353
+48,0.00377
+49,0.00404
+50,0.00434
+51,0.00467
+52,0.00505
+53,0.00547
+54,0.00590
+55,0.00636
+56,0.00682
+57,0.00727
+58,0.00772
+59,0.00823
+60,0.00883
+61,0.00957
+62,0.01049
+63,0.01162
+64,0.01289
+65,0.01426
+66,0.01568
+67,0.01713
+68,0.01863
+69,0.02030
+70,0.02226
+71,0.02465
+72,0.02758
+73,0.03109
+74,0.03513
+75,0.03964
+76,0.04452
+77,0.04975
+78,0.05541
+79,0.06168
+80,0.06881
+81,0.07701
+82,0.08646
+83,0.09712
+84,0.10887
+85,0.12158
+86,0.13516
+87,0.14959
+88,0.16488
+89,0.18115
+90,0.19853
+91,0.21742
+92,0.23853
+93,0.26335
+94,0.29523
+95,0.34102
+96,0.41388
+97,0.53724
+98,0.74396
+99,1.00000

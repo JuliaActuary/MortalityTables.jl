@@ -1,0 +1,109 @@
+Table Name:,"1980 CSO - Female Smoker, ANB"
+Table Identity:,40
+Provider Domain:,soa.org
+Provider Name:,Robert J. Johansen
+Table Reference:,"“Report of the Task Force on Smoker/Nonsmoker Mortality”, Transactions Society of Actuaries - 1982 Reports, Society of Actuaries (1982) p. 378-379. Accessed: February, 2013 from http://www.soa.org/library/research/transactions-reports-of-mortality-moribidity-and-experience/1980-89/1982/january/tsr8210.pdf, p. 36-37"
+Content Type:,CSO/CET
+Table Description:,1980 Commissioners Standard Ordinary (CSO) - Female Smoker. Basis: Age Nearest Birthday. Minimum Age: 15. Maximum Age: 99
+EffDate:,
+Comments:,"Study Data: Information regarding the mortality experience of smoker and nonsmoker insured lives consists primarily of mortality experience of five companies (State Mutual, Mutual Security Life. Phoenix Mutual, Home Life, and Sun Life of Canada) who published their nonsmoker mortality experience from 1973 thru 1978 either in The Record of the Society of Actuaries or the Transactions of the Society of Actuaries (TSA). This experience was supplemented by data from the 1979 Report of the Surgeon General, which is based on general population studies. The Task Force also received some unpublished data developed by the American Cancer Society for ages 65 and above. Methodology: The same loading margins developed to create the 1980 CSO tables (See SOA Table Identities 36 and 42) from the 1980 CSO Basic Tables (See SOA Table Identities 17 and 20) were used on the Smoker/Nonsmoker split tables. The final margin formula is:  [(.035 - .00025x + .000009x^2) / e(x)] where e(x) is the curtate expectation of life calculated from the Basic Table. The loaded qx values for age 92 and age 93 were retained while the tables were shortened by setting age 99 equal to unity. Shortening the loaded tables by one year is consistent with the methodology used on the 1941 CSO and the 1958 CSO Tables. Data Transcription Errors: None. Data Certified: 02/2013"
+Keywords:,"Aggregate,CSO/CET,United States of America"
+
+Table # ,1
+Table Description:,1980 Commissioners Standard Ordinary (CSO) - Female Smoker. Basis: Age Nearest Birthday. Minimum Age: 15. Maximum Age: 99
+Nation:,United States of America
+Scaling Factor:,0
+Data Type:,Floating Point
+"Row, Column (if applicable)->id:",Age
+"Row, Column (if applicable)->ScaleType:",Age
+"Row, Column (if applicable)->AxisName:",Age
+"Row, Column (if applicable)->MinScaleValue:",15
+"Row, Column (if applicable)->MaxScaleValue:",99
+"Row, Column (if applicable)->Increment:",1
+
+Row\Column,1
+15,0.00094
+16,0.00099
+17,0.00104
+18,0.00109
+19,0.00113
+20,0.00116
+21,0.00118
+22,0.00121
+23,0.00123
+24,0.00127
+25,0.00129
+26,0.00134
+27,0.00138
+28,0.00142
+29,0.00148
+30,0.00155
+31,0.00161
+32,0.00168
+33,0.00175
+34,0.00186
+35,0.00194
+36,0.00209
+37,0.00228
+38,0.00249
+39,0.00273
+40,0.00300
+41,0.00333
+42,0.00364
+43,0.00396
+44,0.00428
+45,0.00461
+46,0.00495
+47,0.00531
+48,0.00568
+49,0.00608
+50,0.00654
+51,0.00700
+52,0.00752
+53,0.00813
+54,0.00875
+55,0.00940
+56,0.01005
+57,0.01067
+58,0.01125
+59,0.01185
+60,0.01251
+61,0.01336
+62,0.01439
+63,0.01578
+64,0.01733
+65,0.01907
+66,0.02079
+67,0.02258
+68,0.02420
+69,0.02602
+70,0.02795
+71,0.03045
+72,0.03355
+73,0.03733
+74,0.04174
+75,0.04664
+76,0.05192
+77,0.05746
+78,0.06323
+79,0.06941
+80,0.07626
+81,0.08400
+82,0.09284
+83,0.10287
+84,0.11465
+85,0.12642
+86,0.13979
+87,0.15267
+88,0.16723
+89,0.18107
+90,0.19701
+91,0.21400
+92,0.23254
+93,0.25355
+94,0.27931
+95,0.31732
+96,0.37574
+97,0.47497
+98,0.65585
+99,1.00000

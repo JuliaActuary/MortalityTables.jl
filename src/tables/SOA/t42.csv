@@ -1,0 +1,124 @@
+Table Name:,"1980 CSO  - Male, ANB"
+Table Identity:,42
+Provider Domain:,soa.org
+Provider Name:,Robert J. Johansen
+Table Reference:,"“Report of the Special Committee to Recommend New Mortality Tables For Valuation”, Transactions of the Society of Actuaries, Vol. XXXIII, Society of Actuaries. (1981) p. 618. Accessed: February, 2013 from  http://www.soa.org/Library/Research/Transactions-Of-Society-Of-Actuaries/1981/January/tsa81v3323.pdf,  p. 2."
+Content Type:,CSO/CET
+Table Description:,1980 Commissioners Standard Ordinary (CSO) – Male. Formerly Table K (M). Basis: Age Nearest Birthday. Minimum Age: 0. Maximum Age: 99
+EffDate:,
+Comments:,"Study Data: Prior to this table, an age setback approach was commonly used for female mortality for valuation purposes. However, a comparison of graduated mortality rates from the 1965-70 Ultimate Basic Tables showed that a single age setback produces rates that differ substantially by age. Adequate female mortality experience was felt available, giving greater credibility to the creation of separate female tables. The exposure period for the data is from Society of Actuary (SOA) data submissions for 1970 through 1975 policy anniversaries. All war deaths were excluded. Unlike the 1958 Commissioners Standard Ordinary (CSO) table, policies issued on a nonmedical basis were included due to the trend in writing larger proportions of nonmedical business and to provide adequate data for a separate female table. Methodology: Basic Tables (See SOA Table Identities 17 and 20) were constructed and then a margin was added for reserve adequacy.  The final margin formula is:  [(.035 - .00025x + .000009x^2) / e(x)] where e(x) is the curtate expectation of life calculated from the Basic Table. The loaded qx values for age 92 and age 93 were retained while the tables were shortened by setting age 99 equal to unity. Shortening the loaded tables by one year is consistent with the methodology used on the 1941 CSO and the 1958 CSO Tables. Data Transcription Errors: None. Data Certified: 02/2013"
+Keywords:,"Aggregate,CSO/CET,United States of America"
+
+Table # ,1
+Table Description:,1980 Commissioners Standard Ordinary (CSO) – Male. Formerly Table K (M). Basis: Age Nearest Birthday. Minimum Age: 0. Maximum Age: 99
+Nation:,United States of America
+Scaling Factor:,0
+Data Type:,Floating Point
+"Row, Column (if applicable)->id:",Age
+"Row, Column (if applicable)->ScaleType:",Age
+"Row, Column (if applicable)->AxisName:",Age
+"Row, Column (if applicable)->MinScaleValue:",0
+"Row, Column (if applicable)->MaxScaleValue:",99
+"Row, Column (if applicable)->Increment:",1
+
+Row\Column,1
+0,0.00418
+1,0.00107
+2,0.00099
+3,0.00098
+4,0.00095
+5,0.00090
+6,0.00086
+7,0.00080
+8,0.00076
+9,0.00074
+10,0.00073
+11,0.00077
+12,0.00085
+13,0.00099
+14,0.00115
+15,0.00133
+16,0.00151
+17,0.00167
+18,0.00178
+19,0.00186
+20,0.00190
+21,0.00191
+22,0.00189
+23,0.00186
+24,0.00182
+25,0.00177
+26,0.00173
+27,0.00171
+28,0.00170
+29,0.00171
+30,0.00173
+31,0.00178
+32,0.00183
+33,0.00191
+34,0.00200
+35,0.00211
+36,0.00224
+37,0.00240
+38,0.00258
+39,0.00279
+40,0.00302
+41,0.00329
+42,0.00356
+43,0.00387
+44,0.00419
+45,0.00455
+46,0.00492
+47,0.00532
+48,0.00574
+49,0.00621
+50,0.00671
+51,0.00730
+52,0.00796
+53,0.00871
+54,0.00956
+55,0.01047
+56,0.01146
+57,0.01249
+58,0.01359
+59,0.01477
+60,0.01608
+61,0.01754
+62,0.01919
+63,0.02106
+64,0.02314
+65,0.02542
+66,0.02785
+67,0.03044
+68,0.03319
+69,0.03617
+70,0.03951
+71,0.04330
+72,0.04765
+73,0.05264
+74,0.05819
+75,0.06419
+76,0.07053
+77,0.07712
+78,0.08390
+79,0.09105
+80,0.09884
+81,0.10748
+82,0.11725
+83,0.12826
+84,0.14025
+85,0.15295
+86,0.16609
+87,0.17955
+88,0.19327
+89,0.20729
+90,0.22177
+91,0.23698
+92,0.25345
+93,0.27211
+94,0.29590
+95,0.32996
+96,0.38455
+97,0.48020
+98,0.65798
+99,1.00000
