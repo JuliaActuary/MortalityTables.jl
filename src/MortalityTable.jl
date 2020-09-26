@@ -19,7 +19,7 @@ julia> m[18]
 
 ```
 """
-function UltimateMortality(v::Array{<:Real,1}; start_age = 0)
+function UltimateMortality(v::Array{<:Real,1}; start_age=0)
     return OffsetArray(v, start_age - 1)
 end
 
@@ -51,7 +51,7 @@ julia> sel[0][95] # the mortality rate for a life age 95, that was issued at age
 0.95
 ```
 """
-function SelectMortality(select, ultimate; start_age = 0)
+function SelectMortality(select, ultimate; start_age=0)
 
     # iterate down the rows (issue ages)
     vs = map(enumerate(eachrow(select))) do (row_num, row)
@@ -109,11 +109,11 @@ Base.getindex(u::UltimateTable,x) = u.ultimate[x]
 Base.lastindex(u::UltimateTable) = lastindex(u.ultimate)
 
 
-function MortalityTable(select, ultimate; metadata = TableMetaData())
+function MortalityTable(select, ultimate; metadata=TableMetaData())
     return SelectUltimateTable(select, ultimate, metadata)
 end
 
-function MortalityTable(ultimate; metadata = TableMetaData())
+function MortalityTable(ultimate; metadata=TableMetaData())
     return UltimateTable(ultimate, metadata)
 end
 
@@ -180,7 +180,7 @@ function survival(v::T, from_age::Int, to_age::Int) where {T <: AbstractArray}
     else
         return @views reduce(*,
             1 .- v[from_age:(to_age - 1)],
-            init = 1.0
+            init=1.0
             )
     end
 end
@@ -190,7 +190,7 @@ function survival(v::T, from_age, to_age, dd::DeathDistribution) where {T <: Abs
     age_low = ceil(Int, from_age)
     age_high = floor(Int, to_age)
 
-    #if from_age and to_age are fractional parts of the same attained age, then age_high will round down to 
+    # if from_age and to_age are fractional parts of the same attained age, then age_high will round down to 
     # be below the rounded-up age_low. This line will short circuit the rest and just return the fractional year survival
     age_high < age_low && return 1 - decrement_partial_year(v, from_age, to_age, dd)
     
@@ -213,7 +213,7 @@ function survival(v::T, from_age, to_age, dd::DeathDistribution) where {T <: Abs
          
         whole = @views reduce(*,
             1 .- v[age_low:(age_high - 1)],
-            init = 1.0
+            init=1.0
             )
 
         return whole * low_residual * high_residual
@@ -223,15 +223,15 @@ end
 # Reference: Experience Study Calculations, 2016, Society of Actuaries
 # https://www.soa.org/globalassets/assets/Files/Research/2016-10-experience-study-calculations.pdf
 function decrement_partial_year(v, from_age, to_age, dd::Uniform)
-    return v[floor(Int,from_age)] * (to_age - from_age)
+    return v[floor(Int, from_age)] * (to_age - from_age)
 end
 
 function decrement_partial_year(v, from_age, to_age, dd::Constant)
-    return 1 - (1 - v[floor(Int,from_age)])^(to_age - from_age)
+    return 1 - (1 - v[floor(Int, from_age)])^(to_age - from_age)
 end
 
 function decrement_partial_year(v, from_age, to_age, dd::Balducci)
-    q′ = v[floor(Int,from_age)]
+    q′ = v[floor(Int, from_age)]
     frac = (to_age - from_age)
     return 1 - (1 - q′) / (1 - (1 - frac) * q′)
 end
@@ -309,4 +309,4 @@ OffsetArray(vec,start_age-1)
 ```
 """
 
-mortality_vector(vec; start_age=0) = return OffsetArray(vec,start_age-1)
+mortality_vector(vec; start_age=0) = return OffsetArray(vec, start_age - 1)

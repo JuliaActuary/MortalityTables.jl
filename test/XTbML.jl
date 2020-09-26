@@ -3,10 +3,10 @@
         g = MortalityTables.get_and_parse
         d = Dict(:a => "1.2", :c => "a")
 
-        @test g(d,:a) == 1.2
-        @test ismissing(g(d,:b))
-        @test ismissing(g(d,:b))
-        @test_throws Exception g(d,:c)
+        @test g(d, :a) == 1.2
+        @test ismissing(g(d, :b))
+        @test ismissing(g(d, :b))
+        @test_throws Exception g(d, :c)
 
     end
     
