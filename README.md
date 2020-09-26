@@ -14,6 +14,17 @@ A Julia package for working with MortalityTables. Has:
 - Friendly syntax and flexible usage
 - Extensive set of parametric mortality models.
 
+## On this Page:
+- [Examples](#examples)
+  - [Quickstart](#quickstart)
+  - [Quickly access and compare tables](#quickky-access-and-compare-tables)
+  - [Scaling and capping rates](#scaling-and-capping-rates)
+- [Fractional Years](#fractional-years)
+- [Tables]
+  -[Bundled Tables]
+- [Parameterized Models](#parameterized-models)
+
+
 
 ## Examples
 
@@ -89,7 +100,7 @@ julia> survival(vbt2001.ultimate,30,40.5,Uniform()) # the survival between ages 
 0.9887676470262408
 ```
 
-### Example: Quickly access and compare tables
+### Quickly access and compare tables
 
 ```julia
 using MortalityTables, Plots
@@ -141,7 +152,7 @@ contour(durations,
 
 ![heatmap comparison of 2017 CSO and 2001 CSO Mortality Table](https://user-images.githubusercontent.com/711879/83955100-11861180-a815-11ea-9a22-c85bacceb4bc.png)
 
-### Example: Scaling and capping a table
+### Scaling and capping rates
 
 Say that you want to take a given mortality table, scale it by `130%`, and cap it at `1.0`. You can do this easliy by [broadcasting](https://docs.julialang.org/en/v1/manual/arrays/index.html#Broadcasting-1) over the underlying rates (which is really just a vector of numbers at the end of the day):
 
@@ -168,7 +179,9 @@ The three assumptions are:
 - `Balducci()` which assumes a decreasing force of mortality over the year. It seems [to
 be for making it easier](https://www.soa.org/globalassets/assets/library/research/actuarial-research-clearing-house/1978-89/1988/arch-1/arch88v17.pdf) to calculate successive months by hand rather than any theoretical basis.
 
-## Some Batteries Included
+## Tables
+
+### Bundled Tables
 
 Comes with some tables built in via [mort.SOA.org](https://mort.soa.org) and by using [you agree to their terms](https://mort.soa.org/TermsOfUse.aspx).
 
@@ -187,6 +200,109 @@ Sample of some of the included table sets:
 ```
 
 [Click here to see the full list of tables included.](BundledTables.md)
+
+If you would like more tables added by default, please open a GitHub issue with the request.
+
+#### Load with bundled tables
+
+To add more tables for your use when loading with all of the other bundled tables, download the `.xml` [aka the (`XTbML` format)](https://mort.soa.org/About.aspx) version of the table from [mort.SOA.org](https://mort.soa.org) and place it in the directory the package is installed in. This is usually `~user/.julia/packages/MortalityTables/[changing hash value]/src/tables/`.
+
+> :warning: *updating the package may remove your existing tables. Make a backup before updating your packages*
+
+After placing packages in the folder above, restart Julia and the should be discoverable when you run `mt.Tables()`
+
+### [mort.SOA.org](https://mort.soa.org) Tables
+
+Given a table id ([for example](https://mort.soa.org/ViewTable.aspx?&TableIdentity=60029) `60029`)
+you can request the table directly from the SOA's mortality table service. Remember
+that not all tables have been tested, though the standard source format should mean
+compatibility with `MortalityTables.jl`.
+
+```julia
+aus_life_table_female = get_SOA_table(60029)
+aus_life_table_female[0]  # returns the attained age 0 rate of 0.10139
+```
+
+You can combine it with the bundled tables too:
+
+```julia
+tables = MortalityTables.tables()
+
+get_SOA_table!(tables,60029) # this modifies `tables` by adding the new table
+
+t = tables["Australian Life Tables 1891-1900 Female"]
+t[0]  # returns the attained age 0 rate of 0.10139
+```
+
+### From CSV
+
+If you have a CSV file that is from [mort.SOA.org](mort.SOA.org), or follows the same structure, then you can load and parse the table into a `MortalityTable` like so:
+
+```julia
+using CSV
+using MortalityTables
+
+path = "path/to/table.csv"
+file = CSV.File(path,header=false) # SOA's CSV files have no true header
+table = MortalityTable(file)
+```
+
+### From XTbML
+
+If you have a file using the XTbML format:
+
+```
+using MortalityTables
+path = "path/to/table.xml"
+table = MortalityTables.readXTbML(file)
+```
+
+### Custom Tables
+
+Say you have an ultimate vector and select matrix, and you want to leverage the MortalityTables package.
+
+Here's an example, where we first construct the `UlitmateMortality` and then combine
+it with the select rates to get a `SelectMortality` table.
+
+```julia
+using MortalityTables
+
+# represents attained ages of 15 through 100
+ult_vec = [0.005, 0.008, ...,0.805,1.00]
+ult = UltimateMortality(ult_vec,start_age = 15)
+```
+
+We can now use this the ulitmate rates all by itself:
+
+```julia
+q(ult,15,1) # 0.005
+```
+
+And join with the select rates, which for our example will start at age 0:
+
+```julia
+# attained age going down the column, duration across
+select_matrix = [ 0.001 0.002 ... 0.010;
+                  0.002 0.003 ... 0.012;
+                  ...
+                ]
+sel_start_age = 0
+sel = SelectMortality(select_matrix,ult,start_age = 0)
+
+sel[0][0] #issue age 0, attained age 0 rate of  0.001
+sel[0][100] #issue age 0, attained age 100 rate of  1.0
+```
+
+Lastly, to take the `SelectMortality` and `UltimateMortality` we just created,
+we can combine them into one stored object, along with a `TableMetaData`:
+
+```julia
+my_table = MortalityTable(
+              s1,
+              u1,
+              metadata=TableMetaData(name="My Table", comments="Rates for Product XYZ")
+              )
+```
 
 ## Parameterized Models
 
@@ -244,90 +360,6 @@ survival(m,20,25) # the five year survival rate
 - Because of the large number of parameters for the models, the arguments are keyword rather than positional: `MortalityTables.Gompertz(a=0.01,b=0.2)`
 - The models have default values, so they can be called without args like this: `MortalityTables.Gompertz()`.
   - See the help text for what the default values are: `?Gompertz`
-
-## Adding more tables
-
-### Getting tables from [mort.SOA.org](https://mort.soa.org)
-
-Given a table id ([for example](https://mort.soa.org/ViewTable.aspx?&TableIdentity=60029) `60029`)
-you can request the table directly from the SOA's mortality table service. Remember
-that not all tables have been tested, though the standard source format should mean
-compatibility with `MortalityTables.jl`.
-
-```julia
-aus_life_table_female = get_SOA_table(60029)
-aus_life_table_female[0]  # returns the attained age 0 rate of 0.10139
-```
-
-You can combine it with the bundled tables too:
-
-```julia
-tables = MortalityTables.tables()
-
-get_SOA_table!(tables,60029) # this modifies `tables` by adding the new table
-
-t = tables["Australian Life Tables 1891-1900 Female"]
-t[0]  # returns the attained age 0 rate of 0.10139
-```
-
-### Constructing Dynamically
-
-Say you have an ultimate vector and select matrix, and you want to leverage the MortalityTables package.
-
-Here's an example, where we first construct the `UlitmateMortality` and then combine
-it with the select rates to get a `SelectMortality` table.
-
-```julia
-using MortalityTables
-
-# represents attained ages of 15 through 100
-ult_vec = [0.005, 0.008, ...,0.805,1.00]
-ult = UltimateMortality(ult_vec,start_age = 15)
-```
-
-We can now use this the ulitmate rates all by itself:
-
-```julia
-q(ult,15,1) # 0.005
-```
-
-And join with the select rates, which for our example will start at age 0:
-
-```julia
-# attained age going down the column, duration across
-select_matrix = [ 0.001 0.002 ... 0.010;
-                  0.002 0.003 ... 0.012;
-                  ...
-                ]
-sel_start_age = 0
-sel = SelectMortality(select_matrix,ult,start_age = 0)
-
-sel[0][0] #issue age 0, attained age 0 rate of  0.001
-sel[0][100] #issue age 0, attained age 100 rate of  1.0
-```
-
-Lastly, to take the `SelectMortality` and `UltimateMortality` we just created,
-we can combine them into one stored object, along with a `TableMetaData`:
-
-```julia
-my_table = MortalityTable(
-              s1,
-              u1,
-              metadata=TableMetaData(name="My Table", comments="Rates for Product XYZ")
-              )
-```
-
-### Load with bundled tables
-
-To add more tables for your use when loading with all of the other bundled tables, download the `.xml` [aka the (`XTbML` format)](https://mort.soa.org/About.aspx) version of the table from [mort.SOA.org](https://mort.soa.org) and place it in the directory the package is installed in. This is usually `~user/.julia/packages/MortalityTables/[changing hash value]/src/tables/`.
-
-> :warning: *updating the package may remove your existing tables. Make a backup before updating your packages*
-
-After placing packages in the folder above, restart Julia and the should be discoverable when you run `mt.Tables()`
-
-### Getting more tables bundled with the package
-
-If you would like more tables added by default, please open a GitHub issue with the request.
 
 ## References
 
