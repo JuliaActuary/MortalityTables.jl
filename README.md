@@ -258,7 +258,7 @@ If you have a file using the XTbML format:
 ```
 using MortalityTables
 path = "path/to/table.xml"
-table = MortalityTables.readXTbML(file)
+table = MortalityTables.readXTbML(path)
 ```
 
 ### Custom Tables
