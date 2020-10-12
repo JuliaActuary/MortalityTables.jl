@@ -357,8 +357,14 @@ m[20]                 # the mortality rate at age 20
 decrement(m,20,25)    # the five year cumulative mortality rate
 survival(m,20,25) # the five year survival rate
 ```
+## Mortality Table Comparison Tool
 
-### Some notes:
+You may be interested in [this tool](https://juliaactuary.org/tutorials/mortalitytablecomparison/) to compare mortality tables:
+
+![A gif showing a visualization of the differences between two mortality tables](https://user-images.githubusercontent.com/711879/95031145-e94ed800-0679-11eb-8d8f-b560585042a6.gif)
+
+## Other notes
+
 - Because of the large number of models and the likelihood for overlap with other things (e.g. `Quadratic` or `Weibull` would be expected to be found in other contexts as well), these models Are not exported from the package, so you need to call them by prefixing with `MortalityTables`. 
   - e.g. : `MortalityTables.Kostaki()`
 - Because of the large number of parameters for the models, the arguments are keyword rather than positional: `MortalityTables.Gompertz(a=0.01,b=0.2)`
