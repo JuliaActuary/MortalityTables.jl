@@ -106,6 +106,8 @@ julia> survival(vbt2001.ultimate,30,40.5,Uniform()) # the survival between ages 
 
 ### Quickly access and compare tables
 
+This example shows how to develop a visual comparison of rates from scratch, but you may be interested in [this pre-built tool](#mortality-table-comparison-tool) for this purpose.
+
 ```julia
 using MortalityTables, Plots
 
@@ -114,21 +116,19 @@ tables = MortalityTables.tables()
 cso_2001 = tables["2001 CSO Super Preferred Select and Ultimate - Male Nonsmoker, ANB"]
 cso_2017 = tables["2017 Loaded CSO Preferred Structure Nonsmoker Super Preferred Male ANB"]
 
-issue_age = 27
-durations = 1:30
+issue_age = 80
 mort = [
-     cso_2001.select[issue_age][issue_age .+ durations .- 1],
-     cso_2017.select[issue_age][issue_age .+ durations .- 1],
-     ]
+	cso_2001.select[issue_age][issue_age:end],
+	cso_2017.select[issue_age][issue_age:end],
+	     ]
 plot(
-   durations,
-   mort,
-   label = ["2001 CSO" "2017 CSO"],
-   title = "Comparison of 2107 and 2001 CSO \n for SuperPref NS 27-year-old male",
-   xlabel="duration")
+	   mort,
+	   label = ["2001 CSO" "2017 CSO"],
+	   title = "Comparison of 2107 and 2001 CSO \n for SuperPref NS 80-year-old male",
+	   xlabel="duration")
 ```
 
-![Comparison of 1980 and 2001 CSO \n for 27-year-old male](https://user-images.githubusercontent.com/711879/83955217-1c8d7180-a816-11ea-9406-d98ed360d5c8.png)
+![Comparison of 2001 and 2017 CSO \n for 80-year-old male](https://user-images.githubusercontent.com/711879/96251676-6cbfd180-0f76-11eb-9082-b01630eaca4f.png)
 
 Easily extend the analysis to move up the [ladder of abstraction](http://worrydream.com/LadderOfAbstraction/):
 
