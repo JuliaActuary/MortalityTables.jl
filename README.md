@@ -73,17 +73,24 @@ MortalityTable (Insured Lives Mortality):
 The package revolves around easy-to-access vectors which are indexed by attained age:
 
 ```julia
-julia> vbt2001.select[35] # vector of rates for issue age 35
+julia> vbt2001.select[35]          # vector of rates for issue age 35
  0.00036
  0.00048
  ⋮
  0.94729
  1.0
  
-julia> vbt2001.select[35][35] #issue age 35, attained age 35
+julia> vbt2001.select[35][35]      # issue age 35, attained age 35
  0.00036
  
-julia> vbt2001.ultimate[95]  # ultimate vectors only need to be called with the attained age
+julia> vbt2001.select[35][50:end] # issue age 35, attained age 50 through end of table
+0.00316
+0.00345
+ ⋮
+0.94729
+1.0
+
+julia> vbt2001.ultimate[95]        # ultimate vectors only need to be called with the attained age
  0.24298
 ```
 
