@@ -11,24 +11,14 @@
     end
     
     @testset "XTbML loading" begin
-        pth = joinpath(
-            dirname(pathof(MortalityTables)),
-            "tables",
-            "SOA",
-            "t1076.xml",
-        )
+        pth = joinpath(tbl_dir,"SOA","t1076.xml")
         file = MortalityTables.open_and_read(pth) |> MortalityTables.getXML
         xtbl = MortalityTables.parseXTbMLTable(file, pth)
         @test isa(xtbl, MortalityTables.XTbMLTable)
     end
 
     @testset "Ultimate Only" begin
-        pth = joinpath(
-        dirname(pathof(MortalityTables)),
-        "tables",
-        "SOA",
-        "t17.xml",
-    )
+        pth = joinpath(tbl_dir,"SOA","t17.xml")
         file = MortalityTables.open_and_read(pth) |> MortalityTables.getXML
         xtbl = MortalityTables.parseXTbMLTable(file, pth)
 
@@ -42,12 +32,7 @@
 
     @testset "XTbML to MortalityTable" begin
         @testset "Select and Ultimate" begin
-            pth = joinpath(
-                dirname(pathof(MortalityTables)),
-                "tables",
-                "SOA",
-                "t1076.xml",
-            )
+            pth = joinpath(tbl_dir,"SOA","t1076.xml")
             file = MortalityTables.open_and_read(pth) |> MortalityTables.getXML
             xtbl = MortalityTables.parseXTbMLTable(file, pth)
 
@@ -61,12 +46,7 @@
         end
         
         @testset "Ultimate Only, not begin at age 0" begin
-            pth = joinpath(
-                dirname(pathof(MortalityTables)),
-                "tables",
-                "SOA",
-                "t18.xml",
-            )
+            pth = joinpath(tbl_dir,"SOA","t18.xml")
             file = MortalityTables.open_and_read(pth) |> MortalityTables.getXML
             xtbl = MortalityTables.parseXTbMLTable(file, pth)
             mt = MortalityTables.XTbML_Table_To_MortalityTable(xtbl)
