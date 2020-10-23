@@ -214,13 +214,9 @@ Sample of some of the included table sets:
 
 If you would like more tables added by default, please open a GitHub issue with the request.
 
-#### Load with bundled tables
+#### Load custom set of tables
 
-To add more tables for your use when loading with all of the other bundled tables, download the `.xml` [aka the (`XTbML` format)](https://mort.soa.org/About.aspx) version of the table from [mort.SOA.org](https://mort.soa.org) and place it in the directory the package is installed in. This is usually `~user/.julia/packages/MortalityTables/[changing hash value]/src/tables/`.
-
-> :warning: *updating the package may remove your existing tables. Make a backup before updating your packages*
-
-After placing packages in the folder above, restart Julia and the should be discoverable when you run `mt.Tables()`
+Download the `.xml` [aka the (`XTbML` format)](https://mort.soa.org/About.aspx) version of the table from [mort.SOA.org](https://mort.soa.org) and place it in a directory of your choosing. Then call `MortaliyTables.tables(path_to_your_dir)`.
 
 ### [mort.SOA.org](https://mort.soa.org) Tables
 

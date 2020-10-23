@@ -7,6 +7,7 @@ using QuadGK
 using Requires
 using UnPack
 using XMLDict
+using Pkg.Artifacts
 
 include("MetaData.jl")
 include("death_distribution.jl")
