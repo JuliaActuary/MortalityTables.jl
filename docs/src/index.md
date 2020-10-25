@@ -6,6 +6,8 @@ DocTestSetup = quote
 end
 ```
 
+Part of the [JuliaActuary.org](https://juliaactuary.org/) effort to build packages that enable actuaries everywhere to build solutions using open-source tools.
+
 ## Overview
 
 A Julia package for working with MortalityTables. Has:
@@ -110,3 +112,7 @@ julia> survival(vbt2001.ultimate,30,40.5,Uniform()) # the survival between ages 
 This package is [MIT Licenced](https://github.com/JuliaActuary/MortalityTables.jl/blob/master/LICENSE) ([tl;dr explanation](https://tldrlegal.com/license/mit-license)).
 
 This package contains tables downloaded from [mort.SOA.org](https://mort.soa.org). By using those tables within this package, you also agree to [their Terms of Use](https://mort.soa.org/TermsOfUse.aspx).
+
+## Discussion and Questions
+
+If you have other ideas or questions, feel free to also open an issue, or discuss on the community [Zulip](https://julialang.zulipchat.com/#narrow/stream/249536-actuary) or [Slack #actuary channel](https://slackinvite.julialang.org/). We welcome all actuarial and related disciplines!
