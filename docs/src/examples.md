@@ -1,7 +1,7 @@
 # Usage Examples
 
 ```@contents
-Pages = ["Examples.md"]
+Pages = ["examples.md"]
 Depth = 5
 ```
 

@@ -5,10 +5,12 @@ makedocs(;
     format=Documenter.HTML(),
     pages=[
         "Home" => "index.md",
-        "Usage and Examples" => "examples.md",
-        "Tables" => "Tables.md",
-        "Parametric Models" => "ParametricMortalityModels.md",
-        "Comparison Tool" => "ComparisonTool.md",
+        "Manual" => [
+            "Usage and Examples" => "examples.md",
+            "Tables" => "Tables.md",
+            "Parametric Models" => "ParametricMortalityModels.md",
+            "Comparison Tool" => "ComparisonTool.md",
+        ],
         "Reference" => "Reference.md",
     ],
     repo="https://github.com/JuliaActuary/MortalityTables.jl/blob/{commit}{path}#L{line}",

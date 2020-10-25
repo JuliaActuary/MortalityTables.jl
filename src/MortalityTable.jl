@@ -310,5 +310,4 @@ using OffsetArrays
 OffsetArray(vec,start_age-1)
 ```
 """
-
 mortality_vector(vec; start_age=0) = return OffsetArray(vec, start_age - 1)

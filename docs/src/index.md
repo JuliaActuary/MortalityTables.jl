@@ -6,6 +6,8 @@ DocTestSetup = quote
 end
 ```
 
+## Overview
+
 A Julia package for working with MortalityTables. Has:
 
 - Lots of bundled SOA mort.soa.org tables

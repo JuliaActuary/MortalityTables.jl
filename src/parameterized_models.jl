@@ -8,7 +8,9 @@ abstract type ParametricMortality end
 
 Construct a mortality model following Makeham's law.
 
-``hazard(x) =  ae^{bx} + c``
+``
+\\mathrm{hazard} \\left( {\\rm age} \\right) =  ae^{bx} + c
+``
 
 Default args:
     
@@ -23,12 +25,21 @@ Base.@kwdef struct Makeham <: ParametricMortality
     c = 0.001
 end
 
+"""
+    hazard(model,age)
 
+The force of mortality at `age`. More precisely: the ratio of the probability of failure/death to the survival function.
+"""
 function hazard(m::Makeham,age) 
     @unpack a,b,c = m
     return a*exp(b*age) + c
 end
 
+"""
+    cumhazard(model,age)
+
+The cumulative force of mortality at `age`. More precisely: the ratio of the cumulative probability of failure/death to the survival function.
+"""
 function cumhazard(m::Makeham,age) 
     @unpack a,b,c = m
     return a / b * (exp(b*age) - 1) + age * c
@@ -42,7 +53,9 @@ survival(m::Makeham,age) = exp(-cumhazard(m,age))
 
 Construct a mortality model following Gompertz' law of mortality.
 
-``hazard(x) =  ae^{bx}``
+``
+\\mathrm{hazard} \\left( {\\rm age} \\right) =  ae^{bx}
+``
 
 This is a special case of Makeham's law and will `Makeham` model where `c=0`.
 
@@ -61,7 +74,13 @@ end
 
 Construct a mortality model following InverseGompertz's law.
 
-``hazard(x) = \\frac{1}{\\sigma}e^\\frac{x-m}{\\sigma}/e^{e^\\frac{-(x-m)}{\\sigma}-1}``
+```math
+\\begin{aligned}
+\\mathrm{hazard} \\left( {\\rm age} \\right) &= \\frac{1}{\\sigma}e^\\frac{age-m}{\\sigma}/e^{e^\\frac{-(age-m)}{\\sigma}-1}``
+\\\\
+\\mathrm{survival} \\left( {\\rm age} \\right) &= \\frac{1 - e^{ - e^{\\frac{ - \\left( {\\rm age} - m \\right)}{\\sigma}}}}{1 - e^{ - e^{\\frac{m}{\\sigma}}}}``
+\\end{aligned}
+```
 
 Default args:
     
@@ -92,7 +111,9 @@ end
 
 Construct a mortality model following Opperman's law of mortality.
 
-``hazard(x) = \\frac{a}{\\sqrt{x}} + b +c\\sqrt[3]{x}``
+``
+\\mathrm{hazard} \\left( {\\rm age} \\right) = \\frac{a}{\\sqrt{age}} + b +c\\sqrt[3]{age}
+``
 
 Default args:
 
@@ -116,6 +137,20 @@ end
 
 Construct a mortality model following Opperman's law of mortality.
 
+```math
+\\begin{aligned}
+\\mu_1 &= a \\cdot e^{\\left(  - b \\right) \\cdot {\\rm age}}
+\\\\
+\\mu_2 &= c \\cdot e^{-0.5 \\cdot d \\cdot \\left( {\\rm age} - e \\right)^{2}}
+\\\\
+\\mu_3 &= f \\cdot e^{g \\cdot {\\rm age}}
+\\\\
+\\mathrm{hazard} \\left( {\\rm age} \\right) &= \\begin{cases}
+\\mu_1 + \\mu_3 & \\text{if } \\left( {\\rm age} = 0 \\right)\\\\
+\\mu_1 + \\mu_2 + \\mu_3 & \\text{otherwise}
+\\end{cases}
+\\end{aligned}
+```
 Default args:
 
     a = 0.02474 
@@ -154,6 +189,8 @@ end
 
 Construct a mortality model following Wittstein's law of mortality.
 
+``\\mathrm{hazard} \\left( {\\rm age} \\right) = \\frac{1}{b} \\cdot a^{ - \\left( b \\cdot {\\rm age} \\right)^{n}} + a^{ - \\left( m - {\\rm age} \\right)^{n}}``
+
 Default args:
 
     a = 1.5
@@ -183,6 +220,15 @@ Note that if σ > m, then the mode of the density is 0 and hx is a non-increasin
  - `m >0` is a measure of location
  - `σ >0` is measure of dispersion
 
+```math
+\\begin{aligned}
+\\mathrm{hazard} \\left( {\\rm age} \\right) = \\frac{1}{\\sigma} \\cdot \\left( \\frac{{\\rm age}}{m} \\right)^{\\frac{m}{\\sigma} - 1}
+\\\\
+\\mathrm{cumhazard} \\left( {\\rm age} \\right) = \\left( \\frac{{\\rm age}}{m} \\right)^{\\frac{m}{\\sigma}}
+\\\\
+\\mathrm{survival} \\left( {\\rm age} \\right) =  e^{ - \\mathrm{cumhazard} \\left( m, {\\rm age} \\right)}
+\\end{aligned}
+```
 
  Default args:
 
@@ -221,6 +267,16 @@ The Inverse-Weibull proves useful for modelling the childhood and teenage years,
  - `m >0` is a measure of location
  - `σ >0` is measure of dispersion
 
+```math
+\\begin{aligned}
+\\mathrm{hazard} \\left( {\\rm age} \\right) &= \\frac{\\frac{1}{\\sigma} \\cdot \\left( \\frac{{\\rm age}}{m} \\right)^{\\frac{ - m}{\\sigma} - 1}}{e^{\\left( \\frac{{\\rm age}}{m} \\right)^{\\frac{ - m}{\\sigma}}} - 1}
+\\\\
+\\mathrm{cumhazard}\\left( {\\rm age} \\right) &=  - \\log\\left( 1 - e^{ - \\left( \\frac{{\\rm age}}{m} \\right)^{\\frac{ - m}{\\sigma}}} \\right)
+\\\\
+\\mathrm{survival}\\left( {\\rm age} \\right) &=  e^{ - \\mathrm{cumhazard}\\left( m, {\\rm age} \\right)}
+\\end{aligned}
+```
+
  Default args:
 
     m = 5
@@ -251,6 +307,10 @@ end
 
 Construct a mortality model following Perks' law of mortality.
 
+``
+\\mathrm{hazard} \\left( {\\rm age} \\right) = \\frac{a + b \\cdot c^{{\\rm age}}}{b \\cdot c^{ - {\\rm age}} + 1 + d \\cdot c^{{\\rm age}}}
+``
+
 Default args:
 
     a = 0.002
@@ -274,6 +334,10 @@ end
     VanderMaen(;a,b,c,i,n)
 
 Construct a mortality model following VanderMaen's law of mortality.
+
+``
+\\mathrm{hazard} \\left( {\\rm age} \\right) = a + b \\cdot {\\rm age} + c \\cdot {\\rm age}^{2} + \\frac{i}{n - {\\rm age}}
+``
 
 Default args:
     
@@ -301,6 +365,10 @@ end
 
 Construct a mortality model following VanderMaen2's law of mortality.
 
+``
+\\mathrm{hazard} \\left( {\\rm age} \\right) = a + b \\cdot {\\rm age} + \\frac{i}{n - {\\rm age}}
+``
+
 Default args:
 
     a = 0.01
@@ -325,6 +393,10 @@ end
     StrehlerMildvan(;k,v₀,b,d)
 
 Construct a mortality model following StrehlerMildvan's law of mortality.
+
+``
+\\mathrm{hazard} \\left( {\\rm age} \\right) = k \\cdot e^{\\frac{\\left(  - v_0 \\right) \\cdot \\left( 1 - b \\cdot {\\rm age} \\right)}{d}}
+``
 
 Default args:
 
@@ -351,6 +423,10 @@ end
 
 Construct a mortality model following Beard's law of mortality.
 
+``
+\\mathrm{hazard} \\left( {\\rm age} \\right) = \\frac{a \\cdot e^{b \\cdot {\\rm age}}}{1 + k \\cdot a \\cdot e^{b \\cdot {\\rm age}}}
+``
+
 Default args:
     
     a = 0.002
@@ -372,6 +448,10 @@ end
     MakehamBeard(;a,b,c,k)
 
 Construct a mortality model following MakehamBeard's law of mortality.
+
+``
+\\mathrm{hazard} \\left( {\\rm age} \\right) =\\left( {\\rm age} \\right) = \\frac{a \\cdot e^{b \\cdot {\\rm age}}}{1 + k \\cdot a \\cdot e^{b \\cdot {\\rm age}}} + c
+``
 
 Default args:
 
@@ -397,6 +477,10 @@ end
 
 Construct a mortality model following Quadratic law of mortality.
 
+``
+\\mathrm{hazard} \\left( {\\rm age} \\right) = a + b \\cdot {\\rm age} + c \\cdot {\\rm age}^{2}
+``
+
 Default args:
 
     a = 0.01
@@ -419,6 +503,10 @@ end
 
 Construct a mortality model following GammaGompertz law of mortality.
 
+``
+\\mathrm{hazard} \\left( {\\rm age} \\right) = \\frac{a \\cdot e^{b \\cdot {\\rm age}}}{1 + \\frac{a \\cdot \\gamma}{b} \\cdot \\left( e^{b \\cdot {\\rm age}} - 1 \\right)}
+``
+
 Default args:
 
     a = 0.002
@@ -440,6 +528,10 @@ end
     Siler(;a,b,c,d,e)
 
 Construct a mortality model following Siler law of mortality.
+
+``
+\\mathrm{hazard} \\left( {\\rm age} \\right) = a \\cdot e^{\\left(  - b \\right) \\cdot {\\rm age}} + c + d \\cdot e^{e \\cdot {\\rm age}}
+``
 
 Default args:
 
@@ -466,6 +558,11 @@ end
     HeligmanPollard(;a,b,c,d,e,f,g,h)
 
 Construct a mortality model following HeligmanPollard law of mortality with 8 parameters.
+
+``
+\\mathrm{hazard} \\left( {\\rm age} \\right) = a \\cdot e^{\\left(  - b \\right) \\cdot {\\rm age}} + c + d \\cdot e^{e \\cdot {\\rm age}}
+``
+
 
 Default args:
 
@@ -498,6 +595,20 @@ end
     HeligmanPollard2(;a,b,c,d,e,f,g,h)
 
 Construct a mortality model following HeligmanPollard (alternate) law of mortality with 8 parameters.
+
+
+```math
+\\begin{aligned}
+\\mu_1 &= a^{\\left( {\\rm age} + b \\right)^{c}} + \\frac{g \\cdot h^{{\\rm age}}}{1 + g \\cdot h^{{\\rm age}}}
+\\\\
+\\mu_2 &= d \\cdot e^{\\left(  - e \\right) \\cdot \\left( \\log\\left( \\frac{{\\rm age}}{f} \\right) \\right)^{2}}
+\\\\
+\\mathrm{hazard}\\left( {\\rm age} \\right) &= \\begin{cases}
+\\mu_1 & \\text{if } \\left( {\\rm age} = 0 \\right)\\\\
+\\mu_1 + \\mu_2 & \\text{otherwise}
+\\end{cases}
+\\end{aligned}
+```
 
 Default args:
 
@@ -532,6 +643,19 @@ end
     HeligmanPollard3(;a,b,c,d,e,f,g,h,k)
 
 Construct a mortality model following HeligmanPollard (alternate) law of mortality with 9 parameters.
+
+```math
+\\begin{aligned}
+\\mu_1 &= a^{\\left( {\\rm age} + b \\right)^{c}} + \\frac{g \\cdot h^{{\\rm age}}}{1 + k \\cdot g \\cdot h^{{\\rm age}}}
+\\\\
+\\mu_2 &= d \\cdot e^{\\left(  - e \\right) \\cdot \\left( \\log\\left( \\frac{{\\rm age}}{f} \\right) \\right)^{2}}
+\\\\
+\\mathrm{hazard}\\left( {\\rm age} \\right) &= \\begin{cases}
+\\mu_1 & \\text{if } \\left( {\\rm age} = 0 \\right)\\\\
+\\mu_1 + \\mu_2 & \\text{otherwise}
+\\end{cases}
+\\end{aligned}
+```
 
 Default args:
 
@@ -569,6 +693,19 @@ end
 
 Construct a mortality model following HeligmanPollard (alternate) law of mortality with 9 parameters.
 
+```math
+\\begin{aligned}
+\\mu_1 &= a^{\\left( {\\rm age} + b \\right)^{c}} + \\frac{g \\cdot h^{{\\rm age}^{k}}}{1 + g \\cdot h^{{\\rm age}^{k}}}
+\\\\
+\\mu_2 &= d \\cdot e^{\\left(  - e \\right) \\cdot \\left( \\log\\left( \\frac{{\\rm age}}{f} \\right) \\right)^{2}}
+\\\\
+\\mathrm{hazard}\\left( {\\rm age} \\right) &= \\begin{cases}
+\\mu_1 & \\text{if } \\left( {\\rm age} = 0 \\right)\\\\
+\\mu_1 + \\mu_2 & \\text{otherwise}
+\\end{cases}
+\\end{aligned}
+```
+
 Default args:
 
     a = .0005
@@ -604,6 +741,10 @@ end
     RogersPlanck(;a₀, a₁, a₂, a₃, a, b, c, d, u)
 
 Construct a mortality model following RogersPlanck law of mortality.
+
+``
+\\mathrm{hazard}\\left( {\\rm age} \\right) = a_0 + a_1 \\cdot e^{\\left(  - a \\right) \\cdot {\\rm age}} + a_2 \\cdot e^{b \\cdot \\left( {\\rm age} - u \\right) - e^{\\left(  - c \\right) \\cdot \\left( {\\rm age} - u \\right)}} + a_3 \\cdot e^{d \\cdot {\\rm age}}
+``
 
 Default args:
 
@@ -641,6 +782,10 @@ end
 
 Construct a mortality model following Martinelle's law of mortality.
 
+``
+\\mathrm{hazard}\\left( {\\rm age} \\right) = \\frac{a \\cdot e^{b \\cdot {\\rm age}} + c}{1 + d \\cdot e^{b \\cdot {\\rm age}}} + k \\cdot e^{b \\cdot {\\rm age}}
+``
+
 Default args:
 
     a = 0.001
@@ -668,7 +813,24 @@ end
 
 Construct a mortality model following Kostaki's law of mortality. A nine-parameter adaptation of `HeligmanPollard`.
 
- > Kostaki, A. (1992). A nine‐parameter version of the Heligman‐Pollard formula. Mathematical Population Studies, 3(4), 277–288. doi:10.1080/08898489209525346 
+```math
+\\begin{aligned}
+\\mu_1 &= a^{\\left( {\\rm age} + b \\right)^{c}} + g \\cdot h^{{\\rm age}}
+\\\\
+\\mu_2 &= \\begin{cases}
+d \\cdot e^{ - \\left( e1 \\cdot \\log\\left( \\frac{{\\rm age}}{f} \\right) \\right)^{2}} & \\text{if } \\left( {\\rm age} \\leq f \\right)\\\\
+d \\cdot e^{ - \\left( e2 \\cdot \\log\\left( \\frac{{\\rm age}}{f} \\right) \\right)^{2}} & \\text{otherwise}
+\\end{cases}
+\\\\
+\\eta &= \\begin{cases}
+\\mu_1 & \\text{if } \\left( {\\rm age} = 0 \\right)\\\\
+\\mu_1 + \\mu_2 & \\text{otherwise}
+\\end{cases}
+\\\\
+\\mathrm{hazard}\\left( {\\rm age} \\right) &= \\frac{\\eta}{1 + \\eta}
+
+\\end{aligned}
+```
 
 Default args:
 
@@ -683,6 +845,7 @@ Default args:
     h = 1.1
 
 
+> Kostaki, A. (1992). A nine‐parameter version of the Heligman‐Pollard formula. Mathematical Population Studies, 3(4), 277–288. doi:10.1080/08898489209525346 
 """
 Base.@kwdef struct Kostaki <: ParametricMortality
     a = 0.0005
@@ -715,6 +878,16 @@ end
 
 Construct a mortality model following Kannisto's law of mortality.
 
+```math
+\\begin{aligned}
+\\mathrm{hazard}\\left( {\\rm age} \\right) &= \\frac{a \\cdot e^{b \\cdot {\\rm age}}}{1 + a \\cdot e^{b \\cdot {\\rm age}}}
+\\\\
+\\mathrm{cumhazard}\\left( {\\rm age} \\right) &= 1/a * log((1 + b*exp(b*age)) / (1 + a))
+\\\\
+\\mathrm{survival}\\left( {\\rm age} \\right) &= e^{ - \\mathrm{cumhazard}\\left( m, {\\rm age} \\right)}
+\\end{aligned}
+```
+
 Default args:
 
     a = 0.5
@@ -744,6 +917,10 @@ end
     KannistoMakeham(;a,b,c)
 
 Construct a mortality model following KannistoMakeham's law of mortality.
+
+``
+\\mathrm{hazard}\\left( {\\rm age} \\right) = \\frac{a \\cdot e^{b \\cdot {\\rm age}}}{1 + a \\cdot e^{b \\cdot {\\rm age}}} + c
+``
 
 Default args:
 
