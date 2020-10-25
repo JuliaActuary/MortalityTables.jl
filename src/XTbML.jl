@@ -122,7 +122,7 @@ end
 """
     readXTbML(path)
 
-    Loads the [XtbML](https://mort.soa.org/About.aspx) (the SOA XML data format for mortality tables) stored at the given path and returns a `MortalityTable`.
+Loads the [XtbML](https://mort.soa.org/About.aspx) (the SOA XML data format for mortality tables) stored at the given path and returns a `MortalityTable`.
 """
 function readXTbML(path)
     path

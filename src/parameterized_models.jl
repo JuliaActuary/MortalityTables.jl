@@ -8,6 +8,8 @@ abstract type ParametricMortality end
 
 Construct a mortality model following Makeham's law.
 
+``hazard(x) =  ae^{bx} + c``
+
 Default args:
     
     a = 0.0002
@@ -36,9 +38,11 @@ survival(m::Makeham,age) = exp(-cumhazard(m,age))
 
 
 """
-    Gompertz(a,b)
+    Gompertz(;a,b)
 
 Construct a mortality model following Gompertz' law of mortality.
+
+``hazard(x) =  ae^{bx}``
 
 This is a special case of Makeham's law and will `Makeham` model where `c=0`.
 
@@ -56,6 +60,8 @@ end
     InverseGompertz(;a,b,c)
 
 Construct a mortality model following InverseGompertz's law.
+
+``hazard(x) = \\frac{1}{\\sigma}e^\\frac{x-m}{\\sigma}/e^{e^\\frac{-(x-m)}{\\sigma}-1}``
 
 Default args:
     
@@ -82,9 +88,11 @@ function survival(m::InverseGompertz,age)
 end
 
 """
-    Opperman(a,b,c)
+    Opperman(;a,b,c)
 
 Construct a mortality model following Opperman's law of mortality.
+
+``hazard(x) = \\frac{a}{\\sqrt{x}} + b +c\\sqrt[3]{x}``
 
 Default args:
 
@@ -104,7 +112,7 @@ function hazard(m::Opperman,age)
 end
 
 """
-    Thiele(a,b,c,d,e,f,g)
+    Thiele(;a,b,c,d,e,f,g)
 
 Construct a mortality model following Opperman's law of mortality.
 
@@ -142,7 +150,7 @@ function hazard(m::Thiele,age)
 end
 
 """
-    Wittstein(a,b,m,n)
+    Wittstein(;a,b,m,n)
 
 Construct a mortality model following Wittstein's law of mortality.
 
@@ -167,7 +175,7 @@ function hazard(m::Wittstein,age)
 end
 
 """
-    Weibull(m,σ)
+    Weibull(;m,σ)
 
 Construct a mortality model following Weibull's law of mortality.
 
@@ -205,7 +213,7 @@ function survival(m::Weibull,age)
 end
 
 """
-    InverseWeibull(m,σ)
+    InverseWeibull(;m,σ)
 
 Construct a mortality model following Weibull's law of mortality.
 
@@ -239,7 +247,7 @@ function survival(m::InverseWeibull,age)
 end
 
 """
-    Perks(a,b,c,d)
+    Perks(;a,b,c,d)
 
 Construct a mortality model following Perks' law of mortality.
 
@@ -263,7 +271,7 @@ function hazard(m::Perks,age)
 end
 
 """
-    VanderMaen(a,b,c,i,n)
+    VanderMaen(;a,b,c,i,n)
 
 Construct a mortality model following VanderMaen's law of mortality.
 
@@ -289,7 +297,7 @@ function hazard(m::VanderMaen,age)
 end
 
 """
-    VanderMaen2(a,b,i,n)
+    VanderMaen2(;a,b,i,n)
 
 Construct a mortality model following VanderMaen2's law of mortality.
 
@@ -314,7 +322,7 @@ function hazard(m::VanderMaen2,age)
 end
 
 """
-    StrehlerMildvan(k,v₀,b,d)
+    StrehlerMildvan(;k,v₀,b,d)
 
 Construct a mortality model following StrehlerMildvan's law of mortality.
 
@@ -339,7 +347,7 @@ function hazard(m::StrehlerMildvan,age)
 end
 
 """
-    Beard(a,b,k)
+    Beard(;a,b,k)
 
 Construct a mortality model following Beard's law of mortality.
 
@@ -361,7 +369,7 @@ function hazard(m::Beard,age)
 end
 
 """
-    MakehamBeard(a,b,c,k)
+    MakehamBeard(;a,b,c,k)
 
 Construct a mortality model following MakehamBeard's law of mortality.
 
@@ -385,7 +393,7 @@ function hazard(m::MakehamBeard,age)
 end
 
 """
-    Quadratic(a,b,c)
+    Quadratic(;a,b,c)
 
 Construct a mortality model following Quadratic law of mortality.
 
@@ -407,7 +415,7 @@ function hazard(m::Quadratic,age)
 end
 
 """
-    GammaGompertz(a,b,γ)
+    GammaGompertz(;a,b,γ)
 
 Construct a mortality model following GammaGompertz law of mortality.
 
@@ -429,7 +437,7 @@ function hazard(m::GammaGompertz,age)
 end
 
 """
-    Siler(a,b,c,d,e)
+    Siler(;a,b,c,d,e)
 
 Construct a mortality model following Siler law of mortality.
 
@@ -455,7 +463,7 @@ function hazard(m::Siler,age)
 end
 
 """
-    HeligmanPollard(a,b,c,d,e,f,g,h)
+    HeligmanPollard(;a,b,c,d,e,f,g,h)
 
 Construct a mortality model following HeligmanPollard law of mortality with 8 parameters.
 
@@ -487,7 +495,7 @@ function hazard(m::HeligmanPollard,age)
 end
 
 """
-    HeligmanPollard2(a,b,c,d,e,f,g,h)
+    HeligmanPollard2(;a,b,c,d,e,f,g,h)
 
 Construct a mortality model following HeligmanPollard (alternate) law of mortality with 8 parameters.
 
@@ -521,7 +529,7 @@ function hazard(m::HeligmanPollard2,age)
 end
 
 """
-    HeligmanPollard3(a,b,c,d,e,f,g,h,k)
+    HeligmanPollard3(;a,b,c,d,e,f,g,h,k)
 
 Construct a mortality model following HeligmanPollard (alternate) law of mortality with 9 parameters.
 
@@ -557,7 +565,7 @@ function hazard(m::HeligmanPollard3,age)
 end
 
 """
-    HeligmanPollard4(a,b,c,d,e,f,g,h,k)
+    HeligmanPollard4(;a,b,c,d,e,f,g,h,k)
 
 Construct a mortality model following HeligmanPollard (alternate) law of mortality with 9 parameters.
 
@@ -593,7 +601,7 @@ function hazard(m::HeligmanPollard4,age)
 end
 
 """
-    RogersPlanck(a₀, a₁, a₂, a₃, a, b, c, d, u)
+    RogersPlanck(;a₀, a₁, a₂, a₃, a, b, c, d, u)
 
 Construct a mortality model following RogersPlanck law of mortality.
 
@@ -629,7 +637,7 @@ end
 
 
 """
-    Martinelle(a,b,c,d,k)
+    Martinelle(;a,b,c,d,k)
 
 Construct a mortality model following Martinelle's law of mortality.
 
@@ -656,7 +664,7 @@ end
 
 
 """
-    Kostaki(a,b,c,d,e1,e2,f,g,h)
+    Kostaki(;a,b,c,d,e1,e2,f,g,h)
 
 Construct a mortality model following Kostaki's law of mortality. A nine-parameter adaptation of `HeligmanPollard`.
 
@@ -703,7 +711,7 @@ function hazard(m::Kostaki,age)
 end
 
 """
-    Kannisto(a,b)
+    Kannisto(;a,b)
 
 Construct a mortality model following Kannisto's law of mortality.
 
@@ -733,7 +741,7 @@ end
 
 
 """
-    KannistoMakeham(a,b,c)
+    KannistoMakeham(;a,b,c)
 
 Construct a mortality model following KannistoMakeham's law of mortality.
 
@@ -757,7 +765,7 @@ end
 ### Generic Functions
 
 """
-    μ(m::ParametricMortality,age)
+    μ(;m::ParametricMortality,age)
 
 ``\\mu_x``: Return the force of mortality at the given age. 
 """

@@ -275,6 +275,8 @@ decrement(v,from_age,to_age,dd::DeathDistribution) = 1 .- survival(v, from_age, 
 
 Returns the last index of the given vector. For mortality vectors this means the last attained age for which a rate is defined.
 
+Note that `omega` can vary depending on the issue age for a select table, and that a select `omega` may differ from the table's ultimate `omega`.
+
 ω is aliased to omega, but unexported. To use, do `using MortalityTables: ω` when importing or call `MortalityTables.ω()`
 
 # Examples
