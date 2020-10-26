@@ -92,6 +92,9 @@
 
     end
 
+    @testset "Issue #88 - Stackoverflow" begin
+        @test survival(MortalityTables.mortality_vector([0.5,0.5],start_age=50),50,50.5,MortalityTables.Uniform()) ≈ 1 - 0.5 * 0.5
+    end
  
 end
 
