@@ -962,7 +962,7 @@ end
 # survival(m::ParametricMortality,to_age) = survival(m, 0, to_age)
 
 survival(m::ParametricMortality,to_age) = exp(-quadgk(age->μ(m, age), 0, to_age)[1])
-survival(m,from,to) = survival(m,to) / survival(m,from)
+survival(m::ParametricMortality,from,to) = survival(m,to) / survival(m,from)
 decrement(m::ParametricMortality,from_age,to_age) = 1 - survival(m, from_age, to_age)
 decrement(m::ParametricMortality,to_age) = 1 - survival(m, to_age)
 
