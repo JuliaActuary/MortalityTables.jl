@@ -115,4 +115,4 @@ This package contains tables downloaded from [mort.SOA.org](https://mort.soa.org
 
 ## Discussion and Questions
 
-If you have other ideas or questions, feel free to also open an issue, or discuss on the community [Zulip](https://julialang.zulipchat.com/#narrow/stream/249536-actuary) or [Slack #actuary channel](https://slackinvite.julialang.org/). We welcome all actuarial and related disciplines!
+If you have other ideas or questions, feel free to also open an issue, or discuss on the community [Zulip](https://julialang.zulipchat.com/#narrow/stream/249536-actuary) or [Slack #actuary channel](https://julialang.org/slack/). We welcome all actuarial and related disciplines!
