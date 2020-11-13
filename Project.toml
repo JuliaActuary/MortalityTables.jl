@@ -15,7 +15,7 @@ UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
 XMLDict = "228000da-037f-5747-90a9-8195ccbf91a5"
 
 [compat]
-HTTP = "^0.8"
+HTTP = "^0.8, 0.9"
 OffsetArrays = "1.0"
 Parsers = "^1"
 QuadGK = "^2.3"
