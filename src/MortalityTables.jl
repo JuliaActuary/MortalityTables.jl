@@ -1,6 +1,4 @@
 module MortalityTables
-using HTTP
-using Transducers
 using OffsetArrays
 using Parsers
 using QuadGK
@@ -9,12 +7,17 @@ using UnPack
 using XMLDict
 using Pkg.Artifacts
 
+include("table_source_map.jl")
 include("MetaData.jl")
 include("death_distribution.jl")
 include("MortalityTable.jl")
 include("XTbML.jl")
 include("get_SOA_table.jl")
 include("parameterized_models.jl")
+
+table_dirs = Dict(
+    "mort.soa.org" => artifact"mort.soa.org",
+) 
 
 export MortalityTable,
     survival,
@@ -28,7 +31,6 @@ export MortalityTable,
     Constant,
     DeathDistribution,
     get_SOA_table,
-    get_SOA_table!,
     Makeham, Gompertz, MakehamGompertz,
     hazard,cumhazard,
     mortality_vector

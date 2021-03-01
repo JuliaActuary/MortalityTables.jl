@@ -1,6 +1,6 @@
-[SOA_Tables]
-git-tree-sha1 = "52b77526be6e7c36ebf8e03009e04ef52f802925"
+["mort.soa.org"]
+git-tree-sha1 = "6164a6026f108fe95828b689fcd3b992acbff7c3"
 
-    [[SOA_Tables.download]]
-    sha256 = "4542fd10f0f417f5980740371240070fd144c167a5ebf4d0631708bc4a3307f2"
-    url = "https://github.com/JuliaActuary/Artifacts/raw/master/SOA_Tables_20201022.tar.gz"
+    [["mort.soa.org".download]]
+    sha256 = "6f5eb4909564b55a3397ccf4f4c74290e002f7e2e2474cebeb224bb23a9a2606"
+    url = "https://github.com/JuliaActuary/Artifacts/raw/v2020-02-15/mort.soa.org/2020-02-15.tar.gz"

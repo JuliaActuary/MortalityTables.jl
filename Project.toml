@@ -1,26 +1,22 @@
 name = "MortalityTables"
 uuid = "4780e19d-04b9-53dc-86c2-9e9aa59b5a12"
 authors = ["Alec Loudenback <alecloudenback@gmail.com>"]
-version = "1.0.1"
+version = "2.0.0"
 
 [deps]
-HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
 OffsetArrays = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
 Parsers = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 QuadGK = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
 Requires = "ae029012-a4dd-5104-9daa-d747884805df"
-Transducers = "28d57a85-8fef-5791-bfe6-a80928e7c999"
 UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
 XMLDict = "228000da-037f-5747-90a9-8195ccbf91a5"
 
 [compat]
-HTTP = "^0.8, 0.9"
 OffsetArrays = "1.0"
 Parsers = "^1"
 QuadGK = "^2.3"
 Requires = "^1"
-Transducers = "^0.4"
 UnPack = "^1"
 XMLDict = "0.4"
 julia = "^1.4"

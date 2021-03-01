@@ -34,22 +34,11 @@ A Julia package for working with MortalityTables. Has:
 
 ### Quickstart
 
-Loading the package and bundled tables:
+
+Load and see information about a particular table:
 
 ```julia
-julia> using MortalityTables
-
-julia> tables = MortalityTables.tables()
-Dict{String,MortalityTable} with 266 entries:
-  "2015 VBT Female Non-Smoker RR90 ALB"                                       => SelectUltimateTable{OffsetArray{OffsetArray{Float64,1,Array{Float64,1}},1,Array{OffsetArray{F…  
-  "2017 Loaded CSO Preferred Structure Nonsmoker Preferred Female ANB"        => SelectUltimateTable{OffsetArray{OffsetArray{Float64,1,Array{Float64,1}},1,Array{OffsetArray{F…  
-  ⋮                                                                            => ⋮
-```
-
-Get information about a particular table:
-
-```julia
-julia> vbt2001 = tables["2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB"]
+julia> vbt2001 = MortalityTables.table("2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB")
 MortalityTable (Insured Lives Mortality):
    Name:
        2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB
@@ -119,9 +108,8 @@ This example shows how to develop a visual comparison of rates from scratch, but
 using MortalityTables, Plots
 
 
-tables = MortalityTables.tables()
-cso_2001 = tables["2001 CSO Super Preferred Select and Ultimate - Male Nonsmoker, ANB"]
-cso_2017 = tables["2017 Loaded CSO Preferred Structure Nonsmoker Super Preferred Male ANB"]
+cso_2001 = MortalityTables.table("2001 CSO Super Preferred Select and Ultimate - Male Nonsmoker, ANB")
+cso_2017 = MortalityTables.table("2017 Loaded CSO Preferred Structure Nonsmoker Super Preferred Male ANB")
 
 issue_age = 80
 mort = [
@@ -194,51 +182,21 @@ be for making it easier](https://www.soa.org/globalassets/assets/library/researc
 
 ### Bundled Tables
 
-Comes with some tables built in via [mort.SOA.org](https://mort.soa.org) and by using [you agree to their terms](https://mort.soa.org/TermsOfUse.aspx).
+Comes with all tables built in via [mort.SOA.org](https://mort.soa.org) and by using [you agree to their terms](https://mort.soa.org/TermsOfUse.aspx). The tables were accessed and mirrored as of the date documented in the [JuliaActuary Artifacts repository](https://github.com/JuliaActuary/Artifacts)
 
-Not all tables have been tested that they work by default, though no issues have
-been reported with any of the the VBT/CSO/other common tables.
-
-Sample of some of the included table sets:
-
-```plaintext
-2017 Loaded CSO
-2015 VBT
-2001 VBT
-2001 CSO
-1980 CSO
-1980 CET
-```
-
-[Click here to see the full list of tables included.](BundledTables.md)
-
-If you would like more tables added by default, please open a GitHub issue with the request.
+Not all tables have been tested that they work by default, though no issues have been reported with any of the the VBT/CSO/other common tables.
 
 #### Load custom set of tables
 
-Download the `.xml` [aka the (`XTbML` format)](https://mort.soa.org/About.aspx) version of the table from [mort.SOA.org](https://mort.soa.org) and place it in a directory of your choosing. Then call `MortaliyTables.tables(path_to_your_dir)`.
+Download the `.xml` [aka the (`XTbML` format)](https://mort.soa.org/About.aspx) version of the table from [mort.SOA.org](https://mort.soa.org) and place it in a directory of your choosing. Then call `MortaliyTables.read_tables(path_to_your_dir)`.
 
 ### [mort.SOA.org](https://mort.soa.org) Tables
 
-Given a table id ([for example](https://mort.soa.org/ViewTable.aspx?&TableIdentity=60029) `60029`)
-you can request the table directly from the SOA's mortality table service. Remember
-that not all tables have been tested, though the standard source format should mean
-compatibility with `MortalityTables.jl`.
+Given a table id ([for example](https://mort.soa.org/ViewTable.aspx?&TableIdentity=60029) `60029`), you can also use this to get the table of interest:
 
 ```julia
-aus_life_table_female = get_SOA_table(60029)
+aus_life_table_female = MortalityTables.table(60029)
 aus_life_table_female[0]  # returns the attained age 0 rate of 0.10139
-```
-
-You can combine it with the bundled tables too:
-
-```julia
-tables = MortalityTables.tables()
-
-get_SOA_table!(tables,60029) # this modifies `tables` by adding the new table
-
-t = tables["Australian Life Tables 1891-1900 Female"]
-t[0]  # returns the attained age 0 rate of 0.10139
 ```
 
 ### From CSV
@@ -279,7 +237,7 @@ ult_vec = [0.005, 0.008, ...,0.805,1.00]
 ult = UltimateMortality(ult_vec,start_age = 15)
 ```
 
-We can now use this the ulitmate rates all by itself:
+We can now use this the ultimate rates all by itself:
 
 ```julia
 q(ult,15,1) # 0.005

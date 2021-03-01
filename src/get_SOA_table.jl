@@ -1,44 +1,26 @@
 """
     get_SOA_table(id)
+    get_SOA_table(table_name)
 
-Given the id of a `mort.SOA.org` table, grab it and return it as a `MortalityTable`.
+Given the id or name of a `mort.SOA.org` table, grab it and return it as a `MortalityTable`.
 
 !!! Remember that not all tables have been tested to work.
 """
 function get_SOA_table(id::Int)
-    path = "https://mort.soa.org/Export.aspx?Type=xml&TableIdentity=$id"
-    r = HTTP.request("GET", path, require_ssl_verification=false)
+    readXTbML(joinpath(artifact"mort.soa.org","t$id.xml"))
+end
 
-    # Why skip the first three bytes of the response?
-
-    # From https://docs.python.org/3/library/codecs.html
-    # To increase the reliability with which a UTF-8 encoding can be detected,
-    # Microsoft invented a variant of UTF-8 (that Python 2.5 calls "utf-8-sig")
-    # for its Notepad program: Before any of the Unicode characters is written
-    # to the file, a UTF-8 encoded BOM (which looks like this as a byte sequence:
-    # 0xef, 0xbb, 0xbf) is written.
-    if r.body[1:3] == [0xef, 0xbb, 0xbf]
-        xml = getXML(String(r.body[4:end]))
-    else
-        xml = getXML(String(r.body))
-    end
-    return XTbML_Table_To_MortalityTable(parseXTbMLTable(xml, path))
-
+function get_SOA_table(table_name::String;source_map=table_source_map)
+    entry = findfirst(x-> x.name == table_name, source_map)
+    readXTbML(joinpath(artifact"mort.soa.org","t$(source_map[entry].id).xml"))
 end
 
 """
-    get_SOA_table!(dict,id)
+    table(id)
+    table(name)
 
-Will lookup the given mortality table and add it to the given dict, with the name of
-the table acting as the added key in the dictionary.
+Given the id or name of a `mort.SOA.org` table, grab it and return it as a `MortalityTable`.
 
-This modifies the given `dict` (as is indicated by the conventional `!` at the end
-of the function name).
-
-!! Remember that not all tables have been tested to work.
+!!! Remember that not all tables have been tested to work.
 """
-function get_SOA_table!(dict, id::Int)
-    tbl = get_SOA_table(id)
-    merge!(dict, Dict(tbl.metadata.name => tbl))
-
-end
+table = get_SOA_table
