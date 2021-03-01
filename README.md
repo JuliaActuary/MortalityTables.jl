@@ -8,7 +8,7 @@
 
 A Julia package for working with MortalityTables. Has:
 
-- Lots of bundled SOA mort.soa.org tables
+- Full set of SOA mort.soa.org tables included
 - `survival` and `decrement` functions to calculate decrements over period of time
 - Partial year mortality calculations (Uniform, Constant, Balducci)
 - Friendly syntax and flexible usage
