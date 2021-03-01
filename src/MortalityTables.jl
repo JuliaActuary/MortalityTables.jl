@@ -1,5 +1,4 @@
 module MortalityTables
-using Transducers
 using OffsetArrays
 using Parsers
 using QuadGK
