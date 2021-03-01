@@ -167,6 +167,8 @@ function read_tables(dir=nothing)
     return Dict(tbl.metadata.name => tbl for tbl in tables if ~isnothing(tbl))
 end
 
+
+# this is used to generate the table mapping in table_source_map.jl
 function _write_available_tables()
         table_dir = artifact"mort.soa.org"
     tables = []
