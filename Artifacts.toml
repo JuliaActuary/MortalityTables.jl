@@ -1,6 +1,6 @@
 ["mort.soa.org"]
-git-tree-sha1 = "6900b4da35c541103fda7eb23a437ee7ccd1601b"
+git-tree-sha1 = "6164a6026f108fe95828b689fcd3b992acbff7c3"
 
     [["mort.soa.org".download]]
-    sha256 = "071bffab720c2658b385beca07b222bc6a69c19d64cfad624c5c136fb1f13212"
+    sha256 = "6f5eb4909564b55a3397ccf4f4c74290e002f7e2e2474cebeb224bb23a9a2606"
     url = "https://github.com/JuliaActuary/Artifacts/raw/v2020-02-15/mort.soa.org/2020-02-15.tar.gz"

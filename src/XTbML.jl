@@ -1,8 +1,19 @@
 
 
 function open_and_read(path)
-    s = open(path) do file
-        read(file, String)
+    bytes = read(path)
+    if bytes[1:3] == [0xef, 0xbb, 0xbf]
+        # Why skip the first three bytes of the response?
+
+        # From https://docs.python.org/3/library/codecs.html
+        # To increase the reliability with which a UTF-8 encoding can be detected,
+        # Microsoft invented a variant of UTF-8 (that Python 2.5 calls "utf-8-sig")
+        # for its Notepad program: Before any of the Unicode characters is written
+        # to the file, a UTF-8 encoded BOM (which looks like this as a byte sequence:
+        # 0xef, 0xbb, 0xbf) is written.
+        return String(bytes[4:end])
+    else
+        return String(bytes)
     end
 end
 
@@ -125,7 +136,6 @@ end
 Loads the [XtbML](https://mort.soa.org/About.aspx) (the SOA XML data format for mortality tables) stored at the given path and returns a `MortalityTable`.
 """
 function readXTbML(path)
-    path
     x = open_and_read(path) |> getXML
     XTbML_Table_To_MortalityTable(parseXTbMLTable(x, path))
 end
@@ -134,22 +144,44 @@ end
 # Load Available Tables ###
 
 """
-    tables(dir=nothing)
+    read_tables(dir=nothing)
 
 Loads the [XtbML](https://mort.soa.org/About.aspx) (the SOA XML data format for mortality tables) stored in the given path. If no path is specified, will load the packages in the MortalityTables package directory. To see where your system keeps packages, run `DEPOT_PATH` from a Julia REPL.
 """
-function tables(dir=nothing)
+function read_tables(dir=nothing)
     if isnothing(dir)
-        table_dir = artifact"SOA_Tables"
+        table_dir = artifact"mort.soa.org"
     else
         table_dir = dir
     end
     tables = []
     @info "Loading built-in Mortality Tables..."
     for (root, dirs, files) in walkdir(table_dir)
-        transducer = opcompose(Filter(x -> basename(x)[end - 3:end] == ".xml"), Map(x -> readXTbML(joinpath(root, x))))
-        tables = files |> transducer |> tcopy
+        for file in files
+            if endswith(file,".xml") && !startswith(file,".")
+                tbl =  readXTbML(joinpath(root,file))
+                push!(tables,tbl)
+            end
+        end
     end
-    # return tables
     return Dict(tbl.metadata.name => tbl for tbl in tables if ~isnothing(tbl))
+end
+
+function _write_available_tables()
+        table_dir = artifact"mort.soa.org"
+    tables = []
+    @info "Loading built-in Mortality Tables..."
+    for (root, dirs, files) in walkdir(table_dir)
+        for file in files
+            if endswith(file,".xml") && !startswith(file,".")
+            x = open_and_read(joinpath(root,file)) |> XMLDict.xml_dict
+            md = x["XTbML"]["ContentClassification"]
+            name = get(md, "TableName", nothing) |> strip
+            content_type = get(get(md, "ContentType", nothing), "", nothing) |> strip
+            id = get(md, "TableIdentity", nothing) |> strip
+            push!(tables,(source="mort.soa.org",name=name,id=Parsers.parse(Int,id)))
+            end
+        end
+    end
+    return sort!(tables,by=last)
 end

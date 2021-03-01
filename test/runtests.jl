@@ -6,7 +6,7 @@ using Pkg.Artifacts
 
 # This is the path to the Artifacts.toml we will manipulate
 MT_artifact_toml = joinpath(pkgdir(MortalityTables), "Artifacts.toml")
-tbl_dir = artifact_hash("SOA_Tables", MT_artifact_toml) |> artifact_path
+soa_tbl_dir = artifact_hash("mort.soa.org", MT_artifact_toml) |> artifact_path
 
 include("CSV.jl")
 include("basic.jl")
@@ -15,8 +15,7 @@ include("parameterized_models.jl")
 include("distribution.jl")
 
 # load tables to be used in subsequent tests
-tables = MortalityTables.tables()
-@test length(tables) > 0
+@test isa(MortalityTables.table(1),MortalityTables.MortalityTable)
 
 include("projection_scale.jl")
 include("MortalityTables.jl")

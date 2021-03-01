@@ -3,15 +3,14 @@
     @testset "TableMetaData" begin
         @testset "whitespace management" begin
             # "2017 Loaded CSO Smoker Distinct Nonsmoker Female ALB" comes with a trailing whitespace
-            @test "2017 Loaded CSO Smoker Distinct Nonsmoker Female ALB" in
-                  keys(tables)
+            @test ~isnothing(findfirst(x -> x.name == "2017 Loaded CSO Smoker Distinct Nonsmoker Female ALB",MortalityTables.table_source_map))
         end
     end
 
     @testset "SOA tables" begin
 
         @testset "Ultimate Only SOA table" begin
-            cso1980 = tables["1980 CSO Basic Table – Male, ANB"]
+            cso1980 = MortalityTables.table("1980 CSO Basic Table – Male, ANB")
             @test cso1980.ultimate[35] ≈ 0.00118
             @test cso1980[35] ≈ 0.00118
             @test cso1980[35:36] ≈ [0.00118, 0.00128]
@@ -24,7 +23,7 @@
 
         @testset "2001 VBT" begin
             vbt2001 =
-                tables["2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB"]
+                MortalityTables.table("2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB")
 
 
             @test vbt2001.select[35][35] ≈ 0.00036
@@ -45,7 +44,7 @@
 
         @testset "2001 CSO" begin
             cso2001 =
-                tables["2001 CSO Super Preferred Select and Ultimate - Male Nonsmoker, ANB"]
+                MortalityTables.table("2001 CSO Super Preferred Select and Ultimate - Male Nonsmoker, ANB")
 
             @test cso2001.select[35][35] ≈ 0.00037
             @test cso2001.select[35][35 + 60] ≈ 0.26719
