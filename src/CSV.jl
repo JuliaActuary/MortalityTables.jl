@@ -136,7 +136,7 @@ end
 
 function last_values_line(lines,startline)
 	for i in startline:lastindex(lines)
-		if ismissing(lines[i][1])
+		if ismissing(lines[i][1]) | startswith(lines[i][1], "Table")
 			return i - 1
 		end
 	end
