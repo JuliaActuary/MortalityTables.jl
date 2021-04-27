@@ -15,6 +15,7 @@
 
         # calculate sum of tpx in Excel
         @test life_expectancy(t.ultimate,55) ≈ 22.16469212 atol=1e-6
+        @test life_expectancy(t.ultimate,100) ≈ 0.0 atol=1e-6
 
         # relation of curtate to complete, ALMC 2.6.1
         @test life_expectancy(t.ultimate,55,MortalityTables.Uniform()) ≈ 22.16469212 + 0.5 atol=1e-3
