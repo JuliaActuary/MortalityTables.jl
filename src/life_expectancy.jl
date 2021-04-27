@@ -3,13 +3,24 @@
     life_expectancy(table,age,DeathDistribution)
 
 Calcuate the remaining life expectancy. Assumes curtate life expectancy for tables if not Parametric or DeathDistribution given.
+
+The life_expectancy of the last age defined in the table is set to be `0.0`, even if the table does not end with a rate of `1.0`.
 """
 function life_expectancy(table,age)
-    sum(survival(table,age,age + dur) for dur in 1:lastindex(table) -age)
+    if age == lastindex(table)
+        return 0.
+    else
+        sum(survival(table,age,age + dur) for dur in 1:lastindex(table) -age)
+    end
 end
 
 function life_expectancy(table,age,dist)
-    QuadGK.quadgk(to -> survival(table,age,to+age,dist),0,lastindex(table)-age)[1]
+    if age == lastindex(table)
+        return 0.
+    else
+        QuadGK.quadgk(to -> survival(table,age,to+age,dist),0,lastindex(table)-age)[1]
+    end
+
 end
 
 function life_expectancy(table::ParametricMortality,age)
