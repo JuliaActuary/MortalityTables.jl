@@ -5,7 +5,7 @@
 Calcuate the remaining life expectancy. Assumes curtate life expectancy for tables if not Parametric or DeathDistribution given.
 """
 function life_expectancy(table,age)
-    sum(survival(table,age,age + dur) for dur in 1:length(table) -age)
+    sum(survival(table,age,age + dur) for dur in 1:lastindex(table) -age)
 end
 
 function life_expectancy(table,age,dist)
