@@ -13,6 +13,7 @@ include("basic.jl")
 include("XTbML.jl")
 include("parameterized_models.jl")
 include("distribution.jl")
+include("life_expectancy.jl")
 
 # load tables to be used in subsequent tests
 @test isa(MortalityTables.table(1),MortalityTables.MortalityTable)

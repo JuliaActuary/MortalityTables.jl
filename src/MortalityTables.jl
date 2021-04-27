@@ -14,6 +14,7 @@ include("MortalityTable.jl")
 include("XTbML.jl")
 include("get_SOA_table.jl")
 include("parameterized_models.jl")
+include("life_expectancy.jl")
 
 table_dirs = Dict(
     "mort.soa.org" => artifact"mort.soa.org",
@@ -22,6 +23,7 @@ table_dirs = Dict(
 export MortalityTable,
     survival,
     decrement,
+    life_expectancy,
     omega,
     TableMetaData,
     SelectMortality,
