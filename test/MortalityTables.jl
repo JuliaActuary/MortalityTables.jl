@@ -17,6 +17,8 @@
             @test cso1980[35 + 60] ≈ 0.27302
             @test cso1980[95] ≈ 0.27302
             @test_throws BoundsError cso1980[125]
+            @test_throws ArgumentError survival(cso1980,10,15)
+            @test_throws ArgumentError decrement(cso1980,10,15)
             @test omega(cso1980.ultimate) == 100
             @test MortalityTables.ω(cso1980) == 100
         end

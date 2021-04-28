@@ -220,6 +220,8 @@ function survival(v::T, from_age, to_age, dd::DeathDistribution) where {T <: Abs
     end
 end
 
+survival(v::MortalityTable,args...) = throw(ArgumentError("The first argument should be a vector of rates instead of an entire table. E.g. `table.ulitmate` or `table.select[age]`."))
+
 # Reference: Experience Study Calculations, 2016, Society of Actuaries
 # https://www.soa.org/globalassets/assets/Files/Research/2016-10-experience-study-calculations.pdf
 function decrement_partial_year(v, from_age, to_age, dd::Uniform)
@@ -267,7 +269,7 @@ decrement(v,to_age) = 1 .- survival(v, to_age)
 decrement(v,to_age,dd::DeathDistribution) = 1 .- survival(v, to_age, dd)  
 decrement(v,from_age,to_age) = 1 .- survival(v, from_age, to_age) 
 decrement(v,from_age,to_age,dd::DeathDistribution) = 1 .- survival(v, from_age, to_age, dd) 
-
+decrement(v::MortalityTable,args...) = throw(ArgumentError("The first argument should be a vector of rates instead of an entire table. E.g. `table.ulitmate` or `table.select[age]`."))
 
 """
     omega(x)
