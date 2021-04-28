@@ -218,9 +218,11 @@ julia> vbt2001.ultimate[95]        # ultimate vectors only need to be called wit
 
 ```@docs
 MortalityTables.survival
-MortalityTables.decrement
 ```
 
+```@docs
+MortalityTables.decrement
+```
 ## Life Expectancy
 
 Calculate curtate or complete life expectancy.
