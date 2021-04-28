@@ -26,3 +26,5 @@ end
 function life_expectancy(table::ParametricMortality,age)
     QuadGK.quadgk(to -> survival(table,age,to+age),0,Inf)[1]
 end
+
+life_expectancy(table::MortalityTable,args...) = throw(ArgumentError("The first argument should be a vector of rates instead of an entire table. E.g. `table.ulitmate` or `table.select[age]`."))

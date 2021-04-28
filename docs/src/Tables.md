@@ -1,7 +1,5 @@
 # Tables
 
-
-
 ```@meta
 CurrentModule = MortalityTables
 ```
@@ -137,9 +135,8 @@ my_table = MortalityTable(
 
 ```@docs
 MortalityTables.readXTbML
+MortalityTables.table
 MortalityTables.get_SOA_table
-MortalityTables.tables
-MortalityTables.get_SOA_table!
 ```
 
 ## Table Constructors
@@ -167,7 +164,7 @@ Find the final age for which a table defines a rate.
 MortalityTables.omega
 ```
 
-## Survival and Decrement and Rates
+## Rates, Survival and Decrement
 
 To access the rates, simply index by the attained age. Example:
 
@@ -217,11 +214,23 @@ julia> vbt2001.ultimate[95]        # ultimate vectors only need to be called wit
  0.24298
 ```
 
-To calculate the survivorship or cumulative decrement:
+### Docstrings
 
 ```@docs
 MortalityTables.survival
+```
+
+```@docs
 MortalityTables.decrement
+```
+## Life Expectancy
+
+Calculate curtate or complete life expectancy.
+
+### Docstrings
+
+```@docs
+MortalityTables.life_expectancy
 ```
 
 ## Fractional Year Assumptions

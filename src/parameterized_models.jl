@@ -950,17 +950,6 @@ function μ(m::ParametricMortality, age)
     return hazard(m,age)
 end
 
-
-# # use the integral to calculate the one-year survival
-# function survival(m::ParametricMortality, from_age, to_age) 
-#     if from_age == to_age
-#         return 1.0
-#     else
-#         return exp(-quadgk(age->μ(m, age), from_age, to_age)[1])
-#     end
-# end
-# survival(m::ParametricMortality,to_age) = survival(m, 0, to_age)
-
 survival(m::ParametricMortality,to_age) = exp(-quadgk(age->μ(m, age), 0, to_age)[1])
 survival(m::ParametricMortality,from,to) = survival(m,to) / survival(m,from)
 decrement(m::ParametricMortality,from_age,to_age) = 1 - survival(m, from_age, to_age)

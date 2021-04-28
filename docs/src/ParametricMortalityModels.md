@@ -51,12 +51,12 @@ survival(m,20,25) # the five year survival rate
 Many of the models only have analytical forms for either the `hazard` or `survival` curve. You can still call either on any of the models, as MortalityTables with numerically integrate or automatic differentiate as appropriate.
 
 ```@docs
-decrement
 MortalityTables.hazard
 MortalityTables.cumhazard
-MortalityTables.survival
 MortalityTables.μ
 ```
+
+Also see [`survival`](@ref) and [`decrement`](@ref).
 
 ## Available Models
 
