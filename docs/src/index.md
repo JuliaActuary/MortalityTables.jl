@@ -21,12 +21,17 @@ A Julia package for working with MortalityTables. Has:
 ## Installation
 
 Installation
-The package can be installed with the Julia package manager. From the Julia REPL, type ] to enter the Pkg REPL mode and run:
+The package can be installed with the Julia package manager. From the Julia REPL, type `]` to enter the Pkg REPL mode and run:
 
+```julia-repl
 pkg> add MortalityTables
+```
+
 Or, equivalently, via the Pkg API:
 
+```julia-repl
 julia> import Pkg; Pkg.add("MortalityTables")
+```
 
 ## Quickstart
 

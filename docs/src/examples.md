@@ -7,22 +7,11 @@ Depth = 5
 
 ## Quickstart
 
-Loading the package and bundled tables:
+
+Load and see information about a particular table:
 
 ```julia
-julia> using MortalityTables
-
-julia> tables = MortalityTables.tables()
-Dict{String,MortalityTable} with 266 entries:
-  "2015 VBT Female Non-Smoker RR90 ALB"                                       => SelectUltimateTable{OffsetArray{OffsetArray{Float64,1,Array{Float64,1}},1,Array{OffsetArray{F…  
-  "2017 Loaded CSO Preferred Structure Nonsmoker Preferred Female ANB"        => SelectUltimateTable{OffsetArray{OffsetArray{Float64,1,Array{Float64,1}},1,Array{OffsetArray{F…  
-  ⋮                                                                            => ⋮
-```
-
-Get information about a particular table:
-
-```julia
-julia> vbt2001 = tables["2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB"]
+julia> vbt2001 = MortalityTables.table("2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB")
 MortalityTable (Insured Lives Mortality):
    Name:
        2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB
@@ -92,9 +81,8 @@ This example shows how to develop a visual comparison of rates from scratch, but
 using MortalityTables, Plots
 
 
-tables = MortalityTables.tables()
-cso_2001 = tables["2001 CSO Super Preferred Select and Ultimate - Male Nonsmoker, ANB"]
-cso_2017 = tables["2017 Loaded CSO Preferred Structure Nonsmoker Super Preferred Male ANB"]
+cso_2001 = MortalityTables.table("2001 CSO Super Preferred Select and Ultimate - Male Nonsmoker, ANB")
+cso_2017 = MortalityTables.table("2017 Loaded CSO Preferred Structure Nonsmoker Super Preferred Male ANB")
 
 issue_age = 80
 mort = [
@@ -136,7 +124,7 @@ contour(durations,
 
 ![heatmap comparison of 2017 CSO and 2001 CSO Mortality Table](https://user-images.githubusercontent.com/711879/83955100-11861180-a815-11ea-9a22-c85bacceb4bc.png)
 
-### Scaling and capping rates
+## Scaling and capping rates
 
 Say that you want to take a given mortality table, scale it by `130%`, and cap it at `1.0`. You can do this easliy by [broadcasting](https://docs.julialang.org/en/v1/manual/arrays/index.html#Broadcasting-1) over the underlying rates (which is really just a vector of numbers at the end of the day):
 
