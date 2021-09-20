@@ -10,6 +10,7 @@ makedocs(;
             "Tables" => "Tables.md",
             "Parametric Models" => "ParametricMortalityModels.md",
             "Comparison Tool" => "ComparisonTool.md",
+            "Package Design" => "design.md",
         ],
         "Reference" => "Reference.md",
     ],
