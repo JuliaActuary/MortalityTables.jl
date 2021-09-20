@@ -1,7 +1,7 @@
 name = "MortalityTables"
 uuid = "4780e19d-04b9-53dc-86c2-9e9aa59b5a12"
 authors = ["Alec Loudenback <alecloudenback@gmail.com>"]
-version = "2.1.4"
+version = "2.1.5"
 
 [deps]
 OffsetArrays = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
