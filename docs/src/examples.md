@@ -7,7 +7,6 @@ Depth = 5
 
 ## Quickstart
 
-
 Load and see information about a particular table:
 
 ```julia
@@ -105,7 +104,7 @@ Easily extend the analysis to move up the [ladder of abstraction](http://worrydr
 issue_ages = 18:80
 durations = 1:40
 
-# compute the relative rates with the element-wise division ("brodcasting" in Julia)
+# compute the relative rates with the element-wise division ("broadcasting" in Julia)
 function rel_diff(a, b, issue_age,duration)
         att_age = issue_age + duration - 1
         return a[issue_age][att_age] / b[issue_age][att_age]
@@ -116,7 +115,7 @@ diff = [rel_diff(cso_2017.select,cso_2001.select,ia,dur) for ia in issue_ages, d
 contour(durations,
         issue_ages,
         diff,
-        xlabel="duration",ylabel="issue ages",
+        xlabel="duration", ylabel="issue ages",
         title="Relative difference between 2017 and 2001 CSO \n M PFN",
         fill=true
         )
@@ -126,7 +125,7 @@ contour(durations,
 
 ## Scaling and capping rates
 
-Say that you want to take a given mortality table, scale it by `130%`, and cap it at `1.0`. You can do this easliy by [broadcasting](https://docs.julialang.org/en/v1/manual/arrays/index.html#Broadcasting-1) over the underlying rates (which is really just a vector of numbers at the end of the day):
+Say that you want to take a given mortality table, scale it by `130%`, and cap it at `1.0`. You can do this easily by [broadcasting](https://docs.julialang.org/en/v1/manual/arrays/index.html#Broadcasting-1) over the underlying rates (which is really just a vector of numbers at the end of the day):
 
 ```julia
 issue_age = 30
@@ -135,4 +134,4 @@ m = cso_2001.select[issue_age]
 scaled_m = min.(cso_2001.select[issue_age] .* 1.3, 1.0) # 130% and capped at 1.0 version of `m`
 ```
 
-Note that `min.(cso_2001.select .* 1.3, 1.0)` won't work because `cso_2001.select` is still a vector-of-vectors (a vector for each issue age). You need to drill down to a given issue age or use an `ulitmate` table to manipulate the rates in this way.
+Note that `min.(cso_2001.select .* 1.3, 1.0)` won't work because `cso_2001.select` is still a vector-of-vectors (a vector for each issue age). You need to drill down to a given issue age or use an `ultimate` table to manipulate the rates in this way.

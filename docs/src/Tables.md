@@ -18,7 +18,7 @@ There are a variety of ways to load your own tables, reference online tables, or
 Comes with some tables built in via [mort.SOA.org](https://mort.soa.org) and by using [you agree to their terms](https://mort.soa.org/TermsOfUse.aspx).
 
 !!! note
-    Many mortality tables from `mort.SOA.org` have been tested to work, however not *all* mortality tables have been tested. Additionally, `mort.SOA.org` provides non-mortality rate tables which may not be propoerly parsed by this package. Try it and look at a few of the resulting values. If you encounter any issues, please [file an issue](https://github.com/JuliaActuary/MortalityTables.jl/issues).
+    Many mortality tables from `mort.SOA.org` have been tested to work, however not *all* mortality tables have been tested. Additionally, `mort.SOA.org` provides non-mortality rate tables which may not be properly parsed by this package. Try it and look at a few of the resulting values. If you encounter any issues, please [file an issue](https://github.com/JuliaActuary/MortalityTables.jl/issues).
 
 Sample of some of the included table sets:
 
@@ -60,7 +60,7 @@ t[0]  # returns the attained age 0 rate of 0.10139
 
 ### Load custom set of tables
 
-Download the `.xml` [aka the (`XTbML` format)](https://mort.soa.org/About.aspx) version of the table from [mort.SOA.org](https://mort.soa.org) and place it in a directory of your choosing. Then call `MortaliyTables.tables(path_to_your_dir)`.
+Download the `.xml` [aka the (`XTbML` format)](https://mort.soa.org/About.aspx) version of the table from [mort.SOA.org](https://mort.soa.org) and place it in a directory of your choosing. Then call `MortalityTables.tables(path_to_your_dir)`.
 
 
 ### From CSV
@@ -90,7 +90,7 @@ table = MortalityTables.readXTbML(path)
 
 Say you have an ultimate vector and select matrix, and you want to leverage the MortalityTables package.
 
-Here's an example, where we first construct the `UlitmateMortality` and then combine
+Here's an example, where we first construct the `UltimateMortality` and then combine
 it with the select rates to get a `SelectMortality` table.
 
 ```julia
@@ -101,7 +101,7 @@ ult_vec = [0.005, 0.008, ...,0.805,1.00]
 ult = UltimateMortality(ult_vec,start_age = 15)
 ```
 
-We can now use this the ulitmate rates all by itself:
+We can now use this the ultimate rates all by itself:
 
 ```julia
 q(ult,15,1) # 0.005
