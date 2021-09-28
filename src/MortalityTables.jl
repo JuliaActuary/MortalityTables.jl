@@ -3,6 +3,7 @@ using OffsetArrays
 using Parsers
 using QuadGK
 using Requires
+import StringDistances
 using UnPack
 using XMLDict
 using Pkg.Artifacts

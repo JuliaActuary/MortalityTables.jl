@@ -17,4 +17,6 @@
     @test tbl isa MortalityTable 
     tbl = get_SOA_table(2585)
     @test tbl isa MortalityTable 
+
+    @test_throws ArgumentError get_SOA_table("hello")
 end

@@ -12,6 +12,12 @@ end
 
 function get_SOA_table(table_name::String;source_map=table_source_map)
     entry = findfirst(x-> x.name == table_name, source_map)
+    if entry === nothing
+        search_method = StringDistances.Partial(StringDistances.Levenshtein())
+        suggestion,_ = StringDistances.findnearest(table_name,[x.name for x in table_source_map],search_method)
+        throw(ArgumentError("table name \"table_name\" not found in table set; " *
+            "most similar available name is: \"$suggestion\""))
+    end
     readXTbML(joinpath(artifact"mort.soa.org","t$(source_map[entry].id).xml"))
 end
 
