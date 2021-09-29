@@ -19,17 +19,10 @@ A Julia package for working with MortalityTables. Has:
 - Extensive set of parametric mortality models.
 
 ## On this Page:
-- [Examples](#examples)
-  - [Quickstart](#quickstart)
-  - [Quickly access and compare tables](#quickly-access-and-compare-tables)
-  - [Scaling and capping rates](#scaling-and-capping-rates)
-- [Fractional Years](#fractional-years)
-- [Tables](#Tables)
-  - [mort.SOA.org Tables](#mortsoaorg-tables)
-  - [From CSV](#from-csv)
-  - [From XTbML](#from-XTbML)
-  - [Custom Tables](#custom-tables)
-- [Parameterized Models](#parameterized-models)
+```@contents
+Pages = ["index.md"]
+Depth = 3
+```
 
 
 
