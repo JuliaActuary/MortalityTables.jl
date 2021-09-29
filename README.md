@@ -17,7 +17,7 @@ A Julia package for working with MortalityTables. Has:
 ## On this Page:
 - [Examples](#examples)
   - [Quickstart](#quickstart)
-  - [Quickly access and compare tables](#quickky-access-and-compare-tables)
+  - [Quickly access and compare tables](#quickly-access-and-compare-tables)
   - [Scaling and capping rates](#scaling-and-capping-rates)
 - [Fractional Years](#fractional-years)
 - [Tables](#Tables)
