@@ -347,3 +347,4 @@ You may be interested in [this tool](https://juliaactuary.org/tutorials/mortalit
 ## Similar Projects
 
 - [Pyliferisk, a Python package](https://github.com/franciscogarate/pyliferisk)
+- [Pymort, a Python package](https://github.com/actuarialopensource/pymort)
