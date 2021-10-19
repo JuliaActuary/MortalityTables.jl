@@ -58,9 +58,14 @@ function get_and_parse(dict, key)
     end        
 end
 
-struct XTbMLTable{S,U}
-    select::S
-    ultimate::U
+struct XTbML_SelectUltimate
+    select
+    ultimate
+    d::TableMetaData
+end
+
+struct XTbML_Ultimate
+    ultimate
     d::TableMetaData
 end
 
@@ -92,25 +97,20 @@ function parseXTbMLTable(x, path)
 
         ult = parse_1D_table(x["XTbML"]["Table"][2])
 
+        return XTbML_SelectUltimate(sel,ult,d)
+
     else
         # a table without select period will just have one set of values
 
         ult = parse_1D_table(x["XTbML"]["Table"])
 
-        sel = nothing
+        return XTbML_Ultimate(ult,d)
 
     end
 
-    tbl = XTbMLTable(
-        sel,
-        ult,
-        d
-    )
-
-    return tbl
 end
 
-function XTbML_Table_To_MortalityTable(tbl::XTbMLTable)
+function XTbML_Table_To_MortalityTable(tbl::XTbML_SelectUltimate)
     ult = UltimateMortality(
                 [v.rate for v in  tbl.ultimate], 
                 start_age=tbl.ultimate[1].age
@@ -118,30 +118,35 @@ function XTbML_Table_To_MortalityTable(tbl::XTbMLTable)
 
     ult_omega = lastindex(ult)
 
-    if !isnothing(tbl.select)
-        sel =   map(tbl.select) do (issue_age, rates)
-            last_sel_age = issue_age + rates[end].duration - 1
-            first_defined_select_age =  issue_age + rates[1].duration - 1
-            last_age = max(last_sel_age, ult_omega)
-            vec = map(issue_age:last_age) do attained_age
-                if attained_age < first_defined_select_age
-                    return missing
+    sel =   map(tbl.select) do (issue_age, rates)
+        last_sel_age = issue_age + rates[end].duration - 1
+        first_defined_select_age =  issue_age + rates[1].duration - 1
+        last_age = max(last_sel_age, ult_omega)
+        vec = map(issue_age:last_age) do attained_age
+            if attained_age < first_defined_select_age
+                return missing
+            else
+                if attained_age <= last_sel_age
+                    return rates[attained_age - first_defined_select_age + 1].rate
                 else
-                    if attained_age <= last_sel_age
-                        return rates[attained_age - first_defined_select_age + 1].rate
-                    else
-                        return ult[attained_age]
-                    end
+                    return ult[attained_age]
                 end
-            end 
-            return mortality_vector(vec, start_age=issue_age)
-        end
-        sel = OffsetArray(sel, tbl.select[1].issue_age - 1)
-
-        return MortalityTable(sel, ult, metadata=tbl.d)
-    else
-        return MortalityTable(ult, metadata=tbl.d)
+            end
+        end 
+        return mortality_vector(vec, start_age=issue_age)
     end
+    sel = OffsetArray(sel, tbl.select[1].issue_age - 1)
+
+    return MortalityTable(sel, ult, metadata=tbl.d)
+end
+
+function XTbML_Table_To_MortalityTable(tbl::XTbML_Ultimate)
+    ult = UltimateMortality(
+                [v.rate for v in  tbl.ultimate], 
+                start_age=tbl.ultimate[1].age
+            )
+
+    return MortalityTable(ult, metadata=tbl.d)
 end
 
 """
