@@ -23,9 +23,42 @@ function getXML(open_file)
 
 end
 
-function is_2D_table(x)
-    return haskey(tbl["Values"]["Axis"],["Axis"])
+function is_2D_table(tbl)
+    return isa(tbl["Values"]["Axis"],Vector)
 end
+
+function parse_sub_table(tbl)
+    if is_2D_table(tbl)
+        return parse_2D_table(tbl)
+    else
+        return parse_1D_table(tbl)
+    end
+end
+
+"""
+return a vector of tuples (dict = values...,is_2D as bool for dimension)
+"""
+function parse_dim(tbl::Vector{T}) where {T<:Any}
+   v = map(tbl) do t
+        (
+        dict=parse_sub_table(t),
+        is_2D = is_2D_table(t)
+        ) 
+   end
+
+   return v
+end
+
+"""
+a singular sub-table isn't a length-one vector of tables, it just is a table
+ so we put it in a vector for consistency with the multi-table case
+"""
+function parse_dim(tbl)
+    return [(
+        dict=parse_sub_table(tbl),
+        is_2D = is_2D_table(tbl)
+        )]
+ end
 
 """
 parse a 2D table
@@ -69,6 +102,11 @@ struct XTbML_Ultimate
     d::TableMetaData
 end
 
+struct XTbML_Generic
+    tables
+    d::TableMetaData
+end
+
 function parseXTbMLTable(x, path)
     md = x["XTbML"]["ContentClassification"]
     name = get(md, "TableName", nothing) |> strip
@@ -90,22 +128,34 @@ function parseXTbMLTable(x, path)
         source_path=source_path,
     )
 
-    if isa(x["XTbML"]["Table"], Vector)
-        # for a select and ultimate table, will have multiple tables
-        # parsed into a vector of tables
-        sel = parse_2D_table(x["XTbML"]["Table"][1])
+    # first, loop through each table and parse into dicts
+    # then, depending on the contents and count, either parse into known table type or
+    # return the dictionary
+    tables = parse_dim(x["XTbML"]["Table"])
 
-        ult = parse_1D_table(x["XTbML"]["Table"][2])
-
-        return XTbML_SelectUltimate(sel,ult,d)
-
+    # pattern match into known table types
+    if length(tables) == 1
+        #check if ultimate mortality vector
+        if !tables[1].is_2D
+            ult = tables[1].dict
+            return XTbML_Ultimate(ult,d)
+        else
+            # return generic table
+            return XTbML_Generic(tables,d)
+        end
+    elseif length(tables) == 2
+        #check if matches pattern for select/ultimate table
+        if tables[1].is_2D && !tables[2].is_2D
+            sel = tables[1].dict
+            ult = tables[2].dict
+            return XTbML_SelectUltimate(sel,ult,d)
+        else
+            # return generic table
+            return XTbML_Generic(tables,d)
+        end
     else
-        # a table without select period will just have one set of values
-
-        ult = parse_1D_table(x["XTbML"]["Table"])
-
-        return XTbML_Ultimate(ult,d)
-
+        # return generic table
+        return XTbML_Generic(tables,d)
     end
 
 end
