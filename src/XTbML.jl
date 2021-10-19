@@ -23,17 +23,39 @@ function getXML(open_file)
 
 end
 
+function is_2D_table(x)
+    return haskey(tbl["Values"]["Axis"],["Axis"])
+end
+
+"""
+parse a 2D table
+"""
+function parse_2D_table(tbl)
+    map(tbl["Values"]["Axis"]) do ai
+        (
+            issue_age = Parsers.parse(Int, ai[:t]),
+            rates = [(duration = Parsers.parse(Int, aj[:t]), rate = get_and_parse(aj, "")) for aj in ai["Axis"]["Y"] if !ismissing(get_and_parse(aj, ""))]
+            )
+    end
+end
+
+"""
+parse a 1D table
+"""
+function parse_1D_table(tbl)
+    map(tbl["Values"]["Axis"]["Y"]) do ai 
+        (age  = Parsers.parse(Int, ai[:t]), rate = get_and_parse(ai, ""),)
+    end
+end
+
 # get potentially missing value out of dict
 function get_and_parse(dict, key)
-    try
-        return val = Parsers.parse(Float64, dict[key])
-    catch y
-        if isa(y, KeyError)
-            return val = missing
-        else
-            throw(y)
-        end
-    end
+    val = get(dict,key,missing)
+    if ismissing(val) 
+        return val
+    else
+        return Parsers.parse(Float64,val)
+    end        
 end
 
 struct XTbMLTable{S,U}
@@ -66,22 +88,14 @@ function parseXTbMLTable(x, path)
     if isa(x["XTbML"]["Table"], Vector)
         # for a select and ultimate table, will have multiple tables
         # parsed into a vector of tables
-        sel = map(x["XTbML"]["Table"][1]["Values"]["Axis"]) do ai
-            (issue_age = Parsers.parse(Int, ai[:t]),
-                rates = [(duration = Parsers.parse(Int, aj[:t]), rate = get_and_parse(aj, "")) for aj in ai["Axis"]["Y"] if !ismissing(get_and_parse(aj, ""))])
-        end
+        sel = parse_2D_table(x["XTbML"]["Table"][1])
 
-        ult = map(x["XTbML"]["Table"][2]["Values"]["Axis"]["Y"]) do ai 
-            (age  = Parsers.parse(Int, ai[:t]), rate = get_and_parse(ai, ""),)
-        end
+        ult = parse_1D_table(x["XTbML"]["Table"][2])
 
     else
         # a table without select period will just have one set of values
 
-        ult = map(x["XTbML"]["Table"]["Values"]["Axis"]["Y"]) do ai
-            (age = Parsers.parse(Int, ai[:t]), 
-                rate = get_and_parse(ai, ""))
-        end
+        ult = parse_1D_table(x["XTbML"]["Table"])
 
         sel = nothing
 
