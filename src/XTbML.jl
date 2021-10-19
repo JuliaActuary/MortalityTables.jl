@@ -200,6 +200,7 @@ function XTbML_Table_To_MortalityTable(tbl::XTbML_Ultimate)
 end
 
 function XTbML_Table_To_MortalityTable(tbl::XTbML_Generic)
+    @warn "The requested table is not a known type. The values provided will be in a generic format for accessibility, but will not follow the same API as structured tables. See [#TODO link to doc site describing possible breaking changes further]."
     return tbl
 end
 
