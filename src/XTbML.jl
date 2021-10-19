@@ -155,7 +155,7 @@ function parseXTbMLTable(x, path)
         end
     else
         # return generic table
-        return XTbML_Generic(tables,d)
+        return XTbML_Generic([t.dict for t in tables],d)
     end
 
 end
@@ -197,6 +197,10 @@ function XTbML_Table_To_MortalityTable(tbl::XTbML_Ultimate)
             )
 
     return MortalityTable(ult, metadata=tbl.d)
+end
+
+function XTbML_Table_To_MortalityTable(tbl::XTbML_Generic)
+    return tbl
 end
 
 """
