@@ -29,9 +29,9 @@ end
 
 function parse_sub_table(tbl)
     if is_2D_table(tbl)
-        return parse_2D_table(tbl)
+        return parse_2D_table(tbl["Values"]["Axis"])
     else
-        return parse_1D_table(tbl)
+        return parse_1D_table(tbl["Values"]["Axis"]["Y"])
     end
 end
 
@@ -64,26 +64,32 @@ function parse_dim(tbl)
 parse a 2D table
 """
 function parse_2D_table(tbl)
-    map(tbl["Values"]["Axis"]) do ai
-        (
-            issue_age = Parsers.parse(Int, ai[:t]),
-            rates = [(duration = Parsers.parse(Int, aj[:t]), rate = get_and_parse(aj, "")) for aj in ai["Axis"]["Y"] if !ismissing(get_and_parse(aj, ""))]
-            )
+    # loop through primary axis and create array of arrays
+    vals = map(tbl) do ai
+        outer_index = Parsers.parse(Int,ai[:t]) # capture the outer index, because the inner index doesn't capture the attained point
+        parse_1D_table(ai["Axis"]["Y"],outer_index-1) 
     end
+
+    firstindex = Parsers.parse(Int,first(tbl)[:t])
+    return OffsetArray(vals,firstindex-1)
+    
+    
 end
 
 """
 parse a 1D table
 """
-function parse_1D_table(tbl)
-    vals_xml = tbl["Values"]["Axis"]["Y"]
-    first_index = Parsers.parse(Int,first(vals_xml)[:t])
+function parse_1D_table(tbl,index_adj=0)
+    first_index = Parsers.parse(Int,first(tbl)[:t])
     
-    vals = map(vals_xml) do ai 
-        get_and_parse(ai, "")
+    vals = [get_and_parse(ai,"") for ai in tbl]
+
+    while ismissing(last(vals))
+        # drop trailing missings, but not leading (e.g. keep leading for table 1076)
+        deleteat!(vals,lastindex(vals))
     end
 
-    return OffsetArray(vals,first_index-1)
+    return OffsetArray(vals,first_index-1+index_adj)
 end
 
 # get potentially missing value out of dict
@@ -167,28 +173,16 @@ end
 
 function XTbML_Table_To_MortalityTable(tbl::XTbML_SelectUltimate)
     ult = tbl.ultimate
+    ω = lastindex(ult)
+    sel =   tbl.select
 
-    ult_omega = lastindex(ult)
-
-    sel =   map(tbl.select) do (issue_age, rates)
-        last_sel_age = issue_age + rates[end].duration - 1
-        first_defined_select_age =  issue_age + rates[1].duration - 1
-        last_age = max(last_sel_age, ult_omega)
-        vec = map(issue_age:last_age) do attained_age
-            if attained_age < first_defined_select_age
-                return missing
-            else
-                if attained_age <= last_sel_age
-                    return rates[attained_age - first_defined_select_age + 1].rate
-                else
-                    return ult[attained_age]
-                end
-            end
-        end 
-        return mortality_vector(vec, start_age=issue_age)
+    for iss_age_rates in sel
+        #expand the select rates if ultimate table has further data
+        if lastindex(iss_age_rates) < ω
+            append_range = lastindex(iss_age_rates)+1:ω
+            append!(iss_age_rates,ult[append_range])
+        end
     end
-    sel = OffsetArray(sel, tbl.select[1].issue_age - 1)
-
     return MortalityTable(sel, ult, metadata=tbl.d)
 end
 
