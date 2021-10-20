@@ -162,7 +162,7 @@ function parseXTbMLTable(x, path)
             return XTbML_SelectUltimate(sel,ult,d)
         else
             # return generic table
-            return XTbML_Generic(tables,d)
+            return XTbML_Generic([t.dict for t in tables],d)
         end
     else
         # return generic table
