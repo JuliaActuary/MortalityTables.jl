@@ -76,9 +76,14 @@ end
 parse a 1D table
 """
 function parse_1D_table(tbl)
-    map(tbl["Values"]["Axis"]["Y"]) do ai 
-        (age  = Parsers.parse(Int, ai[:t]), rate = get_and_parse(ai, ""),)
+    vals_xml = tbl["Values"]["Axis"]["Y"]
+    first_index = Parsers.parse(Int,first(vals_xml)[:t])
+    
+    vals = map(vals_xml) do ai 
+        get_and_parse(ai, "")
     end
+
+    return OffsetArray(vals,first_index-1)
 end
 
 # get potentially missing value out of dict
@@ -161,10 +166,7 @@ function parseXTbMLTable(x, path)
 end
 
 function XTbML_Table_To_MortalityTable(tbl::XTbML_SelectUltimate)
-    ult = UltimateMortality(
-                [v.rate for v in  tbl.ultimate], 
-                start_age=tbl.ultimate[1].age
-            )
+    ult = tbl.ultimate
 
     ult_omega = lastindex(ult)
 
@@ -191,12 +193,7 @@ function XTbML_Table_To_MortalityTable(tbl::XTbML_SelectUltimate)
 end
 
 function XTbML_Table_To_MortalityTable(tbl::XTbML_Ultimate)
-    ult = UltimateMortality(
-                [v.rate for v in  tbl.ultimate], 
-                start_age=tbl.ultimate[1].age
-            )
-
-    return MortalityTable(ult, metadata=tbl.d)
+    return MortalityTable(tbl.ultimate, metadata=tbl.d)
 end
 
 function XTbML_Table_To_MortalityTable(tbl::XTbML_Generic)
