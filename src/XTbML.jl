@@ -81,8 +81,12 @@ parse a 1D table
 """
 function parse_1D_table(tbl,index_adj=0)
     first_index = Parsers.parse(Int,first(tbl)[:t])
-    
-    vals = [get_and_parse(ai,"") for ai in tbl]
+    last_index = Parsers.parse(Int,last(tbl)[:t])
+
+    # some tables (e.g. 2975) don't have contiguous indices, so create interim dict to make 
+    # dynamically creating an array with potentially missing values easy
+    d = Dict(Parsers.parse(Int,x[:t]) => get_and_parse(x,"") for x in tbl)
+    vals = [get(d,i,missing) for i in first_index:last_index]
 
     while ismissing(last(vals))
         # drop trailing missings, but not leading (e.g. keep leading for table 1076)
