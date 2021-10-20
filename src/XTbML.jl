@@ -109,18 +109,39 @@ end
 struct XTbML_SelectUltimate
     select
     ultimate
-    d::TableMetaData
+    metadata::TableMetaData
 end
 
 struct XTbML_Ultimate
     ultimate
-    d::TableMetaData
+    metadata::TableMetaData
 end
 
 struct XTbML_Generic
     tables
-    d::TableMetaData
+    metadata::TableMetaData
 end
+
+Base.show(io::IO, ::MIME"text/plain", mt::XTbML_Generic) = print(
+    io,
+    """
+    MortalityTable ($(mt.metadata.content_type)):
+       Name:
+           $(mt.metadata.name)
+       Fields: 
+           $(fieldnames(typeof(mt)))
+       Provider:
+           $(mt.metadata.provider)
+       mort.SOA.org ID:
+           $(mt.metadata.id)
+       mort.SOA.org link:
+           https://mort.soa.org/ViewTable.aspx?&TableIdentity=$(mt.metadata.id)
+       Description:
+           $(mt.metadata.description)
+        Note:
+            The requested table is not a known type. The values provided will be in a generic format for accessibility, but will not follow the same API as structured tables. See [#TODO link to doc site describing possible breaking changes further].
+    """,
+)
 
 function parseXTbMLTable(x, path)
     md = x["XTbML"]["ContentClassification"]
