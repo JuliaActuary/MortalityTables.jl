@@ -19,7 +19,7 @@ julia> m[18]
 
 ```
 """
-function UltimateMortality(v::Array{<:Real,1}; start_age=0)
+function UltimateMortality(v::Array{<:Real,1}; start_age = 0)
     return OffsetArray(v, start_age - 1)
 end
 
@@ -51,12 +51,12 @@ julia> sel[0][95] # the mortality rate for a life age 95, that was issued at age
 0.95
 ```
 """
-function SelectMortality(select, ultimate; start_age=0)
+function SelectMortality(select, ultimate; start_age = 0)
 
     # iterate down the rows (issue ages)
     vs = map(enumerate(eachrow(select))) do (row_num, row)
         end_age = start_age + (row_num - 1) + (length(row) - 1)
-        OffsetArray([row ; ultimate[end_age + 1:end]], (start_age - 1) + (row_num - 1))
+        OffsetArray([row; ultimate[end_age+1:end]], (start_age - 1) + (row_num - 1))
     end
 
     return OffsetArray(vs, start_age - 1)
@@ -105,15 +105,15 @@ struct UltimateTable{U} <: MortalityTable
     metadata::TableMetaData
 end
 
-Base.getindex(u::UltimateTable,x) = u.ultimate[x]
+Base.getindex(u::UltimateTable, x) = u.ultimate[x]
 Base.lastindex(u::UltimateTable) = lastindex(u.ultimate)
 
 
-function MortalityTable(select, ultimate; metadata=TableMetaData())
+function MortalityTable(select, ultimate; metadata = TableMetaData())
     return SelectUltimateTable(select, ultimate, metadata)
 end
 
-function MortalityTable(ultimate; metadata=TableMetaData())
+function MortalityTable(ultimate; metadata = TableMetaData())
     return UltimateTable(ultimate, metadata)
 end
 
@@ -147,7 +147,7 @@ Returns the survival through attained age `to_age`. The start of the calculation
     survival(mortality_vector,to_age,::DeathDistribution)
     survival(mortality_vector,from_age,to_age,::DeathDistribution)
 
-If given a negative `to_age`, it will return `1.0`. Aside from simplifying the code, this makes sense as for something to exist in order to decrement in the first place, it must have existed and surived to the point of  being able to be decremented.
+If given a negative `to_age`, it will return `1.0`. Aside from simplifying the code, this makes sense as for something to exist in order to decrement in the first place, it must have existed and survived to the point of  being able to be decremented.
 
 # Examples
 ```julia-repl
@@ -174,18 +174,16 @@ function survival(v, to_age, dd::DeathDistribution)
     return survival(v, firstindex(v), to_age, dd)
 end
 
-function survival(v::T, from_age::Int, to_age::Int) where {T <: AbstractArray}
+_decrement(surv, q) = surv * (1 - q)
+function survival(v::T, from_age::Int, to_age::Int) where {T<:AbstractArray}
     if from_age == to_age
         return 1.0
     else
-        return @views reduce(*,
-            1 .- v[from_age:(to_age - 1)],
-            init=1.0
-            )
+        return @views reduce(_decrement, v[from_age:(to_age-1)], init = 1.0)
     end
 end
 
-function survival(v::T, from_age, to_age, dd::DeathDistribution) where {T <: AbstractArray}
+function survival(v::T, from_age, to_age, dd::DeathDistribution) where {T<:AbstractArray}
     # calculate the survival for the rounded ages, and then the high and low high_residual
     age_low = ceil(Int, from_age)
     age_high = floor(Int, to_age)
@@ -193,8 +191,7 @@ function survival(v::T, from_age, to_age, dd::DeathDistribution) where {T <: Abs
     # if from_age and to_age are fractional parts of the same attained age, then age_high will round down to 
     # be below the rounded-up age_low. This line will short circuit the rest and just return the fractional year survival
     age_high < age_low && return 1 - decrement_partial_year(v, from_age, to_age, dd)
-    
-    
+
     if age_low == from_age
         low_residual = 1.0
     else
@@ -210,17 +207,19 @@ function survival(v::T, from_age, to_age, dd::DeathDistribution) where {T <: Abs
     if from_age == to_age
         return 1.0
     else
-         
-        whole = @views reduce(*,
-            1 .- v[age_low:(age_high - 1)],
-            init=1.0
-            )
+
+        whole = @views reduce(_decrement, v[age_low:(age_high-1)], init = 1.0)
 
         return whole * low_residual * high_residual
     end
 end
 
-survival(v::MortalityTable,args...) = throw(ArgumentError("The first argument should be a vector of rates instead of an entire table. E.g. `table.ulitmate` or `table.select[age]`."))
+function survival(v::T, from_age::Int, to_age::Int, dd::DeathDistribution) where {T<:AbstractArray}
+
+    return @views reduce(_decrement, v[from_age:to_age-1], init = 1.0)
+end
+
+survival(v::MortalityTable, args...) = throw(ArgumentError("The first argument should be a vector of rates instead of an entire table. E.g. `table.ultimate` or `table.select[age]`."))
 
 # Reference: Experience Study Calculations, 2016, Society of Actuaries
 # https://www.soa.org/globalassets/assets/Files/Research/2016-10-experience-study-calculations.pdf
@@ -265,11 +264,11 @@ julia> decrement(qs,0.5,Uniform())
 0.05
 ```
 """
-decrement(v,to_age) = 1 .- survival(v, to_age)
-decrement(v,to_age,dd::DeathDistribution) = 1 .- survival(v, to_age, dd)  
-decrement(v,from_age,to_age) = 1 .- survival(v, from_age, to_age) 
-decrement(v,from_age,to_age,dd::DeathDistribution) = 1 .- survival(v, from_age, to_age, dd) 
-decrement(v::MortalityTable,args...) = throw(ArgumentError("The first argument should be a vector of rates instead of an entire table. E.g. `table.ulitmate` or `table.select[age]`."))
+decrement(v, to_age) = 1 - survival(v, to_age)
+decrement(v, to_age, dd::DeathDistribution) = 1 - survival(v, to_age, dd)
+decrement(v, from_age, to_age) = 1 - survival(v, from_age, to_age)
+decrement(v, from_age, to_age, dd::DeathDistribution) = 1 - survival(v, from_age, to_age, dd)
+decrement(v::MortalityTable, args...) = throw(ArgumentError("The first argument should be a vector of rates instead of an entire table. E.g. `table.ultimate` or `table.select[age]`."))
 
 """
     omega(x)
@@ -279,7 +278,7 @@ Returns the last index of the given vector. For mortality vectors this means the
 
 Note that `omega` can vary depending on the issue age for a select table, and that a select `omega` may differ from the table's ultimate `omega`.
 
-ω is aliased to omega, but unexported. To use, do `using MortalityTables: ω` when importing or call `MortalityTables.ω()`
+ω is aliased to omega, but un-exported. To use, do `using MortalityTables: ω` when importing or call `MortalityTables.ω()`
 
 # Examples
 
@@ -304,7 +303,7 @@ end
 """
     mortality_vector(vec; start_age=0)
 
-A convienience constructor to create an OffsetArray which has the array indexed by attained age rather than always starting from `1`. The package and JuliaActuary ecosystem assume that the rates are indexed by attained age and this allows transformation of tables without a direct dependency on **OffsetArrays.jl**.
+A convenience constructor to create an OffsetArray which has the array indexed by attained age rather than always starting from `1`. The package and JuliaActuary ecosystem assume that the rates are indexed by attained age and this allows transformation of tables without a direct dependency on **OffsetArrays.jl**.
 
 Equivalent to doing:
 ```
@@ -312,4 +311,4 @@ using OffsetArrays
 OffsetArray(vec,start_age-1)
 ```
 """
-mortality_vector(vec; start_age=0) = return OffsetArray(vec, start_age - 1)
+mortality_vector(vec; start_age = 0) = return OffsetArray(vec, start_age - 1)
