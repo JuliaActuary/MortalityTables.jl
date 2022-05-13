@@ -3,7 +3,7 @@
     @testset "TableMetaData" begin
         @testset "whitespace management" begin
             # "2017 Loaded CSO Smoker Distinct Nonsmoker Female ALB" comes with a trailing whitespace
-            @test ~isnothing(findfirst(x -> x.name == "2017 Loaded CSO Smoker Distinct Nonsmoker Female ALB",MortalityTables.table_source_map))
+            @test ~isnothing(MortalityTables.table_source_map["2017 Loaded CSO Smoker Distinct Nonsmoker Female ALB"])
         end
     end
 
