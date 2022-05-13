@@ -1,4 +1,5 @@
 module MortalityTables
+using Memoize
 using OffsetArrays
 using Parsers
 using QuadGK

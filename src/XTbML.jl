@@ -135,7 +135,7 @@ end
 
 Loads the [XtbML](https://mort.soa.org/About.aspx) (the SOA XML data format for mortality tables) stored at the given path and returns a `MortalityTable`.
 """
-function readXTbML(path)
+@memoize function readXTbML(path)
     x = open_and_read(path) |> getXML
     XTbML_Table_To_MortalityTable(parseXTbMLTable(x, path))
 end

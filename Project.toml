@@ -4,6 +4,7 @@ authors = ["Alec Loudenback <alecloudenback@gmail.com>"]
 version = "2.1.7"
 
 [deps]
+Memoize = "c03570c3-d221-55d1-a50c-7939bbd78826"
 OffsetArrays = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
 Parsers = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
@@ -14,6 +15,7 @@ UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
 XMLDict = "228000da-037f-5747-90a9-8195ccbf91a5"
 
 [compat]
+Memoize = "^0.4"
 OffsetArrays = "1.0"
 Parsers = "^1, 2"
 QuadGK = "^2.3"
