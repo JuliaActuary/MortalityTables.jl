@@ -7,6 +7,7 @@ using Requires
 import StringDistances
 using UnPack
 using XMLDict
+import XML
 using Pkg.Artifacts
 
 include("table_source_map.jl")
@@ -35,6 +36,7 @@ export MortalityTable,
     Constant,
     DeathDistribution,
     get_SOA_table,
+    get_SOA_table2,
     Makeham, Gompertz, MakehamGompertz,
     hazard,cumhazard,
     mortality_vector

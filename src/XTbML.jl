@@ -96,6 +96,71 @@ function parseXTbMLTable(x, path)
     return tbl
 end
 
+function parseXTbMLTable2(x, path="")
+    # md = x["XTbML"]["ContentClassification"]
+    # name = get(md, "TableName", nothing) |> strip
+    # content_type = get(get(md, "ContentType", nothing), "", nothing) |> strip
+    # id = get(md, "TableIdentity", nothing) |> strip
+    # provider = get(md, "ProviderName", nothing) |> strip
+    # reference = get(md, "TableReference", nothing) |> strip
+    # description = get(md, "TableDescription", nothing) |> strip
+    # comments = get(md, "Comments", nothing) |> strip
+    # source_path = path
+    # d = TableMetaData(
+    #     name=name,
+    #     id=id,
+    #     provider=provider,
+    #     reference=reference,
+    #     content_type=content_type,
+    #     description=description,
+    #     comments=comments,
+    #     source_path=source_path,
+    # )
+    d=TableMetaData()
+    if length(XML.children(x.root[2][2])) > 1 # ["XTbML"]["Table"]
+        # for a select and ultimate table, will have multiple tables
+        # parsed into a vector of tables
+        sel = map(XML.children(x.root[2][2])) do ai
+            (issue_age = Parsers.parse(Int, XML.attributes(ai)[:t]),
+                rates = filter!(x->!ismissing(x.rate),map(XML.children(ai[1])) do aj # ["Values"]
+                    (
+                        duration = Parsers.parse(Int, XML.attributes(aj)[:t]), 
+                        rate = length(XML.children(aj)) > 0 ? Parsers.parse(Float64,only(XML.children(aj))) : missing
+                        )
+                end )
+                    ) 
+        end
+
+        ult = map(XML.children(x.root[3][2][1])) do ai 
+            (
+                age  = Parsers.parse(Int, XML.attributes(ai)[:t]), 
+                rate = length(XML.children(ai)) > 0 ? Parsers.parse(Float64,only(XML.children(ai))) : missing
+                )
+        end
+
+    else
+        # a table without select period will just have one set of values
+
+        ult =  filter!(x->!ismissing(x.rate),map(XML.children(x.root[2][2][1])) do ai 
+            (
+                age  = Parsers.parse(Int, XML.attributes(ai)[:t]), 
+                rate = length(XML.children(ai)) > 0 ? Parsers.parse(Float64,only(XML.children(ai))) : missing
+                )
+        end)
+
+        sel = nothing
+
+    end
+
+    tbl = XTbMLTable(
+        sel,
+        ult,
+        d
+    )
+
+    return tbl
+end
+
 function XTbML_Table_To_MortalityTable(tbl::XTbMLTable)
     ult = UltimateMortality(
                 [v.rate for v in  tbl.ultimate], 
@@ -106,8 +171,8 @@ function XTbML_Table_To_MortalityTable(tbl::XTbMLTable)
 
     if !isnothing(tbl.select)
         sel =   map(tbl.select) do (issue_age, rates)
-            last_sel_age = issue_age + rates[end].duration - 1
-            first_defined_select_age =  issue_age + rates[1].duration - 1
+            last_sel_age = issue_age + last(rates).duration - 1
+            first_defined_select_age =  issue_age + first(rates).duration - 1
             last_age = max(last_sel_age, ult_omega)
             vec = map(issue_age:last_age) do attained_age
                 if attained_age < first_defined_select_age
