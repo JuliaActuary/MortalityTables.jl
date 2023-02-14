@@ -49,7 +49,7 @@ survival(m::Makeham,age) = exp(-cumhazard(m,age))
 
 
 """
-    AlterMakeham(;μ,σ,c)
+    Makeham2(;μ,σ,c)
 Construct a mortality model following Makeham's law. Alternative formulation.
 ``
 \\mathrm{hazard} \\left( {\\rm age} \\right) =  (1/sigma)e^{(x-mu)/sigma} + c
@@ -60,7 +60,7 @@ Default args:
     σ = 7.692308
     c = 0.001
 """
-Base.@kwdef struct AlterMakeham <: ParametricMortality
+Base.@kwdef struct Makeham2 <: ParametricMortality
     μ = 49
     σ = 7.692308
     c = 0.001
@@ -70,7 +70,7 @@ end
     hazard(model,age)
 The force of mortality at `age`. More precisely: the ratio of the probability of failure/death to the survival function.
 """
-function hazard(m::AlterMakeham,age) 
+function hazard(m::Makeham2,age) 
     @unpack μ, σ, c = m
     return (1.0 / σ) .* exp.((age .- μ) ./ σ) .+ c
 end
@@ -79,12 +79,12 @@ end
     cumhazard(model,age)
 The cumulative force of mortality at `age`. More precisely: the ratio of the cumulative probability of failure/death to the survival function.
 """
-function cumhazard(m::AlterMakeham,age) 
+function cumhazard(m::Makeham2,age) 
     @unpack μ, σ, c = m
     return exp(-μ / σ) .* (exp.(age ./ σ) .- 1.0) .+ age .* c
 end
 
-survival(m::AlterMakeham,age) = exp.(-cumhazard(m,age))
+survival(m::Makeham2,age) = exp.(-cumhazard(m,age))
 
 """
     Gompertz(;a,b)
@@ -108,7 +108,7 @@ function Gompertz(;a=0.0002, b=0.13)
 end
 
 """
-    AlterGompertz(;μ,σ)
+    Gompertz2(;μ,σ)
 Construct a mortality model following Gompertz' law of mortality. Alternative formulation.
 ``
 \\mathrm{hazard} \\left( {\\rm age} \\right) =  (1/sigma)e^{(x-mu)/sigma}
@@ -118,7 +118,7 @@ Default args:
     μ = 49
     σ = 7.7
 """
-Base.@kwdef struct AlterGompertz <: ParametricMortality
+Base.@kwdef struct Gompertz2 <: ParametricMortality
     μ = 49
     σ = 7.7
 end
@@ -127,7 +127,7 @@ end
     hazard(model,age)
 The force of mortality at `age`. More precisely: the ratio of the probability of failure/death to the survival function.
 """
-function hazard(m::AlterGompertz,age) 
+function hazard(m::Gompertz2,age) 
     @unpack μ, σ = m
     return (1.0 / σ) .* exp.((age .- μ) ./ σ)
 end
@@ -136,12 +136,12 @@ end
     cumhazard(model,age)
 The cumulative force of mortality at `age`. More precisely: the ratio of the cumulative probability of failure/death to the survival function.
 """
-function cumhazard(m::AlterGompertz,age) 
+function cumhazard(m::Gompertz2,age) 
     @unpack μ, σ = m
     return exp(-μ / σ) .* (exp.(age ./ σ) .- 1.0)
 end
 
-survival(m::AlterGompertz,age) = exp.(-cumhazard(m,age))
+survival(m::Gompertz2,age) = exp.(-cumhazard(m,age))
 
 """
     InverseGompertz(;a,b,c)
