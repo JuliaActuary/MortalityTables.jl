@@ -141,9 +141,17 @@
 
         end
 
+        @testset "value equality" begin
+            ult_table_name = "1980 CSO Basic Table – Male, ANB"
+            cso1980_a = MortalityTables.table(ult_table_name)
+            cso1980_b = MortalityTables.table(ult_table_name)
+            @test cso1980_a == cso1980_b
 
-
-
+            select_table_name = "2001 CSO Super Preferred Select and Ultimate - Male Nonsmoker, ANB"
+            cso2001_a = MortalityTables.table(select_table_name)
+            cso2001_b = MortalityTables.table(select_table_name)
+            @test cso2001_a == cso2001_b
+        end
 
     end
 end
