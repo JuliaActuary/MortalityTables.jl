@@ -108,6 +108,16 @@ end
 Base.getindex(u::UltimateTable, x) = u.ultimate[x]
 Base.lastindex(u::UltimateTable) = lastindex(u.ultimate)
 
+Base.:(==)(tbl1::UltimateTable, tbl2::UltimateTable) = tbl1.metadata == tbl2.metadata && isequal(tbl1.ultimate, tbl2.ultimate)
+function Base.:(==)(tbl1::SelectUltimateTable, tbl2::SelectUltimateTable)
+    return (
+        tbl1.metadata == tbl2.metadata && 
+        isequal(tbl1.ultimate, tbl2.ultimate) &&
+        isequal(tbl1.select, tbl2.select)
+    )
+end
+
+
 
 function MortalityTable(select, ultimate; metadata = TableMetaData())
     return SelectUltimateTable(select, ultimate, metadata)
