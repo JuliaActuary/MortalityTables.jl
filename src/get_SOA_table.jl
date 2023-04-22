@@ -29,8 +29,8 @@ function get_SOA_table2(id::Int)
         XML.LazyNode(XML.Raw(XML.Mmap.mmap(f)))
     end
 
-    t = parseXTbMLTable2(x,path)
-    XTbML_Table_To_MortalityTable(t)
+    t = parseXTbMLTable3(x,path)
+    # XTbML_Table_To_MortalityTable(t)
 
 end
 
