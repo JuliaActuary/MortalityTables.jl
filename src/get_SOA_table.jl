@@ -25,11 +25,12 @@ function get_SOA_table2(id::Int)
 
     x = open(path,"r") do f
         skipbytes && skip(f,3)
-        XML.XMLTokenIterator(f) |> XML.Document
+        
+        XML.LazyNode(XML.Raw(XML.Mmap.mmap(f)))
     end
 
-    # t = parseXTbMLTable2(x,path)
-    # XTbML_Table_To_MortalityTable(t)
+    t = parseXTbMLTable2(x,path)
+    XTbML_Table_To_MortalityTable(t)
 
 end
 

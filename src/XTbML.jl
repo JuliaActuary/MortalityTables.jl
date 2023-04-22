@@ -117,34 +117,40 @@ function parseXTbMLTable2(x, path="")
     #     source_path=source_path,
     # )
     d=TableMetaData()
-    if length(XML.children(x.root[2][2])) > 1 # ["XTbML"]["Table"]
+    if length(XML.children(x[2])) > 2 # ["XTbML"]["Table"]
         # for a select and ultimate table, will have multiple tables
         # parsed into a vector of tables
-        sel = map(XML.children(x.root[2][2])) do ai
-            (issue_age = Parsers.parse(Int, XML.attributes(ai)[:t]),
-                rates = filter!(x->!ismissing(x.rate),map(XML.children(ai[1])) do aj # ["Values"]
-                    (
-                        duration = Parsers.parse(Int, XML.attributes(aj)[:t]), 
-                        rate = length(XML.children(aj)) > 0 ? Parsers.parse(Float64,only(XML.children(aj))) : missing
-                        )
-                end )
-                    ) 
-        end
-
-        ult = map(XML.children(x.root[3][2][1])) do ai 
+        sel = map(XML.children(x[2][2][2])) do ai
             (
-                age  = Parsers.parse(Int, XML.attributes(ai)[:t]), 
-                rate = length(XML.children(ai)) > 0 ? Parsers.parse(Float64,only(XML.children(ai))) : missing
+                issue_age = Parsers.parse(Int, XML.attributes(ai)["t"]),
+                rates = let
+                    rs = map(XML.children(ai[1])) do aj # ["Values"]
+                   
+                        (
+                            duration = Parsers.parse(Int, XML.attributes(aj)["t"]) , 
+                            rate = length(XML.children(aj)) == 0 ? missing : Parsers.parse(Float64,XML.value(aj[1]))
+                            )
+                        end 
+                    filter!(y->!ismissing(y.rate),rs)
+
+                end
+                ) 
+            end
+            ult = map(XML.children(x[2][3][2][1])) do ai
+            (
+                age  = Parsers.parse(Int, XML.attributes(ai)["t"]), 
+                rate = length(XML.children(ai)) == 0 ? missing : Parsers.parse(Float64,XML.value(ai[1]))
                 )
         end
 
     else
         # a table without select period will just have one set of values
 
-        ult =  filter!(x->!ismissing(x.rate),map(XML.children(x.root[2][2][1])) do ai 
+        ult =  filter!(x->!ismissing(x.rate),map(XML.children(x.root[2][2][1])) do ai
+
             (
                 age  = Parsers.parse(Int, XML.attributes(ai)[:t]), 
-                rate = length(XML.children(ai)) > 0 ? Parsers.parse(Float64,only(XML.children(ai))) : missing
+                rate = length(XML.children(ai)) == 0 ? missing : Parsers.parse(Float64,XML.value(ai[1]))
                 )
         end)
 
