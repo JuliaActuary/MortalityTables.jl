@@ -14,9 +14,10 @@ include("XTbML.jl")
 include("parameterized_models.jl")
 include("distribution.jl")
 include("life_expectancy.jl")
+include("dukes_macdonald.jl")
 
 # load tables to be used in subsequent tests
-@test isa(MortalityTables.table(1),MortalityTables.MortalityTable)
+@test isa(MortalityTables.table(1), MortalityTables.MortalityTable)
 
 include("projection_scale.jl")
 include("MortalityTables.jl")
