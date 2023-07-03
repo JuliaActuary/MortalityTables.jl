@@ -13,6 +13,7 @@ include("table_source_map.jl")
 include("MetaData.jl")
 include("death_distribution.jl")
 include("MortalityTable.jl")
+include("dukes_macdonald.jl")
 include("XTbML.jl")
 include("get_SOA_table.jl")
 include("parameterized_models.jl")
@@ -20,7 +21,7 @@ include("life_expectancy.jl")
 
 table_dirs = Dict(
     "mort.soa.org" => artifact"mort.soa.org",
-) 
+)
 
 export MortalityTable,
     survival,
@@ -36,7 +37,7 @@ export MortalityTable,
     DeathDistribution,
     get_SOA_table,
     Makeham, Gompertz, MakehamGompertz,
-    hazard,cumhazard,
+    hazard, cumhazard,
     mortality_vector
 
 # lazy load part of the package
