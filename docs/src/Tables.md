@@ -133,7 +133,7 @@ my_table = MortalityTable(
               )
 ```
 
-```@docs
+```@docs; canonical=false
 MortalityTables.readXTbML
 MortalityTables.table
 MortalityTables.get_SOA_table
@@ -143,7 +143,7 @@ MortalityTables.get_SOA_table
 
 Use these to build your own `MortalityTables.jl`-compatible table:
 
-```@docs
+```@docs; canonical=false
 MortalityTables.MortalityTable
 MortalityTables.SelectMortality
 MortalityTables.UltimateMortality
@@ -154,13 +154,13 @@ MortalityTables.mortality_vector
 
 Basic metadata about the table (automatically populated for some tables).
 
-```@docs
+```@docs; canonical=false
 MortalityTables.TableMetaData
 ```
 
 Find the final age for which a table defines a rate.
 
-```@docs
+```@docs; canonical=false
 MortalityTables.omega
 ```
 
@@ -216,11 +216,11 @@ julia> vbt2001.ultimate[95]        # ultimate vectors only need to be called wit
 
 ### Docstrings
 
-```@docs
+```@docs; canonical=false
 MortalityTables.survival
 ```
 
-```@docs
+```@docs; canonical=false
 MortalityTables.decrement
 ```
 ## Life Expectancy
@@ -229,7 +229,7 @@ Calculate curtate or complete life expectancy.
 
 ### Docstrings
 
-```@docs
+```@docs; canonical=false
 MortalityTables.life_expectancy
 ```
 
@@ -247,7 +247,7 @@ The three assumptions are:
 - `Balducci()` which assumes a decreasing force of mortality over the year. It seems [to
 be for making it easier](https://www.soa.org/globalassets/assets/library/research/actuarial-research-clearing-house/1978-89/1988/arch-1/arch88v17.pdf) to calculate successive months by hand rather than any theoretical basis.
 
-```@docs
+```@docs; canonical=false
 MortalityTables.DeathDistribution
 MortalityTables.Balducci
 MortalityTables.Uniform

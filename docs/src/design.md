@@ -7,16 +7,19 @@ There are two types of MortalityTable subtypes for SOA data: `SelectUltimateTabl
 A table with both select and ultimate rates:
 
 ```@example
+using MortalityTables
 MortalityTables.table("2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB")
 ```
 
 A table with just ultimate rates:
+
 ```@example
+using MortalityTables
 MortalityTables.table("1941 CSO Basic Table, ANB")
 ```
 
 ## Motivation for the current design
-x
+
 ### Encourage data-driven design
 
 Probably best explained with an example. In the following example, we calculate the ultimate survivorship for every age in the `cso` table from above. The table itself gives us the right range of ages to do this with. No need to assume a 100 or 121 omega age and handle edge cases when working with tables that don't line up to the usual expectations.
@@ -46,6 +49,7 @@ survival(MortalityTables.Makeham(),25,50) # 25 to 50 year old survival
 When you display a table, you get to see related metadata, which can be lost if simply parsing into a matrix or dataframe:
 
 ```@example
+using MortalityTables
 MortalityTables.table("2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB")
 ```
 

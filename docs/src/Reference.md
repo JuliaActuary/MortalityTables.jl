@@ -2,3 +2,7 @@
 
 ```@index
 ```
+
+```@autodocs
+Modules = [MortalityTables]
+```
