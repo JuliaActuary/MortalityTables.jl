@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Usage and Examples · MortalityTables.jl</title><meta name="title" content="Usage and Examples · MortalityTables.jl"/><meta property="og:title" content="Usage and Examples · MortalityTables.jl"/><meta property="twitter:title" content="Usage and Examples · MortalityTables.jl"/><meta name="description" content="Documentation for MortalityTables.jl."/><meta property="og:description" content="Documentation for MortalityTables.jl."/><meta property="twitter:description" content="Documentation for MortalityTables.jl."/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img src="../assets/logo.svg" alt="MortalityTables.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../">MortalityTables.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><span class="tocitem">Manual</span><ul><li class="is-active"><a class="tocitem" href>Usage and Examples</a><ul class="internal"><li><a class="tocitem" href="#Quickstart"><span>Quickstart</span></a></li><li><a class="tocitem" href="#Quickly-access-and-compare-tables"><span>Quickly access and compare tables</span></a></li><li><a class="tocitem" href="#Scaling-and-capping-rates"><span>Scaling and capping rates</span></a></li></ul></li><li><a class="tocitem" href="../Tables/">Tables</a></li><li><a class="tocitem" href="../ParametricMortalityModels/">Parametric Models</a></li><li><a class="tocitem" href="../ComparisonTool/">Comparison Tool</a></li><li><a class="tocitem" href="../design/">Package Design</a></li></ul></li><li><a class="tocitem" href="../Reference/">Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Manual</a></li><li class="is-active"><a href>Usage and Examples</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Usage and Examples</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/JuliaActuary/MortalityTables.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/JuliaActuary/MortalityTables.jl/blob/master/docs/src/examples.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Usage-Examples"><a class="docs-heading-anchor" href="#Usage-Examples">Usage Examples</a><a id="Usage-Examples-1"></a><a class="docs-heading-anchor-permalink" href="#Usage-Examples" title="Permalink"></a></h1><ul><li><a href="#Usage-Examples">Usage Examples</a></li><li class="no-marker"><ul><li><a href="#Quickstart">Quickstart</a></li><li><a href="#Quickly-access-and-compare-tables">Quickly access and compare tables</a></li><li><a href="#Scaling-and-capping-rates">Scaling and capping rates</a></li></ul></li></ul><h2 id="Quickstart"><a class="docs-heading-anchor" href="#Quickstart">Quickstart</a><a id="Quickstart-1"></a><a class="docs-heading-anchor-permalink" href="#Quickstart" title="Permalink"></a></h2><p>Load and see information about a particular table:</p><pre><code class="language-julia hljs">julia&gt; vbt2001 = MortalityTables.table(&quot;2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB&quot;)
+MortalityTable (Insured Lives Mortality):
+   Name:
+       2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB
+   Fields:
+       (:select, :ultimate, :metadata)
+   Provider:
+       Society of Actuaries
+   mort.SOA.org ID:
+       1118
+   mort.SOA.org link:
+       https://mort.soa.org/ViewTable.aspx?&amp;TableIdentity=1118
+   Description:
+       2001 Valuation Basic Table (VBT) Residual Standard Select and Ultimate Table -  Male Nonsmoker.
+       Basis: Age Nearest Birthday. 
+       Minimum Select Age: 0. 
+       Maximum Select Age: 99. 
+       Minimum Ultimate Age: 25. 
+       Maximum Ultimate Age: 120</code></pre><p>The package revolves around easy-to-access vectors which are indexed by attained age:</p><pre><code class="language-julia hljs">julia&gt; vbt2001.select[35]          # vector of rates for issue age 35
+ 0.00036
+ 0.00048
+ ⋮
+ 0.94729
+ 1.0
+ 
+julia&gt; vbt2001.select[35][35]      # issue age 35, attained age 35
+ 0.00036
+ 
+julia&gt; vbt2001.select[35][50:end] # issue age 35, attained age 50 through end of table
+0.00316
+0.00345
+ ⋮
+0.94729
+1.0
+
+julia&gt; vbt2001.ultimate[95]        # ultimate vectors only need to be called with the attained age
+ 0.24298</code></pre><p>Calculate the force of mortality or survival over a range of time:</p><pre><code class="language-julia hljs">julia&gt; survival(vbt2001.ultimate,30,40) # the survival between ages 30 and 40
+0.9894404665434904
+
+julia&gt; decrement(vbt2001.ultimate,30,40) # the decrement between ages 30 and 40
+0.010559533456509618</code></pre><p>Non-whole periods of time are supported when you specify the assumption (<code>Constant()</code>, <code>Uniform()</code>, or <code>Balducci()</code>) for fractional periods:</p><pre><code class="language-julia hljs">julia&gt; survival(vbt2001.ultimate,30,40.5,Uniform()) # the survival between ages 30 and 40.5
+0.9887676470262408</code></pre><h2 id="Quickly-access-and-compare-tables"><a class="docs-heading-anchor" href="#Quickly-access-and-compare-tables">Quickly access and compare tables</a><a id="Quickly-access-and-compare-tables-1"></a><a class="docs-heading-anchor-permalink" href="#Quickly-access-and-compare-tables" title="Permalink"></a></h2><p>This example shows how to develop a visual comparison of rates from scratch, but you may be interested in <a href="#mortality-table-comparison-tool">this pre-built tool</a> for this purpose.</p><pre><code class="language-julia hljs">using MortalityTables, Plots
+
+
+cso_2001 = MortalityTables.table(&quot;2001 CSO Super Preferred Select and Ultimate - Male Nonsmoker, ANB&quot;)
+cso_2017 = MortalityTables.table(&quot;2017 Loaded CSO Preferred Structure Nonsmoker Super Preferred Male ANB&quot;)
+
+issue_age = 80
+mort = [
+	cso_2001.select[issue_age][issue_age:end],
+	cso_2017.select[issue_age][issue_age:end],
+	     ]
+plot(
+	   mort,
+	   label = [&quot;2001 CSO&quot; &quot;2017 CSO&quot;],
+	   title = &quot;Comparison of 2107 and 2001 CSO \n for SuperPref NS 80-year-old male&quot;,
+	   xlabel=&quot;duration&quot;)</code></pre><p><img src="https://user-images.githubusercontent.com/711879/96251676-6cbfd180-0f76-11eb-9082-b01630eaca4f.png" alt="Comparison of 2001 and 2017 CSO \\n for 80-year-old male"/></p><p>Easily extend the analysis to move up the <a href="http://worrydream.com/LadderOfAbstraction/">ladder of abstraction</a>:</p><pre><code class="language-julia hljs">
+issue_ages = 18:80
+durations = 1:40
+
+# compute the relative rates with the element-wise division (&quot;broadcasting&quot; in Julia)
+function rel_diff(a, b, issue_age,duration)
+        att_age = issue_age + duration - 1
+        return a[issue_age][att_age] / b[issue_age][att_age]
+end
+
+
+diff = [rel_diff(cso_2017.select,cso_2001.select,ia,dur) for ia in issue_ages, dur in durations]
+contour(durations,
+        issue_ages,
+        diff,
+        xlabel=&quot;duration&quot;, ylabel=&quot;issue ages&quot;,
+        title=&quot;Relative difference between 2017 and 2001 CSO \n M PFN&quot;,
+        fill=true
+        )</code></pre><p><img src="https://user-images.githubusercontent.com/711879/83955100-11861180-a815-11ea-9a22-c85bacceb4bc.png" alt="heatmap comparison of 2017 CSO and 2001 CSO Mortality Table"/></p><h2 id="Scaling-and-capping-rates"><a class="docs-heading-anchor" href="#Scaling-and-capping-rates">Scaling and capping rates</a><a id="Scaling-and-capping-rates-1"></a><a class="docs-heading-anchor-permalink" href="#Scaling-and-capping-rates" title="Permalink"></a></h2><p>Say that you want to take a given mortality table, scale it by <code>130%</code>, and cap it at <code>1.0</code>. You can do this easily by <a href="https://docs.julialang.org/en/v1/manual/arrays/index.html#Broadcasting-1">broadcasting</a> over the underlying rates (which is really just a vector of numbers at the end of the day):</p><pre><code class="language-julia hljs">issue_age = 30
+m = cso_2001.select[issue_age]
+
+scaled_m = min.(cso_2001.select[issue_age] .* 1.3, 1.0) # 130% and capped at 1.0 version of `m`</code></pre><p>Note that <code>min.(cso_2001.select .* 1.3, 1.0)</code> won&#39;t work because <code>cso_2001.select</code> is still a vector-of-vectors (a vector for each issue age). You need to drill down to a given issue age or use an <code>ultimate</code> table to manipulate the rates in this way.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../Tables/">Tables »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="auto">Automatic (OS)</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.1.2 on <span class="colophon-date" title="Saturday 28 October 2023 04:11">Saturday 28 October 2023</span>. Using Julia version 1.9.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
