@@ -1,7 +1,7 @@
 name = "MortalityTables"
 uuid = "4780e19d-04b9-53dc-86c2-9e9aa59b5a12"
 authors = ["Alec Loudenback <alecloudenback@gmail.com>"]
-version = "2.5.0"
+version = "2.6.0"
 
 [deps]
 Memoize = "c03570c3-d221-55d1-a50c-7939bbd78826"
