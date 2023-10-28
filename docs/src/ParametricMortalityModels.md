@@ -68,7 +68,7 @@ Modules = [MortalityTables]
 Order   = [:type]
 ```
 
-```@docs
+```@docs; canonical=false
 MortalityTables.Makeham
 MortalityTables.Gompertz
 MortalityTables.InverseGompertz

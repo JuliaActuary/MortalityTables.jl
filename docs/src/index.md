@@ -197,7 +197,7 @@ aus_life_table_female[0]  # returns the attained age 0 rate of 0.10139
 
 ### From CSV
 
-If you have a CSV file that is from [mort.SOA.org](mort.SOA.org), or follows the same structure, then you can load and parse the table into a `MortalityTable` like so:
+If you have a CSV file that is from [mort.SOA.org](https://mort.SOA.org), or follows the same structure, then you can load and parse the table into a `MortalityTable` like so:
 
 ```julia
 using CSV
