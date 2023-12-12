@@ -49,6 +49,44 @@ survival(m::Makeham,age) = exp(-cumhazard(m,age))
 
 
 """
+    Makeham2(;μ,σ,c)
+Construct a mortality model following Makeham's law. Alternative formulation.
+``
+\\mathrm{hazard} \\left( {\\rm age} \\right) =  (1/sigma)e^{(x-mu)/sigma} + c
+``
+Default args:
+    
+    μ = 49
+    σ = 7.692308
+    c = 0.001
+"""
+Base.@kwdef struct Makeham2 <: ParametricMortality
+    μ = 49
+    σ = 7.692308
+    c = 0.001
+end
+
+"""
+    hazard(model,age)
+The force of mortality at `age`. More precisely: the ratio of the probability of failure/death to the survival function.
+"""
+function hazard(m::Makeham2,age) 
+    @unpack μ, σ, c = m
+    return (1.0 / σ) .* exp.((age .- μ) ./ σ) .+ c
+end
+
+"""
+    cumhazard(model,age)
+The cumulative force of mortality at `age`. More precisely: the ratio of the cumulative probability of failure/death to the survival function.
+"""
+function cumhazard(m::Makeham2,age) 
+    @unpack μ, σ, c = m
+    return exp(-μ / σ) .* (exp.(age ./ σ) .- 1.0) .+ age .* c
+end
+
+survival(m::Makeham2,age) = exp.(-cumhazard(m,age))
+
+"""
     Gompertz(;a,b)
 
 Construct a mortality model following Gompertz' law of mortality.
@@ -68,6 +106,42 @@ Default args:
 function Gompertz(;a=0.0002, b=0.13) 
     return Makeham(a=a, b=b, c=0)
 end
+
+"""
+    Gompertz2(;μ,σ)
+Construct a mortality model following Gompertz' law of mortality. Alternative formulation.
+``
+\\mathrm{hazard} \\left( {\\rm age} \\right) =  (1/sigma)e^{(x-mu)/sigma}
+``
+This is a special case of Makeham's law alternative formulation and will `Makeham` model where `c=0`.
+Default args:
+    μ = 49
+    σ = 7.7
+"""
+Base.@kwdef struct Gompertz2 <: ParametricMortality
+    μ = 49
+    σ = 7.7
+end
+
+"""
+    hazard(model,age)
+The force of mortality at `age`. More precisely: the ratio of the probability of failure/death to the survival function.
+"""
+function hazard(m::Gompertz2,age) 
+    @unpack μ, σ = m
+    return (1.0 / σ) .* exp.((age .- μ) ./ σ)
+end
+
+"""
+    cumhazard(model,age)
+The cumulative force of mortality at `age`. More precisely: the ratio of the cumulative probability of failure/death to the survival function.
+"""
+function cumhazard(m::Gompertz2,age) 
+    @unpack μ, σ = m
+    return exp(-μ / σ) .* (exp.(age ./ σ) .- 1.0)
+end
+
+survival(m::Gompertz2,age) = exp.(-cumhazard(m,age))
 
 """
     InverseGompertz(;a,b,c)
@@ -937,6 +1011,106 @@ end
 function hazard(m::KannistoMakeham,age)
     @unpack a,b,c = m
     return  a * exp(b * age) / (1 + a * exp(b*age)) + c
+end
+
+"""
+    Carriere1(;p₁,p₂,μ₁,μ₂,μ₃,σ₁,σ₂,σ₃)
+Construct a mortality model following Carriere1's law of mortality.
+``
+\\mathrm{hazard}\\left( {\\rm age} \\right) = 
+``
+Default args:
+    p₁ = 0.003
+    p₂ = 0.007
+    μ₁ = 2.7
+    μ₂ = 3
+    μ₃ = 88
+    σ₁ = 15
+    σ₂ = 6
+    σ₃ = 9.5
+"""
+Base.@kwdef struct Carriere1 <: ParametricMortality
+    p₁ = 0.003
+    p₂ = 0.007
+    μ₁ = 2.7
+    μ₂ = 3
+    μ₃ = 88
+    σ₁ = 15
+    σ₂ = 6
+    σ₃ = 9.5
+end
+
+function hazard(m::Carriere1,age)
+    c = cumhazard(m, age)
+    return vcat(c[1], diff(c))
+end
+
+function cumhazard(m::Carriere1,age)
+    return -log.(survival(m, age))
+end
+
+function survival(m::Carriere1,age)
+    @unpack p₁, p₂, μ₁, μ₂, μ₃, σ₁, σ₂, σ₃ = m
+
+    s_weibull = exp.(-(age ./ μ₁) .^ (μ₁ / σ₁))
+    s_inv_weibull = 1.0 .- exp.(-(age ./ μ₂) .^ (-μ₂ / σ₁))
+    s_alter_gompertz = survival(AlterGompertz(μ=μ₃, σ=σ₃), age)
+
+    f1 = max(0.0001, min(p₁, 1.0))
+    f2 = max(0.0001, min(p₂, 1.0))
+    f3 = 1.0 - f1 - f2
+
+    return max.(0.0, min.(1.0, f1 .* s_weibull .+ f2 .* s_inv_weibull .+ f3 .* s_alter_gompertz))
+end
+
+"""
+    Carriere2(;p₁,p₂,μ₁,μ₂,μ₃,σ₁,σ₂,σ₃)
+Construct a mortality model following Carriere2's law of mortality.
+``
+\\mathrm{hazard}\\left( {\\rm age} \\right) = 
+``
+Default args:
+    p₁ = 0.01
+    p₂ = 0.01
+    μ₁ = 1
+    μ₂ = 49
+    μ₃ = 49
+    σ₁ = 2
+    σ₂ = 7
+    σ₃ = 7
+"""
+Base.@kwdef struct Carriere2 <: ParametricMortality
+    p₁ = 0.01
+    p₂ = 0.01
+    μ₁ = 1
+    μ₂ = 49
+    μ₃ = 49
+    σ₁ = 2
+    σ₂ = 7
+    σ₃ = 7
+end
+
+function hazard(m::Carriere2,age)
+    c = cumhazard(m, age)
+    return vcat(c[1], diff(c))
+end
+
+function cumhazard(m::Carriere2,age)
+    return -log.(survival(m, age))
+end
+
+function survival(m::Carriere2,age)
+    @unpack p₁, p₂, μ₁, μ₂, μ₃, σ₁, σ₂, σ₃ = m
+
+    s_weibull = exp.(-(age ./ μ₁) .^ (μ₁ / σ₁))
+    s_inv_gompertz = survival(InverseGompertz(μ=μ₂, σ=σ₂), age)
+    s_alter_gompertz = survival(AlterGompertz(μ=μ₃, σ=σ₃), age)
+
+    f1 = max(0.0001, min(p₁, 1.0))
+    f2 = max(0.0001, min(p₂, 1.0))
+    f3 = 1.0 - f1 - f2
+
+    return max.(0.0, min.(1.0, f1 .* s_weibull .+ f2 .* s_inv_gompertz .+ f3 .* s_alter_gompertz))
 end
 
 ### Generic Functions
