@@ -23,24 +23,125 @@ function getXML(open_file)
 
 end
 
-# get potentially missing value out of dict
-function get_and_parse(dict, key)
-    try
-        return val = Parsers.parse(Float64, dict[key])
-    catch y
-        if isa(y, KeyError)
-            return val = missing
-        else
-            throw(y)
-        end
+function is_2D_table(tbl)
+    return isa(tbl["Values"]["Axis"],Vector)
+end
+
+function parse_sub_table(tbl)
+    if is_2D_table(tbl)
+        return parse_2D_table(tbl["Values"]["Axis"])
+    else
+        return parse_1D_table(tbl["Values"]["Axis"]["Y"])
     end
 end
 
-struct XTbMLTable{S,U}
-    select::S
-    ultimate::U
-    d::TableMetaData
+"""
+return a vector of tuples (dict = values...,is_2D as bool for dimension)
+"""
+function parse_dim(tbl::Vector{T}) where {T<:Any}
+   v = map(tbl) do t
+        (
+        dict=parse_sub_table(t),
+        is_2D = is_2D_table(t)
+        ) 
+   end
+
+   return v
 end
+
+"""
+a singular sub-table isn't a length-one vector of tables, it just is a table
+ so we put it in a vector for consistency with the multi-table case
+"""
+function parse_dim(tbl)
+    return [(
+        dict=parse_sub_table(tbl),
+        is_2D = is_2D_table(tbl)
+        )]
+ end
+
+"""
+parse a 2D table
+"""
+function parse_2D_table(tbl)
+    # loop through primary axis and create array of arrays
+    vals = map(tbl) do ai
+        outer_index = Parsers.parse(Int,ai[:t]) # capture the outer index, because the inner index doesn't capture the attained point
+        parse_1D_table(ai["Axis"]["Y"],outer_index-1) 
+    end
+
+    firstindex = Parsers.parse(Int,first(tbl)[:t])
+    return OffsetArray(vals,firstindex-1)
+    
+    
+end
+
+"""
+parse a 1D table
+"""
+function parse_1D_table(tbl,index_adj=0)
+    first_index = Parsers.parse(Int,first(tbl)[:t])
+    last_index = Parsers.parse(Int,last(tbl)[:t])
+
+    # some tables (e.g. 2975) don't have contiguous indices, so create interim dict to make 
+    # dynamically creating an array with potentially missing values easy
+    d = Dict(Parsers.parse(Int,x[:t]) => get_and_parse(x,"") for x in tbl)
+    vals = [get(d,i,missing) for i in first_index:last_index]
+
+    while ismissing(last(vals))
+        # drop trailing missings, but not leading (e.g. keep leading for table 1076)
+        deleteat!(vals,lastindex(vals))
+    end
+
+    return OffsetArray(vals,first_index-1+index_adj)
+end
+
+# get potentially missing value out of dict
+function get_and_parse(dict, key)
+    val = get(dict,key,missing)
+    if ismissing(val) 
+        return val
+    else
+        return Parsers.parse(Float64,val)
+    end        
+end
+
+struct XTbML_SelectUltimate
+    select
+    ultimate
+    metadata::TableMetaData
+end
+
+struct XTbML_Ultimate
+    ultimate
+    metadata::TableMetaData
+end
+
+struct XTbML_Generic
+    tables
+    metadata::TableMetaData
+end
+
+Base.show(io::IO, ::MIME"text/plain", mt::XTbML_Generic) = print(
+    io,
+    """
+    MortalityTable ($(mt.metadata.content_type)):
+       Name:
+           $(mt.metadata.name)
+       Fields: 
+           $(fieldnames(typeof(mt)))
+       Provider:
+           $(mt.metadata.provider)
+       mort.SOA.org ID:
+           $(mt.metadata.id)
+       mort.SOA.org link:
+           https://mort.soa.org/ViewTable.aspx?&TableIdentity=$(mt.metadata.id)
+       Description:
+           $(mt.metadata.description)
+        Note:
+            The requested table is not a known type. The values provided will be in a generic format for accessibility, but will not follow the same API as structured tables. See [#TODO link to doc site describing possible breaking changes further].
+    """,
+)
 
 function parseXTbMLTable(x, path)
     md = x["XTbML"]["ContentClassification"]
@@ -63,71 +164,60 @@ function parseXTbMLTable(x, path)
         source_path=source_path,
     )
 
-    if isa(x["XTbML"]["Table"], Vector)
-        # for a select and ultimate table, will have multiple tables
-        # parsed into a vector of tables
-        sel = map(x["XTbML"]["Table"][1]["Values"]["Axis"]) do ai
-            (issue_age = Parsers.parse(Int, ai[:t]),
-                rates = [(duration = Parsers.parse(Int, aj[:t]), rate = get_and_parse(aj, "")) for aj in ai["Axis"]["Y"] if !ismissing(get_and_parse(aj, ""))])
-        end
+    # first, loop through each table and parse into dicts
+    # then, depending on the contents and count, either parse into known table type or
+    # return the dictionary
+    tables = parse_dim(x["XTbML"]["Table"])
 
-        ult = map(x["XTbML"]["Table"][2]["Values"]["Axis"]["Y"]) do ai 
-            (age  = Parsers.parse(Int, ai[:t]), rate = get_and_parse(ai, ""),)
+    # pattern match into known table types
+    if length(tables) == 1
+        #check if ultimate mortality vector
+        if !tables[1].is_2D
+            ult = tables[1].dict
+            return XTbML_Ultimate(ult,d)
+        else
+            # return generic table
+            return XTbML_Generic(tables,d)
         end
-
+    elseif length(tables) == 2
+        #check if matches pattern for select/ultimate table
+        if tables[1].is_2D && !tables[2].is_2D
+            sel = tables[1].dict
+            ult = tables[2].dict
+            return XTbML_SelectUltimate(sel,ult,d)
+        else
+            # return generic table
+            return XTbML_Generic([t.dict for t in tables],d)
+        end
     else
-        # a table without select period will just have one set of values
-
-        ult = map(x["XTbML"]["Table"]["Values"]["Axis"]["Y"]) do ai
-            (age = Parsers.parse(Int, ai[:t]), 
-                rate = get_and_parse(ai, ""))
-        end
-
-        sel = nothing
-
+        # return generic table
+        return XTbML_Generic([t.dict for t in tables],d)
     end
 
-    tbl = XTbMLTable(
-        sel,
-        ult,
-        d
-    )
-
-    return tbl
 end
 
-function XTbML_Table_To_MortalityTable(tbl::XTbMLTable)
-    ult = UltimateMortality(
-                [v.rate for v in  tbl.ultimate], 
-                start_age=tbl.ultimate[1].age
-            )
+function XTbML_Table_To_MortalityTable(tbl::XTbML_SelectUltimate)
+    ult = tbl.ultimate
+    ω = lastindex(ult)
+    sel =   tbl.select
 
-    ult_omega = lastindex(ult)
-
-    if !isnothing(tbl.select)
-        sel =   map(tbl.select) do (issue_age, rates)
-            last_sel_age = issue_age + rates[end].duration - 1
-            first_defined_select_age =  issue_age + rates[1].duration - 1
-            last_age = max(last_sel_age, ult_omega)
-            vec = map(issue_age:last_age) do attained_age
-                if attained_age < first_defined_select_age
-                    return missing
-                else
-                    if attained_age <= last_sel_age
-                        return rates[attained_age - first_defined_select_age + 1].rate
-                    else
-                        return ult[attained_age]
-                    end
-                end
-            end 
-            return mortality_vector(vec, start_age=issue_age)
+    for iss_age_rates in sel
+        #expand the select rates if ultimate table has further data
+        if lastindex(iss_age_rates) < ω
+            append_range = lastindex(iss_age_rates)+1:ω
+            append!(iss_age_rates,ult[append_range])
         end
-        sel = OffsetArray(sel, tbl.select[1].issue_age - 1)
-
-        return MortalityTable(sel, ult, metadata=tbl.d)
-    else
-        return MortalityTable(ult, metadata=tbl.d)
     end
+    return MortalityTable(sel, ult, metadata=tbl.d)
+end
+
+function XTbML_Table_To_MortalityTable(tbl::XTbML_Ultimate)
+    return MortalityTable(tbl.ultimate, metadata=tbl.d)
+end
+
+function XTbML_Table_To_MortalityTable(tbl::XTbML_Generic)
+    @warn "The requested table is not a known type. The values provided will be in a generic format for accessibility, but will not follow the same API as structured tables. See [#TODO link to doc site describing possible breaking changes further]."
+    return tbl
 end
 
 """
