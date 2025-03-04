@@ -14,7 +14,7 @@
         pth = joinpath(soa_tbl_dir,"t1076.xml")
         file = MortalityTables.open_and_read(pth) |> MortalityTables.getXML
         xtbl = MortalityTables.parseXTbMLTable(file, pth)
-        @test isa(xtbl, MortalityTables.XTbMLTable)
+        @test isa(xtbl, MortalityTables.XTbML_SelectUltimate)
     end
 
     @testset "Ultimate Only" begin
