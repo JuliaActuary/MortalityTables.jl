@@ -1,5 +1,5 @@
 # Reference/Adapted from:
-# https://www.mortality.org/Public/HMD_4th_Symposium/Pascariu_poster.pdf
+# https://mortality.org/File/GetDocument/Public/HMD_4th_Symposium/Pascariu_poster.pdf
 # https://github.com/mpascariu/MortalityLaws/blob/master/R/MortalityLaw_models.R
 
 abstract type ParametricMortality end
