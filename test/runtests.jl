@@ -15,6 +15,7 @@ include("parameterized_models.jl")
 include("distribution.jl")
 include("life_expectancy.jl")
 include("dukes_macdonald.jl")
+include("deflator.jl")
 
 # load tables to be used in subsequent tests
 @test isa(MortalityTables.table(1), MortalityTables.MortalityTable)

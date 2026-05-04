@@ -1,4 +1,6 @@
 module MortalityTables
+import FinanceCore
+using FinanceCore: AbstractDeflator
 using Memoize
 using OffsetArrays
 using Parsers
@@ -12,7 +14,8 @@ using Pkg.Artifacts
 include("table_source_map.jl")
 include("MetaData.jl")
 include("death_distribution.jl")
-include("MortalityTable.jl")
+include("deflator.jl")          # defines AbstractMortality, MortalityVector, ShiftedMortality
+include("MortalityTable.jl")    # UltimateMortality / SelectMortality return MortalityVector
 include("dukes_macdonald.jl")
 include("XTbML.jl")
 include("get_SOA_table.jl")
@@ -38,7 +41,11 @@ export MortalityTable,
     get_SOA_table,
     Makeham, Gompertz, MakehamGompertz,
     hazard, cumhazard,
-    mortality_vector
+    mortality_vector,
+    AbstractMortality,
+    MortalityVector,
+    ShiftedMortality,
+    at_age
 
 # lazy load part of the package
 function __init__()
