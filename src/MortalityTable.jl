@@ -1,26 +1,42 @@
 """
     UltimateMortality(vector; start_age=0)
 
-Given a vector of rates, returns an `OffsetArray` that is indexed by attained age. 
+Given a vector of rates, returns a [`MortalityVector`](@ref) that is indexed by
+attained age. The result is also a `FinanceCore.AbstractDeflator` and composes
+with yield curves and other decrements via `FinanceCore.compose`.
 
-Give the optional keyword argument to start the indexing at an age other than zero.
+`MortalityVector` implements the `AbstractArray` interface by delegation, so
+indexing (`m[18]`), iteration, length, and slicing all work as if you had the
+underlying `OffsetArray`. Use `Base.parent(m)` if you need the underlying
+array directly.
+
+!!! info "Breaking change in 3.0"
+    Prior versions returned an `OffsetArray`. Code that uses the array
+    interface (`m[age]`, iteration, slicing) continues to work. Code that
+    relied on `typeof(m) == OffsetArray` or accessed `OffsetArray`-specific
+    internals needs `Base.parent(m)` to get the underlying array.
+
+Give the optional keyword argument to start the indexing at an age other than
+zero.
 
 # Examples
 ```julia-repl
-julia> m = UltimateMortality([0.1,0.3,0.6,1]);
+julia> m = UltimateMortality([0.1, 0.3, 0.6, 1]);
 
 julia> m[0]
 0.1
 
-julia> m = UltimateMortality([0.1,0.3,0.6,1], start_age = 18);
+julia> m = UltimateMortality([0.1, 0.3, 0.6, 1], start_age = 18);
 
 julia> m[18]
 0.1
 
+julia> m isa FinanceCore.AbstractDeflator
+true
 ```
 """
-function UltimateMortality(v::Array{<:Real,1}; start_age = 0)
-    return OffsetArray(v, start_age - 1)
+function UltimateMortality(v::AbstractVector{<:Real}; start_age = 0)
+    return MortalityVector(OffsetArray(collect(v), start_age - 1))
 end
 
 """
@@ -53,10 +69,12 @@ julia> sel[0][95] # the mortality rate for a life age 95, that was issued at age
 """
 function SelectMortality(select, ultimate; start_age = 0)
 
-    # iterate down the rows (issue ages)
+    # iterate down the rows (issue ages); each row becomes a MortalityVector
+    # so `select_table.select[issue_age]` returns a deflator-friendly object.
     vs = map(enumerate(eachrow(select))) do (row_num, row)
         end_age = start_age + (row_num - 1) + (length(row) - 1)
-        OffsetArray([row; ultimate[end_age+1:end]], (start_age - 1) + (row_num - 1))
+        offset = OffsetArray([row; ultimate[end_age+1:end]], (start_age - 1) + (row_num - 1))
+        MortalityVector(offset)
     end
 
     return OffsetArray(vs, start_age - 1)

@@ -2,7 +2,29 @@
 # https://mortality.org/File/GetDocument/Public/HMD_4th_Symposium/Pascariu_poster.pdf
 # https://github.com/mpascariu/MortalityLaws/blob/master/R/MortalityLaw_models.R
 
-abstract type ParametricMortality end
+"""
+    ParametricMortality
+
+Abstract supertype for parametric mortality laws (Makeham, Gompertz, etc.).
+Subtypes implement [`hazard`](@ref) and inherit `survival`, `cumhazard`, and
+the `FinanceCore.AbstractDeflator` interface — `factor` / `intensity` —
+automatically.
+
+`ParametricMortality <: AbstractMortality <: FinanceCore.AbstractDeflator`,
+so these models compose with yield curves, lapse forces, and default
+decrements via `FinanceCore.compose(...)`.
+
+!!! tip "Age axis"
+    `factor(m, age)` returns survival from birth (age 0) to `age`, matching
+    the existing `survival(m, age)` convention. To compose a parametric
+    mortality model with a yield curve on a years-from-valuation axis, wrap
+    it with [`at_age`](@ref):
+
+    ```julia
+    deflator = compose(yield_curve, at_age(Makeham(...), 65))
+    ```
+"""
+abstract type ParametricMortality <: AbstractMortality end
 """
     Makeham(;a,b,c)
 
@@ -958,3 +980,10 @@ decrement(m::ParametricMortality,to_age) = 1 - survival(m, to_age)
 (m::ParametricMortality)(x) = μ(m, x)
 Base.getindex(m::ParametricMortality,x) = m(x)
 Base.broadcastable(pm::ParametricMortality) = Ref(pm)
+
+# ─── AbstractDeflator interface ──────────────────────────────────────────────
+# Mortality is a multiplicative-factor process: factor = survival probability,
+# intensity = instantaneous force of mortality (the hazard).
+FinanceCore.factor(m::ParametricMortality, age)        = survival(m, age)
+FinanceCore.factor(m::ParametricMortality, from, to)   = survival(m, from, to)
+FinanceCore.intensity(m::ParametricMortality, age)     = hazard(m, age)
