@@ -1,6 +1,5 @@
 module MortalityTables
 using OffsetArrays
-using Parsers
 using QuadGK
 import StringDistances
 using XMLDict
