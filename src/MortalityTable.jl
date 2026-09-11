@@ -307,7 +307,7 @@ function omega(x)
     return lastindex(x)
 end
 
-ω = omega
+const ω = omega
 
 
 """

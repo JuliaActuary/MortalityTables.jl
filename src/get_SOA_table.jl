@@ -29,4 +29,4 @@ Given the id or name of a `mort.SOA.org` table, grab it and return it as a `Mort
 
 !!! Remember that not all tables have been tested to work.
 """
-table = get_SOA_table
+const table = get_SOA_table
