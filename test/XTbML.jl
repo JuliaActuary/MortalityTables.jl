@@ -17,6 +17,12 @@
         @test isa(xtbl, MortalityTables.XTbMLTable)
     end
 
+    @testset "readXTbML cache" begin
+        pth = joinpath(soa_tbl_dir,"t1076.xml")
+        # repeated reads of the same path return the identical object
+        @test MortalityTables.readXTbML(pth) === MortalityTables.readXTbML(pth)
+    end
+
     @testset "Ultimate Only" begin
         pth = joinpath(soa_tbl_dir,"t17.xml")
         file = MortalityTables.open_and_read(pth) |> MortalityTables.getXML

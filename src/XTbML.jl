@@ -130,14 +130,27 @@ function XTbML_Table_To_MortalityTable(tbl::XTbMLTable)
     end
 end
 
+function _read_xtbml(path)
+    x = open_and_read(path) |> getXML
+    XTbML_Table_To_MortalityTable(parseXTbMLTable(x, path))
+end
+
+# Tables parsed from disk are cached by path so that repeated lookups of the
+# same table return the same object without re-parsing the file.
+const _TABLE_CACHE = Dict{String,Any}()
+const _CACHE_LOCK = ReentrantLock()
+
 """
     readXTbML(path)
 
 Loads the [XtbML](https://mort.soa.org/About.aspx) (the SOA XML data format for mortality tables) stored at the given path and returns a `MortalityTable`.
+
+The result is cached by `path`, so calling this twice with the same path returns the identical object.
 """
-@memoize function readXTbML(path)
-    x = open_and_read(path) |> getXML
-    XTbML_Table_To_MortalityTable(parseXTbMLTable(x, path))
+function readXTbML(path)
+    lock(_CACHE_LOCK) do
+        get!(() -> _read_xtbml(path), _TABLE_CACHE, path)
+    end
 end
 
 

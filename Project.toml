@@ -5,7 +5,6 @@ version = "2.6.0"
 
 [deps]
 Artifacts = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
-Memoize = "c03570c3-d221-55d1-a50c-7939bbd78826"
 OffsetArrays = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
 Parsers = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
 QuadGK = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
@@ -20,7 +19,6 @@ MortalityTablesCSVExt = "CSV"
 
 [compat]
 CSV = "0.10"
-Memoize = "^0.4"
 OffsetArrays = "1.0"
 Parsers = "^1, 2"
 QuadGK = "^2.3"
