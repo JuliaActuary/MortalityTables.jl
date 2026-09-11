@@ -128,24 +128,39 @@ function MortalityTable(ultimate; metadata = TableMetaData())
 end
 
 
-Base.show(io::IO, ::MIME"text/plain", mt::MortalityTable) = print(
-    io,
-    """
-    MortalityTable ($(mt.metadata.content_type)):
-       Name:
-           $(mt.metadata.name)
-       Fields: 
-           $(fieldnames(typeof(mt)))
-       Provider:
-           $(mt.metadata.provider)
-       mort.SOA.org ID:
-           $(mt.metadata.id)
-       mort.SOA.org link:
-           https://mort.soa.org/ViewTable.aspx?&TableIdentity=$(mt.metadata.id)
-       Description:
-           $(mt.metadata.description)
-    """,
-)
+function Base.show(io::IO, ::MIME"text/plain", mt::MortalityTable)
+    print(
+        io,
+        """
+        MortalityTable ($(mt.metadata.content_type)):
+           Name:
+               $(mt.metadata.name)
+           Fields:
+               $(fieldnames(typeof(mt)))
+           Provider:
+               $(mt.metadata.provider)
+        """,
+    )
+    # only mort.SOA.org sourced tables have an id and a link
+    if mt.metadata.id !== nothing
+        print(
+            io,
+            """
+               mort.SOA.org ID:
+                   $(mt.metadata.id)
+               mort.SOA.org link:
+                   https://mort.soa.org/ViewTable.aspx?&TableIdentity=$(mt.metadata.id)
+            """,
+        )
+    end
+    print(
+        io,
+        """
+           Description:
+               $(mt.metadata.description)
+        """,
+    )
+end
 
 
 """
