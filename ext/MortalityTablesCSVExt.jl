@@ -1,3 +1,8 @@
+module MortalityTablesCSVExt
+
+using MortalityTables, CSV, OffsetArrays, Parsers
+import MortalityTables: MortalityTable, TableMetaData, UltimateMortality
+
 """ 
     MortalityTable(CSV.File)
 
@@ -147,3 +152,4 @@ end
 # sometimes the value comes through as a string, sometimes as a number when CSV.jl parses it
 parsemaybe(t,x) = typeof(x) <: AbstractString ? Parsers.parse(t,x) : x
 
+end # module

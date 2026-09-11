@@ -3,7 +3,6 @@ using Memoize
 using OffsetArrays
 using Parsers
 using QuadGK
-using Requires
 import StringDistances
 using XMLDict
 using Artifacts
@@ -34,10 +33,5 @@ export MortalityTable,
     Makeham, Gompertz, MakehamGompertz,
     hazard, cumhazard,
     mortality_vector
-
-# lazy load part of the package
-function __init__()
-    @require CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b" include("CSV.jl")
-end
 
 end # module
