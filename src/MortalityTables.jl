@@ -7,7 +7,7 @@ using Requires
 import StringDistances
 using UnPack
 using XMLDict
-using Pkg.Artifacts
+using Artifacts
 
 include("table_source_map.jl")
 include("MetaData.jl")
