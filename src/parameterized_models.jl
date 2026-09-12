@@ -31,7 +31,7 @@ end
 The force of mortality at `age`. More precisely: the ratio of the probability of failure/death to the survival function.
 """
 function hazard(m::Makeham,age) 
-    @unpack a,b,c = m
+    (; a, b, c) = m
     return a*exp(b*age) + c
 end
 
@@ -41,7 +41,7 @@ end
 The cumulative force of mortality at `age`. More precisely: the ratio of the cumulative probability of failure/death to the survival function.
 """
 function cumhazard(m::Makeham,age) 
-    @unpack a,b,c = m
+    (; a, b, c) = m
     return a / b * (exp(b*age) - 1) + age * c
 end
 
@@ -94,15 +94,15 @@ Base.@kwdef struct InverseGompertz <: ParametricMortality
 end
 
 
-function hazard(m::InverseGompertz,age)
-    @unpack m,σ = m 
+function hazard(model::InverseGompertz,age)
+    (; m, σ) = model
     return 1 / σ * exp(-(age - m)/σ) / (exp(exp(-(age - m)/σ)) - 1)
 end
 
 cumhazard(m::InverseGompertz,age) = -log(survival(m,age))
 
-function survival(m::InverseGompertz,age) 
-    @unpack m,σ = m 
+function survival(model::InverseGompertz,age) 
+    (; m, σ) = model
     return (1 - exp(-exp(-(age - m)/σ))) / (1 - exp(-exp(m/σ)))
 end
 
@@ -128,7 +128,7 @@ Base.@kwdef struct Opperman <: ParametricMortality
 end
 
 function hazard(m::Opperman,age) 
-    @unpack a,b,c = m
+    (; a, b, c) = m
     return max(a / √(age+1) - b + c * √(age+1),0.0)
 end
 
@@ -172,7 +172,7 @@ Base.@kwdef struct Thiele <: ParametricMortality
 end
 
 function hazard(m::Thiele,age) 
-    @unpack a,b,c,d,e,f,g = m
+    (; a, b, c, d, e, f, g) = m
     μ₁ = a * exp(-b * age)
     μ₂ = c * exp(-0.5 * d * (age - e)^2)
     μ₃ = f * exp(g * age)
@@ -206,8 +206,8 @@ Base.@kwdef struct Wittstein <: ParametricMortality
     m = 100
 end
 
-function hazard(m::Wittstein,age)
-    @unpack a,b,m,n = m
+function hazard(model::Wittstein,age)
+    (; a, b, m, n) = model
     return (1/b) * a ^ -((b * age) ^ n) + a^ -((m -  age) ^ n) 
 end
 
@@ -240,8 +240,8 @@ Base.@kwdef struct Weibull <: ParametricMortality
     σ = 2
 end
 
-function hazard(m::Weibull,age)
-    @unpack m,σ =m
+function hazard(model::Weibull,age)
+    (; m, σ) = model
     if age == 0
         return 1.0
     else 
@@ -249,8 +249,8 @@ function hazard(m::Weibull,age)
     end
 end
 
-function cumhazard(m::Weibull,age)
-    @unpack m,σ =m
+function cumhazard(model::Weibull,age)
+    (; m, σ) = model
     return (age / m) ^ (m / σ)
 end
 
@@ -288,13 +288,13 @@ Base.@kwdef struct InverseWeibull <: ParametricMortality
     σ = 10
 end
 
-function hazard(m::InverseWeibull,age)
-    @unpack m,σ = m
+function hazard(model::InverseWeibull,age)
+    (; m, σ) = model
     return (1/σ) * (age/m)^(-m/σ - 1) / (exp((age/m)^(-m/σ)) - 1)
 end
 
-function cumhazard(m::InverseWeibull,age)
-    @unpack m,σ = m
+function cumhazard(model::InverseWeibull,age)
+    (; m, σ) = model
     return -log(1 - exp(-(age/m)^(-m/σ)))
 end
 
@@ -326,7 +326,7 @@ Base.@kwdef struct Perks <: ParametricMortality
 end
 
 function hazard(m::Perks,age) 
-    @unpack a,b,c,d = m
+    (; a, b, c, d) = m
     return (a + b*c^age) / (b*(c^-age) + 1 + d*c^age)
 end
 
@@ -356,7 +356,7 @@ Base.@kwdef struct VanderMaen <: ParametricMortality
 end
 
 function hazard(m::VanderMaen,age)
-    @unpack a,b,c,i,n = m
+    (; a, b, c, i, n) = m
     return a + b*age + c*(age^2) + i/(n - age)
 end
 
@@ -385,7 +385,7 @@ Base.@kwdef struct VanderMaen2 <: ParametricMortality
 end
 
 function hazard(m::VanderMaen2,age)
-    @unpack a,b,i,n = m 
+    (; a, b, i, n) = m
     return a + b * age + i/(n - age)
 end
 
@@ -414,7 +414,7 @@ Base.@kwdef struct StrehlerMildvan <: ParametricMortality
 end
 
 function hazard(m::StrehlerMildvan,age)
-    @unpack k,v₀,b,d = m
+    (; k, v₀, b, d) = m
     return  k * exp(-v₀ * (1 - b * age) / d)
 end
 
@@ -440,7 +440,7 @@ Base.@kwdef struct Beard <: ParametricMortality
 end
 
 function hazard(m::Beard,age)
-    @unpack a,b,k = m
+    (; a, b, k) = m
     return  a * exp(b*age) / (1 + k * a * exp(b*age))
 end
 
@@ -468,7 +468,7 @@ Base.@kwdef struct MakehamBeard <: ParametricMortality
 end
 
 function hazard(m::MakehamBeard,age)
-    @unpack a,b,c,k = m
+    (; a, b, c, k) = m
     return  a * exp(b*age) / (1 + k * a * exp(b*age)) + c
 end
 
@@ -494,7 +494,7 @@ Base.@kwdef struct Quadratic <: ParametricMortality
 end
 
 function hazard(m::Quadratic,age)
-    @unpack a,b,c = m
+    (; a, b, c) = m
     return  a + b * age + c * age^2
 end
 
@@ -520,7 +520,7 @@ Base.@kwdef struct GammaGompertz <: ParametricMortality
 end
 
 function hazard(m::GammaGompertz,age)
-    @unpack a,b,γ = m
+    (; a, b, γ) = m
     return  (a * exp(b * age)) / (1 + ( a * γ / b) * (exp(b * age) - 1))
 end
 
@@ -550,7 +550,7 @@ Base.@kwdef struct Siler <: ParametricMortality
 end
 
 function hazard(m::Siler,age)
-    @unpack a,b,c,d,e = m
+    (; a, b, c, d, e) = m
     return  a * exp(-b* age) + c + d * exp(e * age)
 end
 
@@ -584,7 +584,7 @@ Base.@kwdef struct HeligmanPollard <: ParametricMortality
 end
 
 function hazard(m::HeligmanPollard,age)
-    @unpack a,b,c,d,e,f,g,h = m
+    (; a, b, c, d, e, f, g, h) = m
     μ₁ = a^((age + b)^c) + g * h^age
     μ₂ = d * exp(-e * (log(age/f))^2)
     η = age == 0 ?  μ₁ :  μ₁ + μ₂
@@ -633,7 +633,7 @@ Base.@kwdef struct HeligmanPollard2 <: ParametricMortality
 end
 
 function hazard(m::HeligmanPollard2,age)
-    @unpack a,b,c,d,e,f,g,h = m
+    (; a, b, c, d, e, f, g, h) = m
     μ₁ = a^((age + b)^c) + (g * h^age) / (1 + g * h ^ age)
     μ₂ = d * exp(-e * (log(age/f))^2)
     return age == 0 ?  μ₁ :  μ₁ + μ₂
@@ -682,7 +682,7 @@ Base.@kwdef struct HeligmanPollard3 <: ParametricMortality
 end
 
 function hazard(m::HeligmanPollard3,age)
-    @unpack a,b,c,d,e,f,g,h,k = m
+    (; a, b, c, d, e, f, g, h, k) = m
     μ₁ = a^((age + b)^c) + (g * h^age) / (1 + k * g * h ^ age)
     μ₂ = d * exp(-e * (log(age/f))^2)
     return age == 0 ?  μ₁ :  μ₁ + μ₂
@@ -731,7 +731,7 @@ Base.@kwdef struct HeligmanPollard4 <: ParametricMortality
 end
 
 function hazard(m::HeligmanPollard4,age)
-    @unpack a,b,c,d,e,f,g,h,k = m
+    (; a, b, c, d, e, f, g, h, k) = m
     μ₁ = a^((age + b)^c) + (g * h^(age ^ k)) / (1 + g * h ^ (age ^ k))
     μ₂ = d * exp(-e * (log(age/f))^2)
     return age == 0 ?  μ₁ :  μ₁ + μ₂
@@ -772,7 +772,7 @@ Base.@kwdef struct RogersPlanck <: ParametricMortality
 end
 
 function hazard(m::RogersPlanck,age) 
-    @unpack a₀,a₁,a₂,a₃,a,b,c,d,u = m
+    (; a₀, a₁, a₂, a₃, a, b, c, d, u) = m
     return  a₀ + a₁ * exp(-a * age) + a₂ * exp(b*(age - u) - exp(-c*(age - u))) + a₃*exp(d*age)
 end
 
@@ -803,7 +803,7 @@ Base.@kwdef struct Martinelle <: ParametricMortality
 end
 
 function hazard(m::Martinelle,age)
-    @unpack a,b,c,d,k = m
+    (; a, b, c, d, k) = m
     return  (a*exp(b*age) + c) / (1 + d*exp(b * age)) + k*exp(b * age)
 end
 
@@ -860,7 +860,7 @@ Base.@kwdef struct Kostaki <: ParametricMortality
 end
 
 function hazard(m::Kostaki,age) 
-    @unpack a,b,c,d,e1,e2,f,g,h = m
+    (; a, b, c, d, e1, e2, f, g, h) = m
     μ₁ = a^((age + b)^c) + g*h^age 
     if age <= f
         μ₂ =d *exp(-(e1*log(age/f))^2)
@@ -899,12 +899,12 @@ Base.@kwdef struct Kannisto <: ParametricMortality
 end
 
 function hazard(m::Kannisto,age)
-    @unpack a,b = m
+    (; a, b) = m
     return  a * exp(b * age) / (1 + a * exp(b*age))
 end
 
 function cumhazard(m::Kannisto,age)
-    @unpack a,b = m
+    (; a, b) = m
     return  1/a * log((1 + b*exp(b*age)) / (1 + a))
 end
 
@@ -935,7 +935,7 @@ Base.@kwdef struct KannistoMakeham <: ParametricMortality
 end
 
 function hazard(m::KannistoMakeham,age)
-    @unpack a,b,c = m
+    (; a, b, c) = m
     return  a * exp(b * age) / (1 + a * exp(b*age)) + c
 end
 
