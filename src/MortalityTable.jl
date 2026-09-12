@@ -1,7 +1,9 @@
 """
     UltimateMortality(vector; start_age=0)
 
-Given a vector of rates, returns an `OffsetArray` that is indexed by attained age. 
+Given a vector of rates, returns an `OffsetArray` that is indexed by attained age.
+
+Any `AbstractVector` is accepted (a `Vector`, a range, a `view`, or a vector containing `missing`); the input is wrapped without copying.
 
 Give the optional keyword argument to start the indexing at an age other than zero.
 
@@ -19,7 +21,7 @@ julia> m[18]
 
 ```
 """
-function UltimateMortality(v::Array{<:Real,1}; start_age = 0)
+function UltimateMortality(v::AbstractVector; start_age = 0)
     return OffsetArray(v, start_age - 1)
 end
 
@@ -327,5 +329,7 @@ Equivalent to doing:
 using OffsetArrays
 OffsetArray(vec,start_age-1)
 ```
+
+This is an alias for [`UltimateMortality`](@ref).
 """
-mortality_vector(vec; start_age = 0) = return OffsetArray(vec, start_age - 1)
+mortality_vector(vec; start_age = 0) = UltimateMortality(vec; start_age)
