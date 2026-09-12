@@ -1,7 +1,7 @@
 name = "MortalityTables"
 uuid = "4780e19d-04b9-53dc-86c2-9e9aa59b5a12"
 authors = ["Alec Loudenback <alecloudenback@gmail.com>"]
-version = "2.6.0"
+version = "3.0.0"
 
 [deps]
 Artifacts = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
