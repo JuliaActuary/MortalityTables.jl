@@ -100,34 +100,15 @@ function MortalityTable(lines::CSV.File)
 		
 		ult = UltimateMortality(ult_rates,start_age=parse(Int,lines[ult_start][1]))
 
-		ult_end_age = lastindex(ult)
-		
-		
 		sel_start, sel_end = table_starts[1],table_ends[1]
 
 		sel_start_age = parsemaybe(Int,lines[sel_start][1])
 		sel_rates = OffsetArray(
 			map(sel_start:sel_end) do r
 				start_age = sel_start_age + r - sel_start
-				sel_end_age = length(lines[sel_start]) + start_age - 2
-				while ismissing(lines[r][sel_end_age - start_age + 2])
-					sel_end_age -= 1
-				end
-					
-				age_range = start_age:max(ult_end_age,sel_end_age)
-				rates = map(age_range) do age
-					c = age - start_age + 2
-					if age > sel_end_age 
-						return ult[age]
-					else
-						return parsemaybe(Float64,lines[r][c])
-					end
-				end
-				
-				return OffsetArray(
-					rates,
-					start_age - 1
-				)
+				row = lines[r]
+				select_rates = _select_rates([row[c] for c in 2:length(row)])
+				return MortalityTables._select_row(start_age, select_rates, ult)
 			end,
 			sel_start_age - 1
 		)
@@ -151,5 +132,14 @@ end
 # because of the poor standardization of the CSV formatted tables from mort.SOA.org,
 # sometimes the value comes through as a string, sometimes as a number when CSV.jl parses it
 parsemaybe(t,x) = typeof(x) <: AbstractString ? parse(t,x) : x
+
+# The select rates in one CSV row, given the cells after the age column: trailing
+# blanks are trimmed, but a leading or interior blank is kept as `missing` so a
+# row with a gap is not silently truncated.
+function _select_rates(cells)
+	last = findlast(!ismissing, cells)
+	last === nothing && return Float64[]
+	return [parsemaybe(Float64, c) for c in cells[1:last]]
+end
 
 end # module

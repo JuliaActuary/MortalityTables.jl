@@ -38,6 +38,37 @@
 
     end
 
+    @testset "_select_row" begin
+        ult = UltimateMortality([i / 100 for i = 0:100])
+
+        # (a) leading missing: the row is still indexed from the issue age
+        row = MortalityTables._select_row(15, [missing, 0.2, 0.3], ult)
+        @test firstindex(row) == 15
+        @test row[15] === missing
+        @test row[16] == 0.2
+        @test row[17] == 0.3
+        @test row[18] == ult[18]
+        @test omega(row) == 100
+        @test eltype(row) == Union{Missing,Float64}
+
+        # a row without missing keeps a Float64 element type
+        row = MortalityTables._select_row(15, [0.1, 0.2, 0.3], ult)
+        @test eltype(row) == Float64
+        @test row[15:17] == [0.1, 0.2, 0.3]
+        @test row[18:100] == ult[18:100]
+
+        # (b) select period ending exactly at omega: no ultimate tail
+        row = MortalityTables._select_row(95, fill(0.5, 6), ult)
+        @test omega(row) == 100
+        @test all(row .== 0.5)
+
+        # (c) select period extending past omega: the select rates alone
+        row = MortalityTables._select_row(95, fill(0.5, 10), ult)
+        @test omega(row) == 104
+        @test length(row) == 10
+        @test all(row .== 0.5)
+    end
+
     @testset "off-aligned select and ult" begin
         select_matrix = [(i + j - 1) / 100 for i = 0:10, j = 1:20]
         ult = UltimateMortality([i / 100 for i = 18:100], start_age = 18)
