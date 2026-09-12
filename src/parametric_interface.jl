@@ -43,5 +43,4 @@ survival(m::ParametricMortality, from, to, ::DeathDistribution) = survival(m, fr
 omega(::ParametricMortality) = Inf
 
 (m::ParametricMortality)(x) = μ(m, x)
-Base.getindex(m::ParametricMortality,x) = m(x)
 Base.broadcastable(pm::ParametricMortality) = Ref(pm)

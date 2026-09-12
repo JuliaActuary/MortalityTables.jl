@@ -105,9 +105,6 @@ struct UltimateTable{U} <: MortalityTable
     metadata::TableMetaData
 end
 
-Base.getindex(u::UltimateTable, x) = u.ultimate[x]
-Base.lastindex(u::UltimateTable) = lastindex(u.ultimate)
-
 Base.:(==)(tbl1::UltimateTable, tbl2::UltimateTable) = tbl1.metadata == tbl2.metadata && isequal(tbl1.ultimate, tbl2.ultimate)
 function Base.:(==)(tbl1::SelectUltimateTable, tbl2::SelectUltimateTable)
     return (

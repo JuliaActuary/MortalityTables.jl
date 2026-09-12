@@ -34,7 +34,7 @@
         mt2 = MortalityTable(q1)
 
         @test mt2.ultimate[0] == 0
-        @test mt2[0] == 0
+        @test_throws MethodError mt2[0]  # tables are opaque containers
 
     end
 
