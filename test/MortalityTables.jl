@@ -19,6 +19,10 @@
             @test_throws BoundsError cso1980[125]
             @test_throws ArgumentError survival(cso1980,10,15)
             @test_throws ArgumentError decrement(cso1980,10,15)
+            @test_throws ArgumentError survival(cso1980, 10, Uniform())
+            @test_throws ArgumentError survival(cso1980, 10, 15, Uniform())
+            @test_throws ArgumentError decrement(cso1980, 10, Uniform())
+            @test_throws ArgumentError decrement(cso1980, 10, 15, Uniform())
             @test omega(cso1980.ultimate) == 100
             @test MortalityTables.ω(cso1980) == 100
         end
