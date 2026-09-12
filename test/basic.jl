@@ -85,6 +85,17 @@
         @test d.name == "test"
     end
 
+    @testset "show" begin
+        # a custom table has no mort.SOA.org id, so no link should be printed
+        s = sprint(show, MIME"text/plain"(), MortalityTable(UltimateMortality([0.1, 0.2])))
+        @test !occursin("TableIdentity=nothing", s)
+        @test !occursin("mort.SOA.org ID", s)
+        @test occursin("Description", s)
+
+        s = sprint(show, MIME"text/plain"(), MortalityTable(UltimateMortality([0.1, 0.2]), metadata = TableMetaData(id = "42")))
+        @test occursin("TableIdentity=42", s)
+    end
+
     @testset "mortality_vector" begin
         v = [i for i = 3:10]
         q = mortality_vector(v, start_age = 3)
