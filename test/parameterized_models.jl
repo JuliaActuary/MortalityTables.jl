@@ -17,6 +17,25 @@ using InteractiveUtils: subtypes
         @test Gompertz() isa Makeham{Float64}
     end
 
+    @testset "cumhazard is the primitive for every law" begin
+        for L in subtypes(MortalityTables.ParametricMortality)
+            m = L()
+            @test cumhazard(m, 50) isa Real
+            @test survival(m, 0) ≈ 1
+            # any closed-form cumhazard must agree with integrating the law's own hazard
+            @test cumhazard(m, 50) ≈ quadgk(a -> hazard(m, a), 0, 50)[1] rtol = 1e-6
+            # the ratio form is only defined when survival has not underflowed to zero
+            # (the default Quadratic and VanderMaen parameters do); the difference of
+            # cumhazards used by the package is well defined either way
+            if survival(m, 40) > 0
+                @test survival(m, 40, 60) ≈ survival(m, 60) / survival(m, 40)
+            else
+                @test 0 <= survival(m, 40, 60) <= 1
+            end
+            @test decrement(m, 40, 60) ≈ 1 - survival(m, 40, 60)
+        end
+    end
+
     @testset "Makeham" begin
 
         g = Gompertz(a=0.0002, b=.13)
@@ -153,8 +172,8 @@ using InteractiveUtils: subtypes
             # test other characteristics
 
             @test survival(model.juliamodel, 20, 20) == 1.0
-            if model.rmodel in ["quadratic","perks","vandermaen","vandermaen2"]
-                # the default params create a crazy hazard function 
+            if model.rmodel == "perks"
+                # the default params give a hazard that is numerically zero at these ages
                 @test_broken survival(model.juliamodel, 50, 51) < 1.0
             else
                 @test survival(model.juliamodel, 50, 51) < 1.0

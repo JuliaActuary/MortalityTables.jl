@@ -25,27 +25,15 @@ struct Makeham{T<:Real} <: ParametricMortality
 end
 Makeham(; a=0.0002, b=0.13, c=0.001) = Makeham(promote(a, b, c)...)
 
-"""
-    hazard(model,age)
-
-The force of mortality at `age`. More precisely: the ratio of the probability of failure/death to the survival function.
-"""
-function hazard(m::Makeham,age) 
+function hazard(m::Makeham,age)
     (; a, b, c) = m
     return a*exp(b*age) + c
 end
 
-"""
-    cumhazard(model,age)
-
-The cumulative force of mortality at `age`. More precisely: the ratio of the cumulative probability of failure/death to the survival function.
-"""
-function cumhazard(m::Makeham,age) 
+function cumhazard(m::Makeham,age)
     (; a, b, c) = m
     return a / b * (exp(b*age) - 1) + age * c
 end
-
-survival(m::Makeham,age) = exp(-cumhazard(m,age))
 
 
 """
@@ -100,11 +88,10 @@ function hazard(model::InverseGompertz,age)
     return 1 / σ * exp(-(age - m)/σ) / (exp(exp(-(age - m)/σ)) - 1)
 end
 
-cumhazard(m::InverseGompertz,age) = -log(survival(m,age))
-
-function survival(model::InverseGompertz,age) 
+function cumhazard(model::InverseGompertz,age)
     (; m, σ) = model
-    return (1 - exp(-exp(-(age - m)/σ))) / (1 - exp(-exp(m/σ)))
+    # negative log of the closed-form survival function
+    return -log((1 - exp(-exp(-(age - m)/σ))) / (1 - exp(-exp(m/σ))))
 end
 
 """
@@ -259,10 +246,6 @@ function cumhazard(model::Weibull,age)
     return (age / m) ^ (m / σ)
 end
 
-function survival(m::Weibull,age) 
-    return exp(-cumhazard(m,age))
-end
-
 """
     InverseWeibull(;m,σ)
 
@@ -302,10 +285,6 @@ end
 function cumhazard(model::InverseWeibull,age)
     (; m, σ) = model
     return -log(1 - exp(-(age/m)^(-m/σ)))
-end
-
-function survival(m::InverseWeibull,age) 
-    return exp(-cumhazard(m,age))
 end
 
 """
@@ -904,7 +883,7 @@ Construct a mortality model following Kannisto's law of mortality.
 \\begin{aligned}
 \\mathrm{hazard}\\left( {\\rm age} \\right) &= \\frac{a \\cdot e^{b \\cdot {\\rm age}}}{1 + a \\cdot e^{b \\cdot {\\rm age}}}
 \\\\
-\\mathrm{cumhazard}\\left( {\\rm age} \\right) &= 1/a * log((1 + b*exp(b*age)) / (1 + a))
+\\mathrm{cumhazard}\\left( {\\rm age} \\right) &= \\frac{1}{b} \\log\\left( \\frac{1 + a \\cdot e^{b \\cdot {\\rm age}}}{1 + a} \\right)
 \\\\
 \\mathrm{survival}\\left( {\\rm age} \\right) &= e^{ - \\mathrm{cumhazard}\\left( m, {\\rm age} \\right)}
 \\end{aligned}
@@ -928,11 +907,7 @@ end
 
 function cumhazard(m::Kannisto,age)
     (; a, b) = m
-    return  1/a * log((1 + b*exp(b*age)) / (1 + a))
-end
-
-function  survival(m::Kannisto,age)
-    return exp(-cumhazard(m,age))
+    return  1/b * log((1 + a*exp(b*age)) / (1 + a))
 end
 
 
