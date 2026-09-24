@@ -22,7 +22,9 @@ julia> m[18]
 ```
 """
 function UltimateMortality(v::AbstractVector; start_age = 0)
-    return OffsetArray(v, start_age - 1)
+    # the offset is relative to `v`'s own axes, which need not start at 1 (a view, or a vector
+    # that is already indexed by age)
+    return OffsetArray(v, start_age - firstindex(v))
 end
 
 """

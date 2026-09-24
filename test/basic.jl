@@ -131,6 +131,15 @@
         q = UltimateMortality(base)
         base[1] = 0.5
         @test q[0] == 0.5
+
+        # start_age sets the first age whatever the input's own axes: a vector already indexed
+        # by age is re-anchored, not shifted relative to its old first age
+        for v in ([0.1, 0.2], view([0.0, 0.1, 0.2], 2:3), UltimateMortality([0.1, 0.2]; start_age = 40),
+                  UltimateMortality([0.1, 0.2]; start_age = -5))
+            m = UltimateMortality(v; start_age = 7)
+            @test axes(m, 1) == 7:8
+            @test m[7] == 0.1 && m[8] == 0.2
+        end
     end
 
     @testset "utility functions" begin
