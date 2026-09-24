@@ -56,14 +56,21 @@ julia> sel[0][95] # the mortality rate for a life age 95, that was issued at age
 ```
 """
 function SelectMortality(select, ultimate; start_age = 0)
-
     # iterate down the rows (issue ages)
-    vs = map(enumerate(eachrow(select))) do (row_num, row)
-        end_age = start_age + (row_num - 1) + (length(row) - 1)
-        OffsetArray([row; ultimate[end_age+1:end]], (start_age - 1) + (row_num - 1))
+    vs = map(enumerate(eachrow(select))) do (i, row)
+        _select_row(start_age + i - 1, row, ultimate)
     end
 
     return OffsetArray(vs, start_age - 1)
+end
+
+# One row of a select table: `select_rates` covers attained ages
+# `issue_age:issue_age+length(select_rates)-1` (leading `missing` allowed);
+# the ultimate table supplies every age after that, through its omega. A
+# select period that runs past the ultimate omega simply has no ultimate tail.
+function _select_row(issue_age::Integer, select_rates::AbstractVector, ultimate::AbstractVector)
+    last_select_age = issue_age + length(select_rates) - 1
+    return OffsetArray([select_rates; ultimate[last_select_age+1:end]], issue_age - 1)
 end
 
 

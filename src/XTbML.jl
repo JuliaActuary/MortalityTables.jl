@@ -96,33 +96,42 @@ function parseXTbMLTable(x, path)
     return tbl
 end
 
-function XTbML_Table_To_MortalityTable(tbl::XTbMLTable)
-    ult = UltimateMortality(
-                [v.rate for v in  tbl.ultimate], 
-                start_age=tbl.ultimate[1].age
-            )
+# XTbML labels every rate with its age or duration. Each value goes to its label, so a table
+# whose labels skip (rates at grouped ages, or an empty cell inside a select row) keeps its
+# values at the right ages, with `missing` where it gives no rate. The element type widens only
+# when there are such gaps. A repeated label is ambiguous and throws. `first` is the label of
+# the first position (durations start at 1; ages at the smallest label).
+function _by_label(labels, values, what, table; first = minimum(labels))
+    allunique(labels) || throw(
+        ArgumentError(
+            "XTbML table $(something(table.name, table.source_path, "(unnamed)")): $what repeat a " *
+                "label, so their rates cannot be placed: $(labels)"
+        )
+    )
+    n = maximum(labels) - first + 1
+    labels == first:(first + n - 1) && return first, collect(values)
+    placed = Vector{Union{Missing, eltype(values)}}(missing, n)
+    for (label, value) in zip(labels, values)
+        placed[label - first + 1] = value
+    end
+    return first, placed
+end
 
-    ult_omega = lastindex(ult)
+function XTbML_Table_To_MortalityTable(tbl::XTbMLTable)
+    start_age, ult_rates = _by_label([v.age for v in tbl.ultimate], [v.rate for v in tbl.ultimate], "the ultimate ages", tbl.d)
+    ult = UltimateMortality(ult_rates, start_age = start_age)
 
     if !isnothing(tbl.select)
-        sel =   map(tbl.select) do (issue_age, rates)
-            last_sel_age = issue_age + rates[end].duration - 1
-            first_defined_select_age =  issue_age + rates[1].duration - 1
-            last_age = max(last_sel_age, ult_omega)
-            vec = map(issue_age:last_age) do attained_age
-                if attained_age < first_defined_select_age
-                    return missing
-                else
-                    if attained_age <= last_sel_age
-                        return rates[attained_age - first_defined_select_age + 1].rate
-                    else
-                        return ult[attained_age]
-                    end
-                end
-            end 
-            return mortality_vector(vec, start_age=issue_age)
+        rows = map(tbl.select) do (issue_age, rates)
+            # empty cells were dropped when parsing: durations without a rate are `missing`
+            _, select_rates = _by_label(
+                [r.duration for r in rates], [r.rate for r in rates],
+                "the select durations for issue age $issue_age", tbl.d; first = 1
+            )
+            return _select_row(issue_age, select_rates, ult)
         end
-        sel = OffsetArray(sel, tbl.select[1].issue_age - 1)
+        first_issue_age, sel = _by_label([r.issue_age for r in tbl.select], rows, "the select issue ages", tbl.d)
+        sel = OffsetArray(sel, first_issue_age - 1)
 
         return MortalityTable(sel, ult, metadata=tbl.d)
     else
