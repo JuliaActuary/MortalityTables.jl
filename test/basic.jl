@@ -105,6 +105,41 @@
         q = mortality_vector(collect(0:5))
         @test q[0] == 0
         @test q[5] == 5
+
+        # mortality_vector is an alias of UltimateMortality
+        @test mortality_vector(v, start_age = 3) == UltimateMortality(v, start_age = 3)
+    end
+
+    @testset "UltimateMortality accepts any AbstractVector" begin
+        # a range
+        r = UltimateMortality(0:0.1:1)
+        @test r[0] == 0.0
+        @test r[10] == 1.0
+
+        # a view
+        base = [0.1, 0.2, 0.3, 0.4]
+        vw = UltimateMortality(view(base, 2:4), start_age = 1)
+        @test vw[1] == 0.2
+        @test vw[3] == 0.4
+
+        # a vector containing missing (as the XTbML and CSV loaders produce)
+        mv = UltimateMortality([0.1, missing])
+        @test mv[0] == 0.1
+        @test mv[1] === missing
+
+        # no copy is made
+        q = UltimateMortality(base)
+        base[1] = 0.5
+        @test q[0] == 0.5
+
+        # start_age sets the first age whatever the input's own axes: a vector already indexed
+        # by age is re-anchored, not shifted relative to its old first age
+        for v in ([0.1, 0.2], view([0.0, 0.1, 0.2], 2:3), UltimateMortality([0.1, 0.2]; start_age = 40),
+                  UltimateMortality([0.1, 0.2]; start_age = -5))
+            m = UltimateMortality(v; start_age = 7)
+            @test axes(m, 1) == 7:8
+            @test m[7] == 0.1 && m[8] == 0.2
+        end
     end
 
     @testset "utility functions" begin
