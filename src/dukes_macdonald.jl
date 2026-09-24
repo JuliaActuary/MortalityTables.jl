@@ -1,4 +1,7 @@
-using MortalityTables: SelectUltimateTable
+# The point-in-scale rate (issue age `issue_age`, now `attained_age`) and the
+# select rate for a life newly selected at `attained_age`, read from a table.
+_point_in_scale_and_select(table, issue_age, attained_age) =
+    (table.select[issue_age][attained_age], table.select[attained_age][attained_age])
 
 """
   dukes_macdonald1(point_in_scale, select_rate, base_lapses, total_lapses, effectiveness)
@@ -16,11 +19,8 @@ function dukes_macdonald1(point_in_scale, select_rate, base_lapses, total_lapses
   return deteriorated_rate
 end
 
-function dukes_macdonald1(selectultimate, issue_age, attained_age, base_lapses, total_lapses, effectiveness)
-  point_in_scale = selectultimate.select[issue_age][attained_age]
-  select_rate = selectultimate.select[attained_age][attained_age]
-  return dukes_macdonald1(point_in_scale, select_rate, base_lapses, total_lapses, effectiveness)
-end
+dukes_macdonald1(table, issue_age, attained_age, base_lapses, total_lapses, effectiveness) =
+  dukes_macdonald1(_point_in_scale_and_select(table, issue_age, attained_age)..., base_lapses, total_lapses, effectiveness)
 
 """
   dukes_macdonald2(point_in_scale, select_rate, base_lapses, total_lapses, effectiveness)
@@ -39,11 +39,8 @@ function dukes_macdonald2(point_in_scale, select_rate, base_lapses, total_lapses
   return deteriorated_rate
 end
 
-function dukes_macdonald2(selectultimate, issue_age, attained_age, base_lapses, total_lapses, effectiveness)
-  point_in_scale = selectultimate.select[issue_age][attained_age]
-  select_rate = selectultimate.select[attained_age][attained_age]
-  return dukes_macdonald2(point_in_scale, select_rate, base_lapses, total_lapses, effectiveness)
-end
+dukes_macdonald2(table, issue_age, attained_age, base_lapses, total_lapses, effectiveness) =
+  dukes_macdonald2(_point_in_scale_and_select(table, issue_age, attained_age)..., base_lapses, total_lapses, effectiveness)
 
 """
   dukes_macdonald3(point_in_scale, select_rate, base_lapses, total_lapses, effectiveness)
@@ -60,8 +57,5 @@ function dukes_macdonald3(point_in_scale, select_rate, base_lapses, total_lapses
   return deteriorated_rate
 end
 
-function dukes_macdonald3(selectultimate, issue_age, attained_age, base_lapses, total_lapses, effectiveness)
-  point_in_scale = selectultimate.select[issue_age][attained_age]
-  select_rate = selectultimate.select[attained_age][attained_age]
-  return dukes_macdonald3(point_in_scale, select_rate, base_lapses, total_lapses, effectiveness)
-end
+dukes_macdonald3(table, issue_age, attained_age, base_lapses, total_lapses, effectiveness) =
+  dukes_macdonald3(_point_in_scale_and_select(table, issue_age, attained_age)..., base_lapses, total_lapses, effectiveness)
