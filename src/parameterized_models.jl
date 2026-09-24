@@ -30,9 +30,23 @@ function hazard(m::Makeham,age)
     return a*exp(b*age) + c
 end
 
+# expm1(x)/x and log1p(x)/x, both 1 at x = 0: smooth there, so the closed forms below keep
+# their zero-growth limits (and derivatives) instead of evaluating 0/0. They are used only
+# near b·age = 0: at large |b·age| and infinite ages the factored forms would evaluate
+# Inf/Inf or 0·Inf, so the plain closed forms apply there.
+_exprel(x) = abs(x) < 1e-5 ? 1 + x / 2 + x^2 / 6 + x^3 / 24 : expm1(x) / x
+_log1pdivx(x) = abs(x) < 1e-5 ? 1 - x / 2 + x^2 / 3 - x^3 / 4 : log1p(x) / x
+
+# k·age, which is 0 for k = 0 even at an infinite age: a law's zero coefficient contributes
+# nothing there (b = 0 is a constant hazard, c = 0 the Gompertz law).
+_times_age(k, age) = iszero(k) ? zero(k * age) : k * age
+
 function cumhazard(m::Makeham,age)
     (; a, b, c) = m
-    return a / b * (exp(b*age) - 1) + age * c
+    x = _times_age(b, age)
+    # a/b·(exp(b·age) - 1), which is a·age at b = 0, plus c·age
+    growth = iszero(a) ? zero(a * age) : abs(x) < 1 ? a * age * _exprel(x) : a / b * expm1(x)
+    return growth + _times_age(c, age)
 end
 
 
@@ -907,7 +921,13 @@ end
 
 function cumhazard(m::Kannisto,age)
     (; a, b) = m
-    return  1/b * log((1 + a*exp(b*age)) / (1 + a))
+    iszero(a) && return zero(a * age)   # no hazard, even at an infinite age
+    x = _times_age(b, age)
+    # log((1 + a·exp(b·age)) / (1 + a)) / b. Near b·age = 0 it is log1p(u) / b with
+    # u = a·expm1(b·age) / (1 + a), which is a·age/(1 + a) at b = 0.
+    abs(x) < 1 || return (log1p(a * exp(x)) - log1p(a)) / b
+    u = a * expm1(x) / (1 + a)
+    return a / (1 + a) * age * _exprel(x) * _log1pdivx(u)
 end
 
 

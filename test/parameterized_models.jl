@@ -36,6 +36,65 @@ using InteractiveUtils: subtypes
         end
     end
 
+    @testset "zero growth: the constant-hazard limit" begin
+        # b = 0 is a constant hazard: a + c for Makeham, a/(1 + a) for Kannisto. The closed
+        # forms used to evaluate 0/0 there.
+        for (m, λ) in ((Makeham(a = 0.001, b = 0.0, c = 0.002), 0.003), (Gompertz(a = 0.001, b = 0.0), 0.001),
+                       (MortalityTables.Kannisto(a = 0.5, b = 0.0), 0.5 / 1.5))
+            @test cumhazard(m, 50) ≈ 50λ rtol = 1e-14
+            @test survival(m, 40, 41) ≈ exp(-λ) rtol = 1e-14
+        end
+        # continuous through b = 0, with the closed-form derivative in b there on both sides of
+        # the series cutoff: ∂H/∂b = a·x²/2 (Makeham) and a·x²/(2(1 + a)²) (Kannisto)
+        laws = ((b -> Makeham(a = 0.001, b = b, c = 0.002), 0.001 * 50^2 / 2),
+                (b -> MortalityTables.Kannisto(a = 0.5, b = b), 0.5 * 50^2 / (2 * 1.5^2)))
+        for (law, dH) in laws
+            H(b) = cumhazard(law(b), 50)
+            for b in (-1e-4, -1e-6, 1e-6, 1e-4)
+                @test H(b) ≈ quadgk(x -> hazard(law(b), x), 0, 50)[1] rtol = 1e-10
+            end
+            for h in (1e-8, 1e-7, 1e-5)   # both sides of the |b·age| < 1e-5 series cutoff
+                @test (H(h) - H(-h)) / 2h ≈ dH rtol = 1e-6
+            end
+        end
+    end
+
+    @testset "large growth and infinite ages" begin
+        # A growing hazard exhausts survival; a decaying one has a finite total hazard.
+        for m in (Makeham(), Gompertz(), MortalityTables.Kannisto())
+            @test cumhazard(m, Inf) == Inf
+            @test survival(m, Inf) == 0.0
+        end
+        # A zero coefficient contributes nothing, even at an infinite age: a constant hazard
+        # (b = 0) still exhausts survival, and a law with no hazard keeps it.
+        for m in (Makeham(a = 0.001, b = 0.0, c = 0.002), Gompertz(a = 0.001, b = 0.0),
+                  MortalityTables.Kannisto(a = 0.5, b = 0.0), Makeham(a = 0.0, b = 0.13, c = 0.002))
+            @test cumhazard(m, Inf) == Inf
+            @test survival(m, Inf) == 0.0
+        end
+        for m in (Makeham(a = 0.0, b = 0.13, c = 0.0), Makeham(a = 0.0, b = 0.0, c = 0.0),
+                  MortalityTables.Kannisto(a = 0.0, b = 0.13))
+            @test cumhazard(m, Inf) == 0.0
+            @test survival(m, Inf) == 1.0
+        end
+        @test cumhazard(Gompertz(a = 0.001, b = -0.1), Inf) ≈ 0.01 rtol = 1e-14
+        @test cumhazard(MortalityTables.Kannisto(a = 0.5, b = -0.1), Inf) ≈ log1p(0.5) / 0.1 rtol = 1e-14
+        # both sides of the switch to the factored forms at |b·age| = 1, against the closed
+        # forms in high precision
+        H_makeham(a, b, c, x) = a / b * expm1(b * x) + c * x
+        H_kannisto(a, b, x) = log((1 + a * exp(b * x)) / (1 + a)) / b
+        for b in (0.13, -0.13), age in (1 / 0.13 * (1 - 1e-6), 1 / 0.13 * (1 + 1e-6))
+            @test cumhazard(Makeham(a = 0.0002, b = b, c = 0.001), age) ≈
+                  H_makeham(big(0.0002), big(b), big(0.001), big(age)) rtol = 1e-14
+            @test cumhazard(MortalityTables.Kannisto(a = 0.5, b = b), age) ≈
+                  H_kannisto(big(0.5), big(b), big(age)) rtol = 1e-14
+        end
+        # a·exp(b·age) far from 1 + a: the factored form would round u to -1
+        m = MortalityTables.Kannisto(a = 1e18, b = -0.5)
+        ref = exp(H_kannisto(big(1e18), big(-0.5), big(80)) - H_kannisto(big(1e18), big(-0.5), big(100)))
+        @test survival(m, 80, 100) ≈ ref rtol = 1e-12
+    end
+
     @testset "Makeham" begin
 
         g = Gompertz(a=0.0002, b=.13)
