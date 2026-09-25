@@ -41,6 +41,16 @@ _log1pdivx(x) = abs(x) < 1e-5 ? 1 - x / 2 + x^2 / 3 - x^3 / 4 : log1p(x) / x
 # nothing there (b = 0 is a constant hazard, c = 0 the Gompertz law).
 _times_age(k, age) = iszero(k) ? zero(k * age) : k * age
 
+# a·exp(x) / (1 + k·a·exp(x)), the bounded ratio in Beard's and Kannisto's laws, written as
+# a / (exp(-x) + k·a): it stays finite where exp(x) overflows, tending to 1/k.
+function _logistic_ratio(a, k, x)
+    iszero(a) && return zero(a * x)   # no hazard, even at an infinite age
+    return a / (exp(-x) + k * a)
+end
+
+# log(1 + exp(y)), without overflow for large y
+_log1pexp(y) = y > 0 ? y + log1p(exp(-y)) : log1p(exp(y))
+
 function cumhazard(m::Makeham,age)
     (; a, b, c) = m
     x = _times_age(b, age)
@@ -458,7 +468,7 @@ Beard(; a=0.002, b=0.13, k=1.) = Beard(promote(a, b, k)...)
 
 function hazard(m::Beard,age)
     (; a, b, k) = m
-    return  a * exp(b*age) / (1 + k * a * exp(b*age))
+    return _logistic_ratio(a, k, _times_age(b, age))
 end
 
 """
@@ -487,7 +497,7 @@ MakehamBeard(; a=0.002, b=0.13, c=0.01, k=1.) = MakehamBeard(promote(a, b, c, k)
 
 function hazard(m::MakehamBeard,age)
     (; a, b, c, k) = m
-    return  a * exp(b*age) / (1 + k * a * exp(b*age)) + c
+    return _logistic_ratio(a, k, _times_age(b, age)) + c
 end
 
 """
@@ -541,7 +551,13 @@ GammaGompertz(; a=0.002, b=0.13, γ=1) = GammaGompertz(promote(a, b, γ)...)
 
 function hazard(m::GammaGompertz,age)
     (; a, b, γ) = m
-    return  (a * exp(b * age)) / (1 + ( a * γ / b) * (exp(b * age) - 1))
+    iszero(a) && return zero(a * age)   # no hazard, even at an infinite age
+    x = _times_age(b, age)
+    # a·exp(x) / (1 + a·γ/b·expm1(x)), divided through by exp(x) so that it stays finite
+    # where exp(x) overflows (it tends to b/γ). Near b·age = 0, expm1(-x)/b is written with
+    # `_exprel`, which also gives the b = 0 limit a / (1 + a·γ·age).
+    abs(x) < 1 || return a / (exp(-x) - a * γ / b * expm1(-x))
+    return a / (exp(-x) + _times_age(a * γ, age) * _exprel(-x))
 end
 
 """
@@ -831,7 +847,11 @@ Martinelle(; a=0.001, b=0.13, c=0.001, d=0.1, k=0.001) = Martinelle(promote(a, b
 
 function hazard(m::Martinelle,age)
     (; a, b, c, d, k) = m
-    return  (a*exp(b*age) + c) / (1 + d*exp(b * age)) + k*exp(b * age)
+    x = _times_age(b, age)
+    # (a·exp(x) + c) / (1 + d·exp(x)) is bounded (it tends to a/d); for x > 0 it is divided
+    # through by exp(x) so that it stays finite where exp(x) overflows
+    bounded = x > 0 ? (a + c * exp(-x)) / (exp(-x) + d) : (a * exp(x) + c) / (1 + d * exp(x))
+    return bounded + (iszero(k) ? zero(k * x) : k * exp(x))
 end
 
 
@@ -929,17 +949,18 @@ Kannisto(; a=0.5, b=0.13) = Kannisto(promote(a, b)...)
 
 function hazard(m::Kannisto,age)
     (; a, b) = m
-    return  a * exp(b * age) / (1 + a * exp(b*age))
+    return _logistic_ratio(a, one(a), _times_age(b, age))
 end
 
 function cumhazard(m::Kannisto,age)
     (; a, b) = m
     iszero(a) && return zero(a * age)   # no hazard, even at an infinite age
     x = _times_age(b, age)
-    # log((1 + a·exp(b·age)) / (1 + a)) / b. Near b·age = 0 it is log1p(u) / b with
-    # u = a·expm1(b·age) / (1 + a), which is a·age/(1 + a) at b = 0.
-    abs(x) < 1 || return (log1p(a * exp(x)) - log1p(a)) / b
-    u = a * expm1(x) / (1 + a)
+    # log((1 + a·exp(b·age)) / (1 + a)) / b, with log(1 + a·exp(x)) evaluated as
+    # log1pexp(log(a) + x) so that a·exp(x) cannot overflow. Near b·age = 0 it is
+    # log1p(u) / b with u = a·expm1(b·age) / (1 + a), which is a·age/(1 + a) at b = 0.
+    abs(x) < 1 || return (_log1pexp(log(a) + x) - log1p(a)) / b
+    u = a / (1 + a) * expm1(x)
     return a / (1 + a) * age * _exprel(x) * _log1pdivx(u)
 end
 
@@ -968,5 +989,5 @@ KannistoMakeham(; a=0.5, b=0.13, c=0.001) = KannistoMakeham(promote(a, b, c)...)
 
 function hazard(m::KannistoMakeham,age)
     (; a, b, c) = m
-    return  a * exp(b * age) / (1 + a * exp(b*age)) + c
+    return _logistic_ratio(a, one(a), _times_age(b, age)) + c
 end

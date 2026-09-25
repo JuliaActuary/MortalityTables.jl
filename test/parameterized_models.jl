@@ -95,6 +95,49 @@ using InteractiveUtils: subtypes
         @test survival(m, 80, 100) ≈ ref rtol = 1e-12
     end
 
+    @testset "ratio-form hazards stay finite where exp overflows" begin
+        K = MortalityTables
+        # the original ratio formulas, evaluated in high precision as references
+        beard(a, b, k, x) = a * exp(b * x) / (1 + k * a * exp(b * x))
+        gg(a, b, γ, x) = a * exp(b * x) / (1 + a * γ / b * (exp(b * x) - 1))
+        mart(a, b, c, d, k, x) = (a * exp(b * x) + c) / (1 + d * exp(b * x)) + k * exp(b * x)
+        refs = (
+            (K.Beard(), x -> beard(big(0.002), big(0.13), big(1.0), x)),
+            (K.Beard(k = 0.5, b = -0.1), x -> beard(big(0.002), big(-0.1), big(0.5), x)),
+            (K.MakehamBeard(), x -> beard(big(0.002), big(0.13), big(1.0), x) + big(0.01)),
+            (K.Kannisto(), x -> beard(big(0.5), big(0.13), big(1.0), x)),
+            (K.KannistoMakeham(), x -> beard(big(0.5), big(0.13), big(1.0), x) + big(0.001)),
+            (K.GammaGompertz(), x -> gg(big(0.002), big(0.13), big(1.0), x)),
+            (K.GammaGompertz(b = -0.13), x -> gg(big(0.002), big(-0.13), big(1.0), x)),
+            (K.Martinelle(), x -> mart(big(0.001), big(0.13), big(0.001), big(0.1), big(0.001), x)),
+            (K.Martinelle(b = -0.13), x -> mart(big(0.001), big(-0.13), big(0.001), big(0.1), big(0.001), x)),
+        )
+        for (m, ref) in refs, age in (0.0, 0.5, 5.0, 7.7, 20.0, 50.0, 80.0, 110.0)
+            @test hazard(m, age) ≈ ref(big(age)) rtol = 1e-14
+        end
+        # far past the point where exp(b·age) overflows, the hazard tends to its bound
+        @test hazard(K.Beard(k = 0.5), 1e4) == 2.0
+        @test hazard(K.MakehamBeard(), 1e4) ≈ 1.01
+        @test hazard(K.Kannisto(), 1e4) == 1.0
+        @test hazard(K.KannistoMakeham(), 1e4) ≈ 1.001
+        @test hazard(K.GammaGompertz(), 1e4) ≈ 0.13
+        @test hazard(K.Martinelle(k = 0.0), 1e4) ≈ 0.01
+        @test hazard(K.Beard(b = -0.1), Inf) == 0.0
+        @test hazard(K.Kannisto(a = 0.0), Inf) == 0.0
+        # GammaGompertz at b = 0 is a / (1 + a·γ·age)
+        @test hazard(K.GammaGompertz(b = 0.0), 50.0) ≈ 0.002 / (1 + 0.002 * 50) rtol = 1e-14
+        # Kannisto's hazard is bounded by one, so survival over a year in the high-growth
+        # tail is about exp(-1), not NaN
+        H_kannisto(a, b, x) = log((1 + a * exp(b * x)) / (1 + a)) / b
+        for (a, b) in ((0.5, 10.0), (1e308, 0.1))
+            m = K.Kannisto(a = a, b = b)
+            ref = exp(H_kannisto(big(a), big(b), big(80)) - H_kannisto(big(a), big(b), big(81)))
+            @test survival(m, 80, 81) ≈ ref rtol = 1e-12
+        end
+        @test survival(K.Kannisto(a = 0.5, b = 10.0), 80, 81) ≈ 0.36787944117144233 rtol = 1e-12
+        @test isfinite(cumhazard(K.Kannisto(a = 1e308, b = 0.1), 5.0))   # series branch
+    end
+
     @testset "Makeham" begin
 
         g = Gompertz(a=0.0002, b=.13)
