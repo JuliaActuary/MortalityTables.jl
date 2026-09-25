@@ -32,7 +32,7 @@ using InteractiveUtils: subtypes
             else
                 @test 0 <= survival(m, 40, 60) <= 1
             end
-            @test decrement(m, 40, 60) ≈ 1 - survival(m, 40, 60)
+            @test decrement(m, 40, 60) ≈ 1 - survival(m, 40, 60) atol = 1e-15
         end
     end
 
@@ -180,8 +180,13 @@ using InteractiveUtils: subtypes
         # a DeathDistribution is accepted and ignored by continuous models
         @test survival(m, 65, Uniform()) == survival(m, 65)
         @test survival(m, 60, 65, Uniform()) == survival(m, 60, 65)
-        @test decrement(m, 60, 65) == 1 - survival(m, 60, 65)
-        @test decrement(m, 65, Uniform()) == 1 - survival(m, 65)
+        @test decrement(m, 60, 65) ≈ 1 - survival(m, 60, 65)
+        @test decrement(m, 65, Uniform()) == decrement(m, 65)
+        @test decrement(m, 60, 65, Uniform()) == decrement(m, 60, 65)
+        # a small decrement is not rounded to zero by 1 - survival
+        tiny = Makeham(a = 1e-12, b = 0.1, c = 0.0)
+        @test decrement(tiny, 1e-6) ≈ cumhazard(tiny, 1e-6) rtol = 1e-12
+        @test decrement(tiny, 1e-6) > 0
         @test omega(m) == Inf
         # a law whose formula ends has a finite omega, with survival still positive there
         w = MortalityTables.Wittstein()
