@@ -35,11 +35,18 @@ cumhazard(m::ParametricMortality, from, to) = cumhazard(m, to) - cumhazard(m, fr
 survival(m::ParametricMortality, to)        = exp(-cumhazard(m, to))
 survival(m::ParametricMortality, from, to)  = exp(-cumhazard(m, from, to))
 
+# 1 - exp(-H), without rounding a small decrement to zero
+decrement(m::ParametricMortality, to)       = -expm1(-cumhazard(m, to))
+decrement(m::ParametricMortality, from, to) = -expm1(-cumhazard(m, from, to))
+
 # Continuous models need no fractional-age assumption; accept and ignore one.
 survival(m::ParametricMortality, to, ::DeathDistribution) = survival(m, to)
 survival(m::ParametricMortality, from, to, ::DeathDistribution) = survival(m, from, to)
+decrement(m::ParametricMortality, to, ::DeathDistribution) = decrement(m, to)
+decrement(m::ParametricMortality, from, to, ::DeathDistribution) = decrement(m, from, to)
 
-# A parametric model has no last defined age.
+# The last age at which a law is defined: every age, unless the law's formula ends (see the
+# `omega` docstring and the methods beside `Wittstein`, `VanderMaen` and `VanderMaen2`).
 omega(::ParametricMortality) = Inf
 
 (m::ParametricMortality)(x) = μ(m, x)
