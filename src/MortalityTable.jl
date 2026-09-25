@@ -73,6 +73,25 @@ function _select_row(issue_age::Integer, select_rates::AbstractVector, ultimate:
     return OffsetArray([select_rates; ultimate[last_select_age+1:end]], issue_age - 1)
 end
 
+# Table files label every rate with its age or duration (XTbML elements, CSV row and column
+# headers). Each value goes to its label, so a table whose labels skip (rates at grouped ages,
+# or an empty cell inside a select row) keeps its values at the right ages, with `missing` where
+# it gives no rate. The element type widens only when there are such gaps. A repeated label is
+# ambiguous and throws; `source` names the table in that error. `first` is the label of the
+# first position (durations start at 1; ages at the smallest label).
+function _by_label(labels, values, what, source; first = minimum(labels))
+    allunique(labels) || throw(
+        ArgumentError("$source: $what repeat a label, so their rates cannot be placed: $(labels)")
+    )
+    n = maximum(labels) - first + 1
+    labels == first:(first + n - 1) && return first, collect(values)
+    placed = Vector{Union{Missing, eltype(values)}}(missing, n)
+    for (label, value) in zip(labels, values)
+        placed[label - first + 1] = value
+    end
+    return first, placed
+end
+
 
 
 """
