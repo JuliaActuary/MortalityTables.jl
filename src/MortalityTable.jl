@@ -73,6 +73,25 @@ function _select_row(issue_age::Integer, select_rates::AbstractVector, ultimate:
     return OffsetArray([select_rates; ultimate[last_select_age+1:end]], issue_age - 1)
 end
 
+# Table files label every rate with its age or duration (XTbML elements, CSV row and column
+# headers). Each value goes to its label, so a table whose labels skip (rates at grouped ages,
+# or an empty cell inside a select row) keeps its values at the right ages, with `missing` where
+# it gives no rate. The element type widens only when there are such gaps. A repeated label is
+# ambiguous and throws; `source` names the table in that error. `first` is the label of the
+# first position (durations start at 1; ages at the smallest label).
+function _by_label(labels, values, what, source; first = minimum(labels))
+    allunique(labels) || throw(
+        ArgumentError("$source: $what repeat a label, so their rates cannot be placed: $(labels)")
+    )
+    n = maximum(labels) - first + 1
+    labels == first:(first + n - 1) && return first, collect(values)
+    placed = Vector{Union{Missing, eltype(values)}}(missing, n)
+    for (label, value) in zip(labels, values)
+        placed[label - first + 1] = value
+    end
+    return first, placed
+end
+
 
 
 """
@@ -182,6 +201,8 @@ Returns the survival through attained age `to_age`. The start of the calculation
 
 If given a negative `to_age`, it will return `1.0`. Aside from simplifying the code, this makes sense as for something to exist in order to decrement in the first place, it must have existed and survived to the point of  being able to be decremented.
 
+Survival from a fractional `from_age` is conditional on surviving to `from_age`: it equals `survival(v, to_age, dd) / survival(v, from_age, dd)` under the same assumption, so survival over consecutive intervals multiplies.
+
 Parametric models (see `ParametricMortality`) are continuous and need no fractional-age assumption, so they accept a trailing `DeathDistribution` and ignore it.
 
 # Examples
@@ -253,8 +274,16 @@ survival(v::MortalityTable, args...) = throw(ArgumentError("The first argument s
 
 # Reference: Experience Study Calculations, 2016, Society of Actuaries
 # https://www.soa.org/globalassets/assets/Files/Research/2016-10-experience-study-calculations.pdf
+#
+# The decrement between `from_age` and `to_age` within one year of age x = ⌊from_age⌋,
+# conditional on surviving to `from_age`. With s = from_age - x and t = to_age - x, it is
+# 1 - S(x+t)/S(x+s), where S(x+u)/S(x) is 1 - u·q (Uniform), (1-q)^u (Constant), or
+# (1-q)/(1-(1-u)·q) (Balducci).
 function decrement_partial_year(v, from_age, to_age, dd::Uniform)
-    return v[floor(Int, from_age)] * (to_age - from_age)
+    x = floor(Int, from_age)
+    q = v[x]
+    s, t = from_age - x, to_age - x
+    return q * (t - s) / (1 - s * q)
 end
 
 function decrement_partial_year(v, from_age, to_age, dd::Constant)
@@ -262,9 +291,10 @@ function decrement_partial_year(v, from_age, to_age, dd::Constant)
 end
 
 function decrement_partial_year(v, from_age, to_age, dd::Balducci)
-    q′ = v[floor(Int, from_age)]
-    frac = (to_age - from_age)
-    return 1 - (1 - q′) / (1 - (1 - frac) * q′)
+    x = floor(Int, from_age)
+    q = v[x]
+    s, t = from_age - x, to_age - x
+    return q * (t - s) / (1 - q + t * q)
 end
 
 """
@@ -304,7 +334,7 @@ Returns the last index of the given vector. For mortality vectors this means the
 
 Note that `omega` can vary depending on the issue age for a select table, and that a select `omega` may differ from the table's ultimate `omega`.
 
-A parametric model (see `ParametricMortality`) has no last age, so `omega` of a parametric model returns `Inf`.
+For a parametric model (see `ParametricMortality`), `omega` is the last age at which its law is defined: `Inf` for a law defined at every age, `m` for `Wittstein` (whose `(m - age)^n` term is not real beyond it), and `n` for `VanderMaen` and `VanderMaen2` (whose hazard has a pole there). Survival need not reach zero at `omega` (for `Wittstein` it does not), so a projection that stops at `omega` truncates such a law. `omega` does not validate a law's parameters either: some parameters give a negative hazard at ages inside the domain.
 
 ω is aliased to omega, but un-exported. To use, do `using MortalityTables: ω` when importing or call `MortalityTables.ω()`
 

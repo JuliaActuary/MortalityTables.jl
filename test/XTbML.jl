@@ -99,5 +99,30 @@ using XML: XML
             # t217 has an empty metadata element that the 2.x parser could not read
             @test MortalityTables.table(217) isa MortalityTables.UltimateTable
         end
+
+        @testset "every bundled table loads, except the known unsupported ones" begin
+            # test/data/unsupported_tables.txt lists each table that does not load, with its error
+            expected = Dict{Int, String}()
+            for line in eachline(joinpath(pkgdir(MortalityTables), "test", "data", "unsupported_tables.txt"))
+                (isempty(line) || startswith(line, "#")) && continue
+                id, err = split(line)
+                expected[parse(Int, id)] = err
+            end
+            files = filter(f -> endswith(f, ".xml") && !startswith(f, "._"), readdir(soa_tbl_dir))
+            failed = Dict{Int, String}()
+            for f in files
+                try
+                    # uncached, so this does not fill the table cache
+                    MortalityTables._read_xtbml(joinpath(soa_tbl_dir, f))
+                catch e
+                    failed[parse(Int, f[2:(end - 4)])] = string(nameof(typeof(e)))
+                end
+            end
+            @test length(files) - length(failed) > 2000
+            # the ids of tables that newly fail or newly load
+            @test sort!(collect(setdiff(keys(failed), keys(expected)))) == Int[]
+            @test sort!(collect(setdiff(keys(expected), keys(failed)))) == Int[]
+            @test [id for id in keys(failed) if get(expected, id, nothing) != failed[id]] == Int[]
+        end
     end
 end
