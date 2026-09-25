@@ -39,7 +39,8 @@ survival(m::ParametricMortality, from, to)  = exp(-cumhazard(m, from, to))
 survival(m::ParametricMortality, to, ::DeathDistribution) = survival(m, to)
 survival(m::ParametricMortality, from, to, ::DeathDistribution) = survival(m, from, to)
 
-# A parametric model has no last defined age.
+# The last age at which a law is defined: every age, unless the law's formula ends (see the
+# `omega` docstring and the methods beside `Wittstein`, `VanderMaen` and `VanderMaen2`).
 omega(::ParametricMortality) = Inf
 
 (m::ParametricMortality)(x) = μ(m, x)

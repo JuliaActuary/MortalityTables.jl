@@ -334,7 +334,7 @@ Returns the last index of the given vector. For mortality vectors this means the
 
 Note that `omega` can vary depending on the issue age for a select table, and that a select `omega` may differ from the table's ultimate `omega`.
 
-A parametric model (see `ParametricMortality`) has no last age, so `omega` of a parametric model returns `Inf`.
+For a parametric model (see `ParametricMortality`), `omega` is the last age at which its law is defined: `Inf` for a law defined at every age, `m` for `Wittstein` (whose `(m - age)^n` term is not real beyond it), and `n` for `VanderMaen` and `VanderMaen2` (whose hazard has a pole there). Survival need not reach zero at `omega` (for `Wittstein` it does not), so a projection that stops at `omega` truncates such a law. `omega` does not validate a law's parameters either: some parameters give a negative hazard at ages inside the domain.
 
 ω is aliased to omega, but un-exported. To use, do `using MortalityTables: ω` when importing or call `MortalityTables.ω()`
 

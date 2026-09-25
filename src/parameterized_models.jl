@@ -202,6 +202,7 @@ Default args:
     n = 0.5
     m = 100
 
+The law is defined up to age `m`, which `omega` returns.
 """
 struct Wittstein{T<:Real} <: ParametricMortality
     a::T
@@ -215,6 +216,9 @@ function hazard(model::Wittstein,age)
     (; a, b, m, n) = model
     return (1/b) * a ^ -((b * age) ^ n) + a^ -((m -  age) ^ n) 
 end
+
+# `(m - age)^n` is not real beyond age `m`
+omega(model::Wittstein) = model.m
 
 """
     Weibull(;m,σ)
@@ -346,6 +350,8 @@ Default args:
     c = 0.01
     i = 100
     n = 200
+
+The law is defined up to age `n`, where the hazard has a pole; `omega` returns `n`.
 """
 struct VanderMaen{T<:Real} <: ParametricMortality
     a::T
@@ -360,6 +366,9 @@ function hazard(m::VanderMaen,age)
     (; a, b, c, i, n) = m
     return a + b*age + c*(age^2) + i/(n - age)
 end
+
+# the hazard has a pole at age `n`
+omega(m::VanderMaen) = m.n
 
 """
     VanderMaen2(;a,b,i,n)
@@ -377,6 +386,7 @@ Default args:
     i = 100
     n = 200
 
+The law is defined up to age `n`, where the hazard has a pole; `omega` returns `n`.
 """
 struct VanderMaen2{T<:Real} <: ParametricMortality
     a::T
@@ -390,6 +400,9 @@ function hazard(m::VanderMaen2,age)
     (; a, b, i, n) = m
     return a + b * age + i/(n - age)
 end
+
+# the hazard has a pole at age `n`
+omega(m::VanderMaen2) = m.n
 
 """
     StrehlerMildvan(;k,v₀,b,d)

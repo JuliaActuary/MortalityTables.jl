@@ -140,6 +140,14 @@ using InteractiveUtils: subtypes
         @test decrement(m, 60, 65) == 1 - survival(m, 60, 65)
         @test decrement(m, 65, Uniform()) == 1 - survival(m, 65)
         @test omega(m) == Inf
+        # a law whose formula ends has a finite omega, with survival still positive there
+        w = MortalityTables.Wittstein()
+        @test omega(w) == 100
+        @test isfinite(hazard(w, 100)) && survival(w, 100) > 0
+        @test_throws DomainError hazard(w, 101)
+        @test omega(MortalityTables.VanderMaen()) == 200
+        @test omega(MortalityTables.VanderMaen2(n = 150)) == 150
+        @test omega(MortalityTables.Wittstein(m = 90.0)) === 90.0
     end
 
     @testset "Gompertz and Makeham equality" begin
