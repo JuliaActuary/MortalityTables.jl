@@ -182,6 +182,8 @@ Returns the survival through attained age `to_age`. The start of the calculation
 
 If given a negative `to_age`, it will return `1.0`. Aside from simplifying the code, this makes sense as for something to exist in order to decrement in the first place, it must have existed and survived to the point of  being able to be decremented.
 
+Survival from a fractional `from_age` is conditional on surviving to `from_age`: it equals `survival(v, to_age, dd) / survival(v, from_age, dd)` under the same assumption, so survival over consecutive intervals multiplies.
+
 Parametric models (see `ParametricMortality`) are continuous and need no fractional-age assumption, so they accept a trailing `DeathDistribution` and ignore it.
 
 # Examples
@@ -253,8 +255,16 @@ survival(v::MortalityTable, args...) = throw(ArgumentError("The first argument s
 
 # Reference: Experience Study Calculations, 2016, Society of Actuaries
 # https://www.soa.org/globalassets/assets/Files/Research/2016-10-experience-study-calculations.pdf
+#
+# The decrement between `from_age` and `to_age` within one year of age x = ⌊from_age⌋,
+# conditional on surviving to `from_age`. With s = from_age - x and t = to_age - x, it is
+# 1 - S(x+t)/S(x+s), where S(x+u)/S(x) is 1 - u·q (Uniform), (1-q)^u (Constant), or
+# (1-q)/(1-(1-u)·q) (Balducci).
 function decrement_partial_year(v, from_age, to_age, dd::Uniform)
-    return v[floor(Int, from_age)] * (to_age - from_age)
+    x = floor(Int, from_age)
+    q = v[x]
+    s, t = from_age - x, to_age - x
+    return q * (t - s) / (1 - s * q)
 end
 
 function decrement_partial_year(v, from_age, to_age, dd::Constant)
@@ -262,9 +272,10 @@ function decrement_partial_year(v, from_age, to_age, dd::Constant)
 end
 
 function decrement_partial_year(v, from_age, to_age, dd::Balducci)
-    q′ = v[floor(Int, from_age)]
-    frac = (to_age - from_age)
-    return 1 - (1 - q′) / (1 - (1 - frac) * q′)
+    x = floor(Int, from_age)
+    q = v[x]
+    s, t = from_age - x, to_age - x
+    return q * (t - s) / (1 - q + t * q)
 end
 
 """
