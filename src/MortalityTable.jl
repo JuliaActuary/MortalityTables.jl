@@ -270,8 +270,6 @@ end
 # whole ages need no fractional-year assumption
 survival(v::AbstractArray, from_age::Int, to_age::Int, ::DeathDistribution) = survival(v, from_age, to_age)
 
-survival(v::MortalityTable, args...) = throw(ArgumentError("The first argument should be a vector of rates instead of an entire table. E.g. `table.ultimate` or `table.select[age]`."))
-
 # Reference: Experience Study Calculations, 2016, Society of Actuaries
 # https://www.soa.org/globalassets/assets/Files/Research/2016-10-experience-study-calculations.pdf
 #

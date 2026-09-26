@@ -28,7 +28,8 @@
             @test life_expectancy(t.ultimate, age) ≈ sum(survival(t.ultimate, age, age + dur) for dur in 1:omega(t.ultimate)-age)
         end
 
-        @test_throws ArgumentError life_expectancy(t,100)
+        @test_throws MethodError life_expectancy(t,100)
+        @test_throws MethodError life_expectancy(t,100,MortalityTables.Uniform())
 
         # relation of curtate to complete, ALMC 2.6.1
         @test life_expectancy(t.ultimate,55,MortalityTables.Uniform()) ≈ 22.16469212 + 0.5 atol=1e-3

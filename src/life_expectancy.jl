@@ -36,5 +36,3 @@ end
 
 # continuous models need no fractional-age assumption; accept and ignore one
 life_expectancy(table::ParametricMortality, age, ::DeathDistribution) = life_expectancy(table, age)
-
-life_expectancy(table::MortalityTable,args...) = throw(ArgumentError("The first argument should be a vector of rates instead of an entire table. E.g. `table.ulitmate` or `table.select[age]`."))
