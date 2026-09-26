@@ -203,6 +203,8 @@ Survival from a fractional `from_age` is conditional on surviving to `from_age`:
 
 When `to_age` is before `from_age`, the result is the reverse factor `1 / survival(v, to_age, from_age)`: the number expected alive at the earlier age for each life alive at the later one, as used to project a population backward or to accumulate with the benefit of survivorship. It is not a probability (it can exceed one, and the corresponding `decrement` is negative), and it is an expected-value back-calculation rather than a reconstruction of realized deaths. It is defined where the forward survival is positive; a zero forward survival gives `Inf`. With it, survival composes over any three ages: `survival(v, a, c) == survival(v, a, b) * survival(v, b, c)`, whatever their order. Ages outside the table (such as a negative `to_age` for a table starting at zero) are a `BoundsError`.
 
+Results have the numeric type of the rates, promoted with the ages' type for fractional ages, including the exact one of an empty interval: a `BigFloat` table gives `BigFloat` survival, and a `Float32` table gives `Float32` survival at whole ages.
+
 Parametric models (see `ParametricMortality`) are continuous and need no fractional-age assumption, so they accept a trailing `DeathDistribution` and ignore it.
 
 # Examples
@@ -231,16 +233,25 @@ function survival(v::AbstractArray, to_age, dd::DeathDistribution)
 end
 
 _decrement(surv, q) = surv * (1 - q)
+
+# The numeric type of survival and decrement: that of the rates (ignoring `missing`, as in a
+# select row with a gap), promoted with the ages' type for fractional ages. Identities such as
+# the survival over an empty interval have this type too, so a BigFloat or Float32 table keeps
+# its precision whether or not an interval is empty.
+_rate_type(v) = float(nonmissingtype(eltype(v)))
+_survival_type(v, ages...) = float(promote_type(_rate_type(v), map(typeof, ages)...))
+
 function survival(v::AbstractArray, from_age::Int, to_age::Int)
     # a reversed interval is the reverse factor (see the docstring)
     from_age > to_age && return inv(survival(v, to_age, from_age))
-    # an empty age range (from_age == to_age) reduces to `init`, i.e. 1.0
-    return @views reduce(_decrement, v[from_age:(to_age-1)], init = 1.0)
+    # an empty age range (from_age == to_age) reduces to `init`, i.e. one
+    return @views reduce(_decrement, v[from_age:(to_age-1)], init = one(_rate_type(v)))
 end
 
 function survival(v::AbstractArray, from_age, to_age, dd::DeathDistribution)
     # a reversed interval is the reverse factor (see the docstring)
     from_age > to_age && return inv(survival(v, to_age, from_age, dd))
+    T = _survival_type(v, from_age, to_age)
 
     # calculate the survival for the rounded ages, and then the high and low high_residual
     age_low = ceil(Int, from_age)
@@ -251,22 +262,22 @@ function survival(v::AbstractArray, from_age, to_age, dd::DeathDistribution)
     age_high < age_low && return 1 - decrement_partial_year(v, from_age, to_age, dd)
 
     if age_low == from_age
-        low_residual = 1.0
+        low_residual = one(T)
     else
         low_residual = 1 - decrement_partial_year(v, from_age, age_low, dd)
     end
 
     if age_high == to_age
-        high_residual = 1.0
+        high_residual = one(T)
     else
         high_residual = 1 - decrement_partial_year(v, age_high, to_age, dd)
     end
 
     if from_age == to_age
-        return 1.0
+        return one(T)
     else
 
-        whole = @views reduce(_decrement, v[age_low:(age_high-1)], init = 1.0)
+        whole = @views reduce(_decrement, v[age_low:(age_high-1)], init = one(T))
 
         return whole * low_residual * high_residual
     end
@@ -345,17 +356,18 @@ _reverse_decrement(d) = -d / (1 - d)
 
 function decrement(v::AbstractArray, from_age::Int, to_age::Int)
     from_age > to_age && return _reverse_decrement(decrement(v, to_age, from_age))
-    return @views reduce(_accumulate_decrement, v[from_age:(to_age-1)], init = 0.0)
+    return @views reduce(_accumulate_decrement, v[from_age:(to_age-1)], init = zero(_rate_type(v)))
 end
 
 function decrement(v::AbstractArray, from_age, to_age, dd::DeathDistribution)
     from_age > to_age && return _reverse_decrement(decrement(v, to_age, from_age, dd))
-    from_age == to_age && return 0.0
+    T = _survival_type(v, from_age, to_age)
+    from_age == to_age && return zero(T)
     age_low = ceil(Int, from_age)
     age_high = floor(Int, to_age)
     # within one year of age
     age_high < age_low && return _decrement_piece(v, from_age, to_age, dd)
-    d = age_low == from_age ? 0.0 : _decrement_piece(v, from_age, age_low, dd)
+    d = age_low == from_age ? zero(T) : _decrement_piece(v, from_age, age_low, dd)
     d = @views reduce(_accumulate_decrement, v[age_low:(age_high-1)], init = d)
     return age_high == to_age ? d : _accumulate_decrement(d, _decrement_piece(v, age_high, to_age, dd))
 end

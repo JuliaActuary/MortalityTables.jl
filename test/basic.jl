@@ -159,6 +159,47 @@
         @test survival(q, 4.3, 4.6, Balducci()) ≈ 0.5   # (1 - (1 - s)q) / (1 - (1 - t)q) at q = 1
     end
 
+    @testset "results take the rates' numeric type, empty intervals included" begin
+        q64 = UltimateMortality([0.1, 0.3, 1.0])
+        q32 = UltimateMortality(Float32[0.1, 0.3, 1.0])
+        qbig = UltimateMortality(big.([0.1, 0.3, 1.0]))
+        for (q, T) in ((q64, Float64), (q32, Float32), (qbig, BigFloat))
+            # whole ages: the rates' type
+            @test survival(q, 1, 1) isa T
+            @test survival(q, 1, 1) == 1
+            @test survival(q, 0, 2) isa T
+            @test survival(q, 2, 0) isa T
+            @test decrement(q, 1, 1) isa T
+            @test decrement(q, 1, 1) == 0
+            @test decrement(q, 0, 2) isa T
+            @test decrement(q, 2, 0) isa T
+            @test life_expectancy(q, 2) isa T
+            @test life_expectancy(q, 2) == 0
+            @test life_expectancy(q, 0) isa T
+            @test life_expectancy(q, 0) ≈ 0.9 + 0.9 * 0.7
+            # fractional ages promote with the ages' type
+            S = promote_type(T, Float64)
+            for dd in (Uniform(), Balducci(), Constant())
+                @test survival(q, 0.5, 0.5, dd) isa S
+                @test survival(q, 0.5, 1.5, dd) isa S
+                @test decrement(q, 0.5, 0.5, dd) isa S
+                @test decrement(q, 0.5, 1.5, dd) isa S
+            end
+            @test life_expectancy(q, 2, Uniform()) isa S
+            @test life_expectancy(q, 2, Uniform()) == 0
+            @test life_expectancy(q, 0, Uniform()) isa S
+        end
+        # Float32 rates and Float32 ages stay Float32
+        @test survival(q32, 0.5f0, 1.5f0, Uniform()) isa Float32
+        @test decrement(q32, 0.5f0, 1.5f0, Constant()) isa Float32
+        # rates that admit `missing` (a select row with a gap) are typed by their numbers
+        row = MortalityTables._select_row(0, [missing, 0.2], q64)
+        @test survival(row, 1, 1) isa Float64
+        @test survival(row, 1, 1) == 1
+        @test survival(row, 1, 2) ≈ 0.8
+        @test decrement(row, 1, 1) === 0.0
+    end
+
     @testset "reversed intervals are reverse factors" begin
         q4 = UltimateMortality([0.1, 0.3, 0.6, 1])
         # the inverse of the forward survival, and its decrement 1 - 1/S is negative
