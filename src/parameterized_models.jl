@@ -27,7 +27,10 @@ Makeham(; a=0.0002, b=0.13, c=0.001) = Makeham(promote(a, b, c)...)
 
 function hazard(m::Makeham,age)
     (; a, b, c) = m
-    return a*exp(b*age) + c
+    # a zero coefficient contributes nothing, even at an infinite age (b = 0 is a constant
+    # hazard, a = 0 leaves c)
+    growth = iszero(a) ? zero(a * age) : a * exp(_times_age(b, age))
+    return growth + c
 end
 
 # expm1(x)/x and log1p(x)/x, both 1 at x = 0: smooth there, so the closed forms below keep
@@ -41,11 +44,15 @@ _log1pdivx(x) = abs(x) < 1e-5 ? 1 - x / 2 + x^2 / 3 - x^3 / 4 : log1p(x) / x
 # nothing there (b = 0 is a constant hazard, c = 0 the Gompertz law).
 _times_age(k, age) = iszero(k) ? zero(k * age) : k * age
 
-# a·exp(x) / (1 + k·a·exp(x)), the bounded ratio in Beard's and Kannisto's laws, written as
-# a / (exp(-x) + k·a): it stays finite where exp(x) overflows, tending to 1/k.
+# a·exp(x) / (1 + k·a·exp(x)), the bounded ratio in Beard's and Kannisto's laws. The algebra
+# follows the sign of x: for x > 0 it is 1 / (exp(-x)/a + k), finite where exp(x) (or k·a)
+# overflows and tending to 1/k; for x ≤ 0 the numerator a·exp(x) is formed directly, since
+# there it is exp(-x) that can overflow.
 function _logistic_ratio(a, k, x)
     iszero(a) && return zero(a * x)   # no hazard, even at an infinite age
-    return a / (exp(-x) + k * a)
+    x > 0 && return inv(exp(-x) / a + k)
+    z = a * exp(x)
+    return z / (1 + k * z)
 end
 
 # log(1 + exp(y)), without overflow for large y
@@ -553,11 +560,14 @@ function hazard(m::GammaGompertz,age)
     (; a, b, γ) = m
     iszero(a) && return zero(a * age)   # no hazard, even at an infinite age
     x = _times_age(b, age)
-    # a·exp(x) / (1 + a·γ/b·expm1(x)), divided through by exp(x) so that it stays finite
-    # where exp(x) overflows (it tends to b/γ). Near b·age = 0, expm1(-x)/b is written with
-    # `_exprel`, which also gives the b = 0 limit a / (1 + a·γ·age).
-    abs(x) < 1 || return a / (exp(-x) - a * γ / b * expm1(-x))
-    return a / (exp(-x) + _times_age(a * γ, age) * _exprel(-x))
+    # a·exp(x) / (1 + a·γ/b·expm1(x)). Near b·age = 0, expm1(-x)/b is written with `_exprel`,
+    # which also gives the b = 0 limit a / (1 + a·γ·age). Away from it the algebra follows the
+    # sign of x: for x > 0 it is divided through by a·exp(x), so it stays finite where exp(x)
+    # overflows (tending to b/γ); for x < 0 the numerator a·exp(x) is formed directly, since
+    # there exp(-x) can overflow (and a·γ/b·expm1(-x) would be 0·Inf when γ = 0).
+    abs(x) < 1 && return a / (exp(-x) + _times_age(a * γ, age) * _exprel(-x))
+    x > 0 && return inv(exp(-x) / a - γ / b * expm1(-x))
+    return a * exp(x) / (1 + a * γ / b * expm1(x))
 end
 
 """

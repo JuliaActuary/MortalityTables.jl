@@ -138,6 +138,62 @@ using InteractiveUtils: subtypes
         @test isfinite(cumhazard(K.Kannisto(a = 1e308, b = 0.1), 5.0))   # series branch
     end
 
+    @testset "ratio-form hazards follow the sign of the exponent" begin
+        K = MortalityTables
+        setprecision(BigFloat, 256) do
+            logistic(a, k, x) = a * exp(x) / (1 + k * a * exp(x))
+            gg(a, b, γ, x) = a * exp(b * x) / (1 + a * γ / b * expm1(b * x))
+            # negative growth: exp(-x) overflows where the hazard is still representable
+            @test hazard(K.Kannisto(a = 1e308, b = -10.0), 71) ≈ Float64(logistic(big(1e308), 1, big(-710))) rtol = 1e-14
+            @test hazard(K.Kannisto(a = 0.5, b = -10.0), 71) ≈ Float64(logistic(big(0.5), 1, big(-710))) rtol = 1e-12
+            @test hazard(K.Kannisto(a = 0.5, b = -10.0), 71) > 0   # subnormal, not flushed to zero
+            @test hazard(K.Beard(a = 1e308, b = -10.0, k = 0.5), 71) ≈ Float64(logistic(big(1e308), big(0.5), big(-710))) rtol = 1e-14
+            @test hazard(K.MakehamBeard(a = 1e308, b = -10.0, k = 0.5), 71) ≈
+                  Float64(logistic(big(1e308), big(0.5), big(-710)) + big(0.01)) rtol = 1e-14
+            @test hazard(K.KannistoMakeham(a = 1e308, b = -10.0), 71) ≈
+                  Float64(logistic(big(1e308), 1, big(-710)) + big(0.001)) rtol = 1e-14
+            # positive growth with a large coefficient: k·a would overflow
+            @test hazard(K.Beard(a = 1e308, b = 0.1, k = 10.0), 50) ≈ 0.1 rtol = 1e-14
+            # GammaGompertz with zero frailty is Gompertz: a decaying hazard, not 0·Inf
+            @test hazard(K.GammaGompertz(a = 0.002, b = -10.0, γ = 0.0), 80) == 0.0
+            @test hazard(K.GammaGompertz(a = 0.002, b = -10.0, γ = 0.0), Inf) == 0.0
+            @test hazard(K.GammaGompertz(a = 0.002, b = -10.0, γ = 0.0), 50) ≈ Float64(big(0.002) * exp(big(-500))) rtol = 1e-12
+            @test hazard(K.GammaGompertz(a = 0.5, b = -10.0, γ = 1.0), 71) ≈ Float64(gg(big(0.5), big(-10), big(1), big(71))) rtol = 1e-12
+            # Float32 laws keep their type and reach their (subnormal) values
+            m32 = K.GammaGompertz(a = 0.002f0, b = -10.0f0, γ = 0.0f0)
+            @test hazard(m32, 9.0f0) isa Float32
+            @test hazard(m32, 9.0f0) ≈ Float32(0.002 * exp(-90.0)) rtol = 1e-2   # subnormal Float32
+            @test hazard(m32, 10.0f0) == 0.0f0
+            @test hazard(K.Kannisto(a = 0.5f0, b = -10.0f0), 9.0f0) ≈ Float32(Float64(logistic(big(0.5), 1, big(-90)))) rtol = 1e-2
+            @test hazard(K.Kannisto(a = 0.5f0, b = 10.0f0), 100.0f0) == 1.0f0
+            # both sides of each branch point: x = 0 for the logistic ratio, and |x| = 1 for
+            # GammaGompertz (b = ±1/8 at age 8 is exactly x = ±1)
+            for b in (0.125, -0.125), age in (prevfloat(8.0), 8.0, nextfloat(8.0), 0.0, 1e-300)
+                @test hazard(K.Beard(a = 0.002, b = b, k = 0.5), age) ≈ Float64(logistic(big(0.002), big(0.5), big(b) * big(age))) rtol = 1e-14
+                @test hazard(K.Kannisto(a = 0.5, b = b), age) ≈ Float64(logistic(big(0.5), 1, big(b) * big(age))) rtol = 1e-14
+                age > 0 && @test hazard(K.GammaGompertz(a = 0.002, b = b, γ = 1.0), age) ≈
+                                 Float64(gg(big(0.002), big(b), big(1), big(age))) rtol = 1e-14
+            end
+        end
+        # Beard with k = 1 is Kannisto: the same hazard, and a quadrature cumulative hazard
+        # that agrees with Kannisto's closed form in both tails (it underflowed to a wrong
+        # 70.84 for a = 1e308, b = -10 when the hazard was flushed to zero)
+        for (a, b) in ((0.5, 10.0), (0.5, -10.0), (1e308, -10.0), (1e308, 0.1)), age in (71.0, 80.0)
+            @test hazard(K.Beard(a = a, b = b, k = 1.0), age) == hazard(K.Kannisto(a = a, b = b), age)
+            @test cumhazard(K.Beard(a = a, b = b, k = 1.0), age) ≈ cumhazard(K.Kannisto(a = a, b = b), age) rtol = 1e-10
+            # the hazard is the derivative of Kannisto's closed-form cumulative hazard
+            H(x) = cumhazard(K.Kannisto(a = a, b = b), x)
+            h = 1e-5
+            @test (H(age + h) - H(age - h)) / 2h ≈ hazard(K.Kannisto(a = a, b = b), age) rtol = 1e-6 atol = 1e-12
+        end
+        # zero coefficients in Makeham/Gompertz at an infinite age
+        @test hazard(Makeham(a = 0.001, b = 0.0, c = 0.002), Inf) == 0.003
+        @test hazard(Makeham(a = 0.0, b = 0.13, c = 0.002), Inf) == 0.002
+        @test hazard(Gompertz(a = 0.001, b = 0.0), Inf) == 0.001
+        @test hazard(Gompertz(a = 0.001, b = -0.1), Inf) == 0.0
+        @test hazard(Makeham(), Inf) == Inf
+    end
+
     @testset "Makeham" begin
 
         g = Gompertz(a=0.0002, b=.13)
