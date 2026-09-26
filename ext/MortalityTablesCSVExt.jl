@@ -83,7 +83,16 @@ function MortalityTable(lines::CSV.File)
 	# durations in the header row), as for XTbML, so grouped ages or blank cells keep every rate
 	# at its own age.
 	source = "CSV table $(something(d.name, "(unnamed)"))"
-	
+	# an ultimate table has one block of rates; a select and ultimate table has two, the select
+	# rates followed by the ultimate rates. Reading any other layout this way would silently
+	# drop its other blocks.
+	length(table_starts) in (1, 2) || throw(
+		ArgumentError(
+			"$source has $(length(table_starts)) tables; only an ultimate table (one) or a select " *
+				"table followed by its ultimate table (two) can be read."
+		)
+	)
+
 	if length(table_starts) == 1 
 		# ultimate only
 		ult = _ultimate(lines, table_starts[1], table_ends[1], source)

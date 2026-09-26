@@ -102,6 +102,20 @@ end
         @test isequal(csv.select[issue_age], xml.select[issue_age])
     end
 
+    # a third block of rates would be dropped
+    @test_throws "has 3 tables" read_csv("""
+    Table Name:,three tables
+
+    Row\\Column,Rate
+    60,0.1
+
+    Row\\Column,Rate
+    60,0.2
+
+    Row\\Column,Rate
+    60,0.3
+    """)
+
     # a repeated age label is ambiguous
     @test_throws "repeat" read_csv("""
     Table Name:,repeated ultimate
