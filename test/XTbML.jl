@@ -100,6 +100,14 @@ using XML: XML
             @test MortalityTables.table(217) isa MortalityTables.UltimateTable
         end
 
+        @testset "layouts with more than two tables are rejected" begin
+            # t357 has three <Table> elements: reading its first and last would silently drop
+            # the issue ages in the middle one
+            path = joinpath(soa_tbl_dir, "t357.xml")
+            @test_throws ArgumentError MortalityTables._read_xtbml(path)
+            @test_throws "has 3 <Table> elements" MortalityTables._read_xtbml(path)
+        end
+
         @testset "every bundled table loads, except the known unsupported ones" begin
             # test/data/unsupported_tables.txt lists each table that does not load, with its error
             expected = Dict{Int, String}()

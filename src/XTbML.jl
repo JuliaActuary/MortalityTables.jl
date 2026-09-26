@@ -65,16 +65,24 @@ of `(duration, rate)` for the defined durations.
 """
 function parseXTbMLTable(str::AbstractString, path)
     root = _child(XML.parse(str, XML.Node), "XTbML")
+    metadata = _content_classification(root, path)
     tables = _by_tag(root, "Table")
+    # an ultimate table has one <Table>; a select and ultimate table has two: the select rates
+    # (by issue age, then duration) followed by the ultimate rates. Reading any other layout
+    # this way would silently drop its other tables.
+    length(tables) in (1, 2) || throw(
+        ArgumentError(
+            "$(_xtbml_source(metadata)) has $(length(tables)) <Table> elements; only an ultimate " *
+                "table (one) or a select table followed by its ultimate table (two) can be read."
+        )
+    )
     ys(tbl) = _by_tag(_child(_child(tbl, "Values"), "Axis"), "Y")
     ult = [(age = parse(Int, y["t"]), rate = _rate(y)) for y in ys(tables[end])]
-    # a select and ultimate table has two <Table>s: the select rates (by issue
-    # age, then duration) followed by the ultimate rates
     sel = length(tables) == 1 ? nothing : map(_by_tag(_child(tables[1], "Values"), "Axis")) do ai
         rates = [(duration = parse(Int, y["t"]), rate = _rate(y)) for y in _by_tag(_child(ai, "Axis"), "Y")]
         (issue_age = parse(Int, ai["t"]), rates = filter(r -> !ismissing(r.rate), rates))
     end
-    return (select = sel, ultimate = ult, metadata = _content_classification(root, path))
+    return (select = sel, ultimate = ult, metadata = metadata)
 end
 
 # XTbML labels every rate with its age or duration, so rates are placed by label (see

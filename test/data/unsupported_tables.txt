@@ -14,6 +14,10 @@
 52 BoundsError
 53 BoundsError
 54 BoundsError
+357 ArgumentError
+359 ArgumentError
+754 ArgumentError
+755 ArgumentError
 811 ArgumentError
 812 ArgumentError
 842 ArgumentError
