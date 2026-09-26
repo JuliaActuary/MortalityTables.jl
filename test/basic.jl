@@ -108,6 +108,57 @@
         @test_throws BoundsError decrement(q4, 4, -1)
     end
 
+    @testset "small decrements keep their precision" begin
+        q = UltimateMortality([1e-18, 1e-6, 0.3, 0.0, 1.0])
+        # 1 - (1 - q) rounds 1e-18 to zero and 1e-6 to about 11 correct digits
+        @test decrement(q, 0, 1) == 1e-18
+        @test decrement(q, 1, 2) == 1e-6
+        @test decrement(q, 0, 2) == 1.0000000000009999e-6   # 1e-18 + 1e-6 - 1e-24
+        @test decrement(q, 0, 3) ≈ 1 - survival(q, 0, 3)
+        # against a high-precision table, whole and fractional ages
+        qbig = UltimateMortality(big.([1e-18, 1e-6, 0.3, 0.0, 1.0]))
+        for dd in (Uniform(), Balducci(), Constant()), (a, b) in ((0.25, 0.75), (0.5, 1.5), (0.0, 1.25), (1.1, 1.9), (0.3, 2.6))
+            @test decrement(q, a, b, dd) ≈ Float64(decrement(qbig, big(a), big(b), dd)) rtol = 1e-13
+            @test decrement(q, a, b, dd) ≈ 1 - survival(q, a, b, dd) atol = 1e-15
+        end
+        @test decrement(q, 0.25, 0.75, Constant()) > 0   # not rounded away
+        @test decrement(q, 1, 2, Uniform()) == 1e-6
+
+        # terminal rates: q = 0 contributes nothing, q = 1 exhausts survival
+        @test decrement(q, 3, 4) == 0.0
+        @test survival(q, 3, 4) == 1.0
+        @test decrement(q, 4, 5) == 1.0
+        @test survival(q, 4, 5) == 0.0
+        @test decrement(q, 2, 5) == 1.0
+        for dd in (Uniform(), Balducci(), Constant())
+            # equal endpoints are exactly the identity, even at a rate of one
+            for a in (2.0, 3.5, 4.0, 4.5)
+                @test survival(q, a, a, dd) == 1.0
+                @test decrement(q, a, a, dd) == 0.0
+            end
+            # a piece starting at a birthday, and one ending at the next birthday
+            @test decrement(q, 2, 2.5, dd) ≈ 1 - survival(q, 2, 2.5, dd)
+            @test decrement(q, 2.5, 3, dd) ≈ 1 - survival(q, 2.5, 3, dd)
+            @test decrement(q, 4.0, 4.5, dd) == (dd isa Uniform ? 0.5 : 1.0)
+            @test decrement(q, 3.25, 3.75, dd) == 0.0
+        end
+        # Uniform and Balducci agree with q at s = 0, t = 1 of the year
+        for dd in (Uniform(), Balducci())
+            @test MortalityTables.decrement_partial_year(q, 2, 3, dd) == 0.3
+            @test decrement(q, 2.0, 3.0, dd) == 0.3
+        end
+        # under Uniform, a rate of one leaves positive survival inside the year
+        @test survival(q, 4.0, 4.5, Uniform()) == 0.5
+        # beyond a rate of one under Constant or Balducci there is no survival to condition on:
+        # the formulas are evaluated as written and stay finite
+        for dd in (Balducci(), Constant())
+            @test survival(q, 4.0, 4.3, dd) == 0.0
+            @test isfinite(survival(q, 4.3, 4.6, dd))
+            @test isfinite(decrement(q, 4.3, 4.6, dd))
+        end
+        @test survival(q, 4.3, 4.6, Balducci()) ≈ 0.5   # (1 - (1 - s)q) / (1 - (1 - t)q) at q = 1
+    end
+
     @testset "reversed intervals are reverse factors" begin
         q4 = UltimateMortality([0.1, 0.3, 0.6, 1])
         # the inverse of the forward survival, and its decrement 1 - 1/S is negative

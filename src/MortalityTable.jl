@@ -199,7 +199,7 @@ Returns the survival through attained age `to_age`. The start of the calculation
     survival(mortality_vector,to_age,::DeathDistribution)
     survival(mortality_vector,from_age,to_age,::DeathDistribution)
 
-Survival from a fractional `from_age` is conditional on surviving to `from_age`: it equals `survival(v, to_age, dd) / survival(v, from_age, dd)` under the same assumption, so survival over consecutive intervals multiplies.
+Survival from a fractional `from_age` is conditional on surviving to `from_age`: it equals `survival(v, to_age, dd) / survival(v, from_age, dd)` under the same assumption, so survival over consecutive intervals multiplies. Where the assumption gives zero survival to a fractional `from_age` (after a rate of one under `Constant` or `Balducci`) there is nothing to condition on; the formulas are still evaluated as written and give finite values.
 
 When `to_age` is before `from_age`, the result is the reverse factor `1 / survival(v, to_age, from_age)`: the number expected alive at the earlier age for each life alive at the later one, as used to project a population backward or to accumulate with the benefit of survivorship. It is not a probability (it can exceed one, and the corresponding `decrement` is negative), and it is an expected-value back-calculation rather than a reconstruction of realized deaths. It is defined where the forward survival is positive; a zero forward survival gives `Inf`. With it, survival composes over any three ages: `survival(v, a, c) == survival(v, a, b) * survival(v, b, c)`, whatever their order. Ages outside the table (such as a negative `to_age` for a table starting at zero) are a `BoundsError`.
 
@@ -326,8 +326,47 @@ julia> decrement(qs,1,2)
 julia> decrement(qs,0.5,Uniform())
 0.05
 ```
+
+The decrement is accumulated directly (``d \\leftarrow q + d(1 - q)``) rather than computed as one minus the survival product, so a small decrement keeps its precision. A reversed interval gives the negative decrement `1 - survival(v, from_age, to_age)` of the reverse factor.
 """
-decrement(v, args...) = 1 - survival(v, args...)
+decrement(v::AbstractArray, to_age) = decrement(v, firstindex(v), to_age)
+decrement(v::AbstractArray, to_age, dd::DeathDistribution) = decrement(v, firstindex(v), to_age, dd)
+
+# d ← q + d·(1 - q), i.e. 1 - (1 - d)(1 - q): the complement of the survival product without
+# the cancellation in 1 - ∏(1 - q), so a small decrement is not rounded away. For rates in
+# [0, 1] both terms are non-negative, so the sum is accurate to a few ulps; `1 - q` does not
+# depend on d, so each step is one fused multiply-add, as fast as the product. Values above one
+# (claim costs or factors, which some bundled tables hold) are not probabilities; the same
+# expression is evaluated for them, and it can round more than the product would.
+_accumulate_decrement(d, q) = muladd(d, 1 - q, q)
+
+# the decrement of a reversed interval, 1 - 1/(1 - d), written without cancellation
+_reverse_decrement(d) = -d / (1 - d)
+
+function decrement(v::AbstractArray, from_age::Int, to_age::Int)
+    from_age > to_age && return _reverse_decrement(decrement(v, to_age, from_age))
+    return @views reduce(_accumulate_decrement, v[from_age:(to_age-1)], init = 0.0)
+end
+
+function decrement(v::AbstractArray, from_age, to_age, dd::DeathDistribution)
+    from_age > to_age && return _reverse_decrement(decrement(v, to_age, from_age, dd))
+    from_age == to_age && return 0.0
+    age_low = ceil(Int, from_age)
+    age_high = floor(Int, to_age)
+    # within one year of age
+    age_high < age_low && return _decrement_piece(v, from_age, to_age, dd)
+    d = age_low == from_age ? 0.0 : _decrement_piece(v, from_age, age_low, dd)
+    d = @views reduce(_accumulate_decrement, v[age_low:(age_high-1)], init = d)
+    return age_high == to_age ? d : _accumulate_decrement(d, _decrement_piece(v, age_high, to_age, dd))
+end
+
+decrement(v::AbstractArray, from_age::Int, to_age::Int, ::DeathDistribution) = decrement(v, from_age, to_age)
+
+# The decrement over part of one year of age: `decrement_partial_year`, except that the
+# constant force is written as -expm1((t - s)·log1p(-q)), since 1 - (1 - q)^(t - s) rounds a
+# small rate away. (`survival` keeps `1 - decrement_partial_year`, so its values are unchanged.)
+_decrement_piece(v, from_age, to_age, dd::DeathDistribution) = decrement_partial_year(v, from_age, to_age, dd)
+_decrement_piece(v, from_age, to_age, ::Constant) = -expm1((to_age - from_age) * log1p(-v[floor(Int, from_age)]))
 
 """
     omega(x)
