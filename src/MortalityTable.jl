@@ -199,9 +199,9 @@ Returns the survival through attained age `to_age`. The start of the calculation
     survival(mortality_vector,to_age,::DeathDistribution)
     survival(mortality_vector,from_age,to_age,::DeathDistribution)
 
-If given a negative `to_age`, it will return `1.0`. Aside from simplifying the code, this makes sense as for something to exist in order to decrement in the first place, it must have existed and survived to the point of  being able to be decremented.
-
 Survival from a fractional `from_age` is conditional on surviving to `from_age`: it equals `survival(v, to_age, dd) / survival(v, from_age, dd)` under the same assumption, so survival over consecutive intervals multiplies.
+
+When `to_age` is before `from_age`, the result is the reverse factor `1 / survival(v, to_age, from_age)`: the number expected alive at the earlier age for each life alive at the later one, as used to project a population backward or to accumulate with the benefit of survivorship. It is not a probability (it can exceed one, and the corresponding `decrement` is negative), and it is an expected-value back-calculation rather than a reconstruction of realized deaths. It is defined where the forward survival is positive; a zero forward survival gives `Inf`. With it, survival composes over any three ages: `survival(v, a, c) == survival(v, a, b) * survival(v, b, c)`, whatever their order. Ages outside the table (such as a negative `to_age` for a table starting at zero) are a `BoundsError`.
 
 Parametric models (see `ParametricMortality`) are continuous and need no fractional-age assumption, so they accept a trailing `DeathDistribution` and ignore it.
 
@@ -232,11 +232,16 @@ end
 
 _decrement(surv, q) = surv * (1 - q)
 function survival(v::AbstractArray, from_age::Int, to_age::Int)
-    # an empty age range (from_age >= to_age) reduces to `init`, i.e. 1.0
+    # a reversed interval is the reverse factor (see the docstring)
+    from_age > to_age && return inv(survival(v, to_age, from_age))
+    # an empty age range (from_age == to_age) reduces to `init`, i.e. 1.0
     return @views reduce(_decrement, v[from_age:(to_age-1)], init = 1.0)
 end
 
 function survival(v::AbstractArray, from_age, to_age, dd::DeathDistribution)
+    # a reversed interval is the reverse factor (see the docstring)
+    from_age > to_age && return inv(survival(v, to_age, from_age, dd))
+
     # calculate the survival for the rounded ages, and then the high and low high_residual
     age_low = ceil(Int, from_age)
     age_high = floor(Int, to_age)

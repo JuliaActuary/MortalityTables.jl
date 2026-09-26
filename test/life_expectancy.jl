@@ -22,7 +22,8 @@
         # the table has no rates past omega
         @test_throws BoundsError life_expectancy(t.ultimate,101)
         @test_throws BoundsError life_expectancy(t.ultimate,-1)
-        @test_throws BoundsError life_expectancy(t.ultimate,101,MortalityTables.Uniform())
+        # past omega, the integral runs back through ages the table does not have
+        @test_throws BoundsError life_expectancy(t.ultimate,102,MortalityTables.Uniform())
         # values at several ages match the quadratic formulation this replaced
         for age in (0, 35, 55, 99)
             @test life_expectancy(t.ultimate, age) ≈ sum(survival(t.ultimate, age, age + dur) for dur in 1:omega(t.ultimate)-age)

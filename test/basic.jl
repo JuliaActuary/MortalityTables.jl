@@ -101,10 +101,46 @@
         @test decrement(q4, 1, 4) ≈ 1.0
 
 
-        @test survival(q4, -1) ≈ 1.0
-        @test survival(q4, 4, -1) ≈ 1.0
-        @test decrement(q4, -1) ≈ 0.0
-        @test decrement(q4, 4, -1) ≈ 0.0
+        # the table has no rates before age 0
+        @test_throws BoundsError survival(q4, -1)
+        @test_throws BoundsError survival(q4, 4, -1)
+        @test_throws BoundsError decrement(q4, -1)
+        @test_throws BoundsError decrement(q4, 4, -1)
+    end
+
+    @testset "reversed intervals are reverse factors" begin
+        q4 = UltimateMortality([0.1, 0.3, 0.6, 1])
+        # the inverse of the forward survival, and its decrement 1 - 1/S is negative
+        @test survival(q4, 2, 0) ≈ 1 / (0.9 * 0.7)
+        @test decrement(q4, 2, 0) ≈ 1 - 1 / (0.9 * 0.7)
+        @test decrement(q4, 2, 0) < 0
+        @test survival(q4, 1, 0) * survival(q4, 0, 1) ≈ 1
+        # a zero forward survival has no finite inverse
+        @test survival(q4, 4, 0) == Inf
+        for dd in (Uniform(), Balducci(), Constant())
+            @test survival(q4, 2.5, 0.25, dd) ≈ 1 / survival(q4, 0.25, 2.5, dd)
+            @test survival(q4, 1.75, 1.25, dd) ≈ 1 / survival(q4, 1.25, 1.75, dd)   # within one year
+            @test decrement(q4, 2.5, 0.25, dd) ≈ 1 - 1 / survival(q4, 0.25, 2.5, dd)
+        end
+
+        # survival composes over any three ages, whatever their order
+        ult = UltimateMortality([0.01 * k for k in 1:20], start_age = 40)
+        row = MortalityTables._select_row(40, [0.005, 0.02, 0.07], ult)
+        for v in (ult, row), dd in (Uniform(), Balducci(), Constant())
+            ages = (40.0, 40.3, 41.0, 42.5, 43.75, 45.0)
+            for a in ages, b in ages, c in ages
+                @test survival(v, a, c, dd) ≈ survival(v, a, b, dd) * survival(v, b, c, dd)
+            end
+            for a in 40:45, b in 40:45
+                @test survival(v, a, b) * survival(v, b, a) ≈ 1
+            end
+        end
+
+        # projecting a population backward: 1,000 lives at 45 imply the number expected at 40
+        l45 = 1000.0
+        l40 = l45 * survival(ult, 45, 40)
+        @test l40 ≈ l45 / prod(1 - ult[x] for x in 40:44)
+        @test l40 * survival(ult, 40, 45) ≈ l45
     end
 
     @testset "Metadata" begin
