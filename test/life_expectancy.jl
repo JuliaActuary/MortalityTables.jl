@@ -19,8 +19,10 @@
         # calculate sum of tpx in Excel
         @test life_expectancy(t.ultimate,55) ≈ 22.16469212 atol=1e-6
         @test life_expectancy(t.ultimate,100) ≈ 0.0 atol=1e-6
-        # an age past omega has no remaining years
-        @test life_expectancy(t.ultimate,101) == 0.0
+        # the table has no rates past omega
+        @test_throws BoundsError life_expectancy(t.ultimate,101)
+        @test_throws BoundsError life_expectancy(t.ultimate,-1)
+        @test_throws BoundsError life_expectancy(t.ultimate,101,MortalityTables.Uniform())
         # values at several ages match the quadratic formulation this replaced
         for age in (0, 35, 55, 99)
             @test life_expectancy(t.ultimate, age) ≈ sum(survival(t.ultimate, age, age + dur) for dur in 1:omega(t.ultimate)-age)
