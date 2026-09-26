@@ -96,8 +96,12 @@ function MortalityTable(lines::CSV.File)
 		sel_start, sel_end = table_starts[1],table_ends[1]
 		header = lines[sel_start - 1]
 		durations = [ismissing(header[c]) ? missing : parsemaybe(Int, header[c]) for c in 2:length(header)]
-		issue_ages = [parsemaybe(Int, lines[r][1]) for r in sel_start:sel_end]
-		rows = map(issue_ages, sel_start:sel_end) do issue_age, r
+		# a row without any rate has no select period: like an issue age absent from the table
+		# (as in XTbML) it is left `missing`, rather than read as a zero-length select period
+		# that falls straight through to the ultimate rates
+		rate_rows = [r for r in sel_start:sel_end if any(c -> !ismissing(lines[r][c]), 2:length(lines[r]))]
+		issue_ages = [parsemaybe(Int, lines[r][1]) for r in rate_rows]
+		rows = map(issue_ages, rate_rows) do issue_age, r
 			row = lines[r]
 			select_rates = _select_rates(
 				[row[c] for c in 2:length(row)], durations,
@@ -142,7 +146,6 @@ parsemaybe(t,x) = typeof(x) <: AbstractString ? parse(t,x) : convert(t,x)
 # neither truncated nor shifted.
 function _select_rates(cells, durations, what = "the select durations", source = "CSV table")
 	given = findall(!ismissing, cells)
-	isempty(given) && return Float64[]
 	_, rates = MortalityTables._by_label(
 		[durations[i] for i in given], [parsemaybe(Float64, cells[i]) for i in given], what, source;
 		first = 1

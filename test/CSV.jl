@@ -12,7 +12,6 @@ tbl_dir_test = joinpath(pkgdir(MortalityTables), "test", "data", "CSV")
     # string cells are parsed, and a row with no blanks stays Float64
     @test ext._select_rates(["0.1", "0.2"], 1:2) == [0.1, 0.2]
     @test eltype(ext._select_rates([0.1, 0.2, missing], 1:3)) == Float64
-    @test isempty(ext._select_rates([missing, missing], 1:2))
     # rates go to their duration labels, not their column positions
     @test isequal(ext._select_rates([0.1, 0.2, 0.4], [1, 2, 4]), [0.1, 0.2, missing, 0.4])
     @test ext._select_rates([0.2, 0.1], [2, 1]) == [0.1, 0.2]
@@ -57,6 +56,33 @@ end
     @test isequal(csv.select[40][40:44], [0.01, 0.02, missing, 0.04, 0.24])
     @test isequal(csv.select[42][42:46], [0.03, missing, missing, 0.05, 0.26])
     @test ismissing(csv.select[41])
+
+    # a select row with no rates is an absent issue age, as in XTbML, not a zero-length select
+    # period that falls through to the ultimate rates
+    blank = read_csv("""
+    Table Name:,blank select row,,
+    Table Identity:,996,,
+
+    Row\\Column,1,2,4
+    40,0.01,0.02,0.04
+    41,,,
+    42,0.03,,0.05
+
+    Table # ,2,,
+    Row\\Column,1,,
+    40,0.2,,
+    41,0.21,,
+    42,0.22,,
+    43,0.23,,
+    44,0.24,,
+    45,0.25,,
+    46,0.26,,
+    """)
+    @test ismissing(blank.select[41])
+    @test axes(blank.select) == axes(csv.select)
+    for issue_age in (40, 42)
+        @test isequal(blank.select[issue_age], csv.select[issue_age])
+    end
 
     # the same labels read as XTbML give the same table
     md = MortalityTables.TableMetaData(name = "gapped select")
