@@ -1,4 +1,5 @@
 using InteractiveUtils: subtypes
+using ForwardDiff
 
 @testset "Parameterized Models" begin
 
@@ -192,6 +193,71 @@ using InteractiveUtils: subtypes
         @test hazard(Gompertz(a = 0.001, b = 0.0), Inf) == 0.001
         @test hazard(Gompertz(a = 0.001, b = -0.1), Inf) == 0.0
         @test hazard(Makeham(), Inf) == Inf
+    end
+
+    @testset "parameter derivatives across each algebra switch" begin
+        K = MortalityTables
+        # a zero amplitude is a smooth boundary at a finite age: the derivatives there are the
+        # analytic exp(x) for the hazard and expm1(x)/b for Kannisto's cumulative hazard
+        for L in (K.Kannisto, K.Beard, K.MakehamBeard, K.KannistoMakeham, K.GammaGompertz)
+            @test ForwardDiff.derivative(a -> hazard(L(a = a, b = 0.13), 50.0), 0.0) ≈ exp(6.5) rtol = 1e-14
+            @test ForwardDiff.derivative(a -> hazard(L(a = a, b = -0.13), 50.0), 0.0) ≈ exp(-6.5) rtol = 1e-14
+        end
+        @test ForwardDiff.derivative(a -> cumhazard(K.Kannisto(a = a, b = 0.13), 50.0), 0.0) ≈ expm1(6.5) / 0.13 rtol = 1e-14
+        @test ForwardDiff.derivative(a -> cumhazard(K.KannistoMakeham(a = a, b = 0.13), 50.0), 0.0) ≈ expm1(6.5) / 0.13 rtol = 1e-8
+        # the values there are unchanged
+        @test hazard(K.Kannisto(a = 0.0, b = 0.13), 50.0) == 0.0
+        @test cumhazard(K.Kannisto(a = 0.0, b = 0.13), 50.0) == 0.0
+
+        # Gradients in every parameter against the laws as written, differentiated in 4096-bit
+        # arithmetic (the plain formulas cancel at the extreme amplitudes and tiny ages below,
+        # so 256 bits isn't enough for a reference). The points sit in and beside each switch
+        # of the stable forms: the sign of x = b·age, |x| = 1 (GammaGompertz, and Kannisto's
+        # cumulative hazard), a zero amplitude, and amplitudes at which k·a, a·γ/b or a·exp(x)
+        # overflows.
+        logistic(a, b, k, age) = a * exp(b * age) / (1 + k * a * exp(b * age))
+        gg(a, b, γ, age) = a * exp(b * age) / (1 + a * γ / b * expm1(b * age))
+        kannisto_H(a, b, age) = log((1 + a * exp(b * age)) / (1 + a)) / b
+        function check_gradient(f, ref, p, age)
+            ad = ForwardDiff.gradient(q -> f(q, age), p)
+            exact = Float64.(ForwardDiff.gradient(q -> ref(q..., big(age)), big.(p)))
+            for i in eachindex(p)
+                @test ad[i] ≈ exact[i] rtol = 1e-12 atol = 1e-300
+            end
+        end
+        cases = (
+            (K.Kannisto, (a, b, age) -> logistic(a, b, 1, age),
+                ([0.5, 0.13], [0.0, 0.13], [0.5, -0.13], [0.0, -0.13], [1e308, 0.1])),
+            (K.Beard, logistic,   # k·a is 1e308 and then overflows
+                ([0.002, 0.13, 0.5], [0.0, 0.13, 0.5], [1e307, 0.1, 10.0], [1e307, 0.1, 20.0])),
+            (K.MakehamBeard, (a, b, c, k, age) -> logistic(a, b, k, age) + c,
+                ([0.002, 0.13, 0.01, 0.5], [0.0, 0.13, 0.01, 0.5])),
+            (K.KannistoMakeham, (a, b, c, age) -> logistic(a, b, 1, age) + c,
+                ([0.5, 0.13, 0.001], [0.0, 0.13, 0.001])),
+            (K.GammaGompertz, gg,   # a·γ/b is 5e307 and then overflows
+                ([0.002, 0.13, 1.0], [0.0, 0.13, 1.0], [0.002, -0.13, 1.0], [1e307, 0.2, 1.0], [1e307, 0.05, 1.0])),
+        )
+        setprecision(BigFloat, 4096) do
+            for (L, ref, params) in cases, p in params, age in (0.0, 5.0, 50.0, 100.0)
+                check_gradient((q, age) -> hazard(L(q...), age), ref, p, age)
+            end
+            # both sides of x = 0 and of |x| = 1 (b = ±1/8 at age 8 is exactly x = ±1)
+            for b in (0.125, -0.125), age in (0.0, 1e-300, prevfloat(8.0), 8.0, nextfloat(8.0)), a in (0.0, 0.5)
+                check_gradient((q, age) -> hazard(K.Kannisto(q...), age), (a, b, age) -> logistic(a, b, 1, age), [a, b], age)
+                check_gradient((q, age) -> hazard(K.Beard(q...), age), logistic, [a, b, 0.5], age)
+                check_gradient((q, age) -> hazard(K.GammaGompertz(q...), age), gg, [a, b, 1.0], age)
+                age > 0 && check_gradient((q, age) -> cumhazard(K.Kannisto(q...), age), kannisto_H, [a, b], age)
+            end
+            # Kannisto's cumulative hazard: ordinary and zero amplitudes, negative growth, a large
+            # amplitude with negative growth, and each side of a·exp(x) overflowing (x = 709, 710)
+            for (p, age) in (
+                    ([0.5, 0.13], 5.0), ([0.5, 0.13], 50.0), ([0.5, 0.13], 100.0), ([0.0, 0.13], 50.0),
+                    ([0.5, -0.13], 50.0), ([0.0, -0.13], 50.0), ([1e308, -10.0], 71.0),
+                    ([0.5, 10.0], 70.9), ([0.5, 10.0], 71.0),
+                )
+                check_gradient((q, age) -> cumhazard(K.Kannisto(q...), age), kannisto_H, p, age)
+            end
+        end
     end
 
     @testset "Makeham" begin

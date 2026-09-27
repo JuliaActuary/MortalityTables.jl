@@ -44,15 +44,24 @@ _log1pdivx(x) = abs(x) < 1e-5 ? 1 - x / 2 + x^2 / 3 - x^3 / 4 : log1p(x) / x
 # nothing there (b = 0 is a constant hazard, c = 0 the Gompertz law).
 _times_age(k, age) = iszero(k) ? zero(k * age) : k * age
 
+# a / (e + a·c) for e > 0 and c ≥ 0, the form the ratio laws take once divided through by their
+# exponential. Where a·c ≤ e it is evaluated as written: smooth in a at a = 0, and its derivative
+# in a, e / (e + a·c)², is formed without cancellation. Where a·c > e it is also divided by a,
+# 1 / (e/a + c), which stays finite where a·c overflows and keeps its derivatives free of
+# cancellation and of the overflowing (e + a·c)². Under ForwardDiff 1.x the comparison uses the
+# primal values, and `iszero` in the laws' zero-coefficient shortcuts also requires zero partials,
+# so a derivative at a = 0 goes through this form.
+_amplitude_ratio(a, c, e) = a * c <= e ? a / (e + a * c) : inv(e / a + c)
+
 # a·exp(x) / (1 + k·a·exp(x)), the bounded ratio in Beard's and Kannisto's laws. The algebra
-# follows the sign of x: for x > 0 it is 1 / (exp(-x)/a + k), finite where exp(x) (or k·a)
-# overflows and tending to 1/k; for x ≤ 0 the numerator a·exp(x) is formed directly, since
-# there it is exp(-x) that can overflow.
+# follows the sign of x: for x > 0 it is divided through by exp(x), a / (exp(-x) + k·a), finite
+# where exp(x) overflows and tending to 1/k; for x ≤ 0 the numerator z = a·exp(x) is formed
+# directly, z / (1 + k·z), since there it is exp(-x) that can overflow.
 function _logistic_ratio(a, k, x)
     iszero(a) && return zero(a * x)   # no hazard, even at an infinite age
-    x > 0 && return inv(exp(-x) / a + k)
+    x > 0 && return _amplitude_ratio(a, k, exp(-x))
     z = a * exp(x)
-    return z / (1 + k * z)
+    return _amplitude_ratio(z, k, one(z))
 end
 
 # log(1 + exp(y)), without overflow for large y
@@ -560,14 +569,15 @@ function hazard(m::GammaGompertz,age)
     (; a, b, γ) = m
     iszero(a) && return zero(a * age)   # no hazard, even at an infinite age
     x = _times_age(b, age)
-    # a·exp(x) / (1 + a·γ/b·expm1(x)). Near b·age = 0, expm1(-x)/b is written with `_exprel`,
-    # which also gives the b = 0 limit a / (1 + a·γ·age). Away from it the algebra follows the
-    # sign of x: for x > 0 it is divided through by a·exp(x), so it stays finite where exp(x)
-    # overflows (tending to b/γ); for x < 0 the numerator a·exp(x) is formed directly, since
-    # there exp(-x) can overflow (and a·γ/b·expm1(-x) would be 0·Inf when γ = 0).
-    abs(x) < 1 && return a / (exp(-x) + _times_age(a * γ, age) * _exprel(-x))
-    x > 0 && return inv(exp(-x) / a - γ / b * expm1(-x))
-    return a * exp(x) / (1 + a * γ / b * expm1(x))
+    # a·exp(x) / (1 + a·γ/b·expm1(x)), evaluated as a ratio in a (see `_amplitude_ratio`). Near
+    # b·age = 0 it is a / (exp(-x) + a·γ·age·expm1(-x)/(-x)), with `_exprel`, which also gives the
+    # b = 0 limit a / (1 + a·γ·age). Away from it the algebra follows the sign of x: for x > 0 it
+    # is divided through by exp(x), a / (exp(-x) + a·γ/b·(1 - exp(-x))), finite where exp(x)
+    # overflows (tending to b/γ); for x < 0 it is exp(x)·a / (1 + a·γ/b·expm1(x)), since there
+    # exp(-x) can overflow (and a·γ/b·expm1(-x) would be 0·Inf when γ = 0).
+    abs(x) < 1 && return _amplitude_ratio(a, _times_age(γ, age) * _exprel(-x), exp(-x))
+    x > 0 && return _amplitude_ratio(a, -γ / b * expm1(-x), exp(-x))
+    return exp(x) * _amplitude_ratio(a, γ / b * expm1(x), one(a))
 end
 
 """
@@ -966,10 +976,14 @@ function cumhazard(m::Kannisto,age)
     (; a, b) = m
     iszero(a) && return zero(a * age)   # no hazard, even at an infinite age
     x = _times_age(b, age)
-    # log((1 + a·exp(b·age)) / (1 + a)) / b, with log(1 + a·exp(x)) evaluated as
-    # log1pexp(log(a) + x) so that a·exp(x) cannot overflow. Near b·age = 0 it is
-    # log1p(u) / b with u = a·expm1(b·age) / (1 + a), which is a·age/(1 + a) at b = 0.
-    abs(x) < 1 || return (_log1pexp(log(a) + x) - log1p(a)) / b
+    # log((1 + a·exp(b·age)) / (1 + a)) / b. Away from b·age = 0, log(1 + v) with v = a·exp(x)
+    # is log1p(v) where v ≤ 1, which is smooth in a at a = 0, and log1pexp(log(a) + x) where
+    # v > 1, which cannot overflow and keeps the derivatives free of the large v. Near b·age = 0
+    # it is log1p(u) / b with u = a·expm1(b·age) / (1 + a), which is a·age/(1 + a) at b = 0.
+    if abs(x) >= 1
+        v = a * exp(x)
+        return ((v <= 1 ? log1p(v) : _log1pexp(log(a) + x)) - log1p(a)) / b
+    end
     u = a / (1 + a) * expm1(x)
     return a / (1 + a) * age * _exprel(x) * _log1pdivx(u)
 end
