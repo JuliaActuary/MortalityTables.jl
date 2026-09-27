@@ -1,3 +1,7 @@
+# a type that extends only `survival` (as a downstream life model may)
+struct SurvivalOnly end
+MortalityTables.survival(::SurvivalOnly, from, to) = exp(-0.1 * (to - from))
+
 
 @testset "basic MortalityTable" begin
     @testset "basic structure" begin
@@ -207,6 +211,13 @@
         @test ismissing(life_expectancy(UltimateMortality([missing, 0.2, 0.3]), 0))
     end
 
+    @testset "a type that defines only survival has the complementary decrement" begin
+        @test decrement(SurvivalOnly(), 0, 2) == 1 - exp(-0.2)
+        @test decrement(SurvivalOnly(), 2, 0) == 1 - exp(0.2)
+        # without a survival method the natural error remains
+        @test_throws MethodError decrement(:not_a_table, 0, 1)
+    end
+
     @testset "reversed intervals are reverse factors" begin
         q4 = UltimateMortality([0.1, 0.3, 0.6, 1])
         # the inverse of the forward survival, and its decrement 1 - 1/S is negative
@@ -234,6 +245,25 @@
                 @test survival(v, a, b) * survival(v, b, a) ≈ 1
             end
         end
+
+        # The reverse decrement -d/S keeps its precision both where the forward decrement is tiny
+        # and where the forward survival is tiny but representable (d rounds to one there, so
+        # rebuilding S as 1 - d would give -Inf). The exact value here is 1 - 2^60.
+        half = UltimateMortality(fill(0.5, 60))
+        @test survival(half, 0, 60) == 2.0^-60
+        @test decrement(half, 60, 0) == Float64(1 - big(2)^60)
+        halfbig = UltimateMortality(fill(big"0.5", 60))
+        for dd in (Uniform(), Balducci(), Constant()), (a, b) in ((59.5, 0.25), (60.0, 0.5), (59.75, 0.0))
+            expected = Float64(decrement(halfbig, big(a), big(b), dd))
+            @test decrement(half, a, b, dd) ≈ expected rtol = 1.0e-13
+            @test isfinite(decrement(half, a, b, dd))
+        end
+        tiny = UltimateMortality([1.0e-18, 1.0e-18, 0.1])
+        tinybig = UltimateMortality(big.([1.0e-18, 1.0e-18, 0.1]))
+        @test decrement(tiny, 2, 0) ≈ Float64(decrement(tinybig, 2, 0)) rtol = 1.0e-15
+        @test decrement(tiny, 1.5, 0.25, Constant()) ≈ Float64(decrement(tinybig, big"1.5", big"0.25", Constant())) rtol = 1.0e-13
+        # after a rate of one there is no forward survival, and no finite reverse factor
+        @test decrement(q4, 4, 0) == -Inf
 
         # projecting a population backward: 1,000 lives at 45 imply the number expected at 40
         l45 = 1000.0

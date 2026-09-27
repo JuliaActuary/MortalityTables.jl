@@ -201,7 +201,7 @@ Returns the survival through attained age `to_age`. The start of the calculation
 
 Survival from a fractional `from_age` is conditional on surviving to `from_age`: it equals `survival(v, to_age, dd) / survival(v, from_age, dd)` under the same assumption, so survival over consecutive intervals multiplies. Where the assumption gives zero survival to a fractional `from_age` (after a rate of one under `Constant` or `Balducci`) there is nothing to condition on; the formulas are still evaluated as written and give finite values.
 
-When `to_age` is before `from_age`, the result is the reverse factor `1 / survival(v, to_age, from_age)`: the number expected alive at the earlier age for each life alive at the later one, as used to project a population backward or to accumulate with the benefit of survivorship. It is not a probability (it can exceed one, and the corresponding `decrement` is negative), and it is an expected-value back-calculation rather than a reconstruction of realized deaths. It is defined where the forward survival is positive; a zero forward survival gives `Inf`. With it, survival composes over any three ages: `survival(v, a, c) == survival(v, a, b) * survival(v, b, c)`, whatever their order. Ages outside the table (such as a negative `to_age` for a table starting at zero) are a `BoundsError`.
+When `to_age` is before `from_age`, the result is the reverse factor `1 / survival(v, to_age, from_age)`: the number expected alive at the earlier age for each life alive at the later one, as used to project a population backward or to accumulate with the benefit of survivorship. It is not a probability (it can exceed one, and the corresponding `decrement` is negative), and it is an expected-value back-calculation rather than a reconstruction of realized deaths. It is defined where the forward survival is positive; a zero forward survival gives `Inf`. With it, survival composes over any three ages whose factors are positive and representable: `survival(v, a, c) == survival(v, a, b) * survival(v, b, c)`, whatever their order. (A zero factor has no inverse: `0 * Inf` is not one.) Ages outside the table (such as a negative `to_age` for a table starting at zero) are a `BoundsError`.
 
 Results have the numeric type of the rates, promoted with the ages' type for fractional ages, including the exact one of an empty interval: a `BigFloat` table gives `BigFloat` survival, and a `Float32` table gives `Float32` survival at whole ages.
 
@@ -338,10 +338,15 @@ julia> decrement(qs,0.5,Uniform())
 0.05
 ```
 
-The decrement is accumulated directly (``d \\leftarrow q + d(1 - q)``) rather than computed as one minus the survival product, so a small decrement keeps its precision. A reversed interval gives the negative decrement `1 - survival(v, from_age, to_age)` of the reverse factor.
+The decrement is accumulated directly (``d \\leftarrow q + d(1 - q)``) rather than computed as one minus the survival product, so a small decrement keeps its precision. A reversed interval gives the negative decrement `1 - survival(v, from_age, to_age)` of the reverse factor, computed as `-d / S` from the forward decrement `d` and forward survival `S`, so it keeps its precision both for a small decrement and for a small forward survival.
+
+A type that defines only `survival` gets `decrement` as `1 - survival`; define `decrement` too where that complement would lose precision.
 """
 decrement(v::AbstractArray, to_age) = decrement(v, firstindex(v), to_age)
 decrement(v::AbstractArray, to_age, dd::DeathDistribution) = decrement(v, firstindex(v), to_age, dd)
+
+# the extension contract: a type that defines `survival` has the complementary `decrement`
+decrement(v, args...) = 1 - survival(v, args...)
 
 # d ← q + d·(1 - q), i.e. 1 - (1 - d)(1 - q): the complement of the survival product without
 # the cancellation in 1 - ∏(1 - q), so a small decrement is not rounded away. For rates in
@@ -351,16 +356,18 @@ decrement(v::AbstractArray, to_age, dd::DeathDistribution) = decrement(v, firsti
 # expression is evaluated for them, and it can round more than the product would.
 _accumulate_decrement(d, q) = muladd(d, 1 - q, q)
 
-# the decrement of a reversed interval, 1 - 1/(1 - d), written without cancellation
-_reverse_decrement(d) = -d / (1 - d)
+# The decrement of a reversed interval, 1 - 1/S = -d/S for the forward decrement d and survival
+# S. Both are accurate to a few ulps, so the quotient is too: rebuilding S as 1 - d would round it
+# to zero once d rounds to one, although S (say 2^-60) is representable.
+_reverse_decrement(v, args...) = -decrement(v, args...) / survival(v, args...)
 
 function decrement(v::AbstractArray, from_age::Int, to_age::Int)
-    from_age > to_age && return _reverse_decrement(decrement(v, to_age, from_age))
+    from_age > to_age && return _reverse_decrement(v, to_age, from_age)
     return @views reduce(_accumulate_decrement, v[from_age:(to_age-1)], init = zero(_rate_type(v)))
 end
 
 function decrement(v::AbstractArray, from_age, to_age, dd::DeathDistribution)
-    from_age > to_age && return _reverse_decrement(decrement(v, to_age, from_age, dd))
+    from_age > to_age && return _reverse_decrement(v, to_age, from_age, dd)
     T = _survival_type(v, from_age, to_age)
     from_age == to_age && return zero(T)
     age_low = ceil(Int, from_age)
