@@ -209,6 +209,29 @@ MortalityTables.survival(::SurvivalOnly, from, to) = exp(-0.1 * (to - from))
         @test life_expectancy(gap, 0) ≈ 0.9
         # a missing rate that is used propagates
         @test ismissing(life_expectancy(UltimateMortality([missing, 0.2, 0.3]), 0))
+        # an element type that doesn't name the rates' numbers gives Float64 identities, as
+        # before v3, and nonempty results take the type of the rates' arithmetic
+        for v in (Any[0.1, 0.2], Real[0.1, 0.2])
+            qa = UltimateMortality(v)
+            @test survival(qa, 0, 1) ≈ 0.9
+            @test survival(qa, 0, 2) ≈ 0.9 * 0.8
+            @test decrement(qa, 0, 2) ≈ 1 - 0.9 * 0.8
+            @test survival(qa, 1, 1) === 1.0
+            @test decrement(qa, 1, 1) === 0.0
+            @test survival(qa, 0.5, 1.5, Uniform()) ≈ (1 - 0.05 / 0.95) * 0.9 rtol = 1e-15
+            @test life_expectancy(qa, 0) ≈ 0.9
+            @test life_expectancy(qa, 1) === 0.0
+        end
+        @test survival(UltimateMortality(Any[big"0.1", big"0.2"]), 0, 2) isa BigFloat
+        # a column with no rates propagates `missing`; an empty interval is the identity
+        qm = UltimateMortality([missing])
+        @test ismissing(survival(qm, 0, 1))
+        @test ismissing(decrement(qm, 0, 1))
+        @test survival(qm, 0, 0) === 1.0
+        @test decrement(qm, 0, 0) === 0.0
+        # concretely typed tables keep their own type
+        @test survival(UltimateMortality(Float32[0.1, 0.2]), 1, 1) === 1.0f0
+        @test survival(UltimateMortality(BigFloat[0.1, 0.2]), 1, 1) isa BigFloat
     end
 
     @testset "a type that defines only survival has the complementary decrement" begin

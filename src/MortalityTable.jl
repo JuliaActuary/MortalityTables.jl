@@ -203,7 +203,7 @@ Survival from a fractional `from_age` is conditional on surviving to `from_age`:
 
 When `to_age` is before `from_age`, the result is the reverse factor `1 / survival(v, to_age, from_age)`: the number expected alive at the earlier age for each life alive at the later one, as used to project a population backward or to accumulate with the benefit of survivorship. It is not a probability (it can exceed one, and the corresponding `decrement` is negative), and it is an expected-value back-calculation rather than a reconstruction of realized deaths. It is defined where the forward survival is positive; a zero forward survival gives `Inf`. With it, survival composes over any three ages whose factors are positive and representable: `survival(v, a, c) == survival(v, a, b) * survival(v, b, c)`, whatever their order. (A zero factor has no inverse: `0 * Inf` is not one.) Ages outside the table (such as a negative `to_age` for a table starting at zero) are a `BoundsError`.
 
-Results have the numeric type of the rates, promoted with the ages' type for fractional ages, including the exact one of an empty interval: a `BigFloat` table gives `BigFloat` survival, and a `Float32` table gives `Float32` survival at whole ages.
+Results have the numeric type of the rates, promoted with the ages' type for fractional ages, including the exact one of an empty interval: a `BigFloat` table gives `BigFloat` survival, and a `Float32` table gives `Float32` survival at whole ages. A vector whose element type doesn't name the rates' number type (such as `Any`, `Real`, or `Missing` for a column with no rates) has `Float64` identities, as in version 2: an empty interval gives `1.0`, and a nonempty result takes the type its rates' arithmetic gives. Use a concretely typed vector for type-consistent and fast results.
 
 Parametric models (see `ParametricMortality`) are continuous and need no fractional-age assumption, so they accept a trailing `DeathDistribution` and ignore it.
 
@@ -237,8 +237,12 @@ _decrement(surv, q) = surv * (1 - q)
 # The numeric type of survival and decrement: that of the rates (ignoring `missing`, as in a
 # select row with a gap), promoted with the ages' type for fractional ages. Identities such as
 # the survival over an empty interval have this type too, so a BigFloat or Float32 table keeps
-# its precision whether or not an interval is empty.
-_rate_type(v) = float(nonmissingtype(eltype(v)))
+# its precision whether or not an interval is empty. An element type that isn't concrete says
+# nothing about the rates' numbers (`Any`, `Real`, or `Union{}` for an all-`missing` vector), so
+# the identities are Float64's, as before v3. A concrete non-number, such as a `String` rate,
+# still fails where it is converted.
+_rate_type(v) = _rate_type(nonmissingtype(eltype(v)))
+_rate_type(::Type{T}) where {T} = isconcretetype(T) ? float(T) : Float64
 _survival_type(v, ages...) = float(promote_type(_rate_type(v), map(typeof, ages)...))
 
 function survival(v::AbstractArray, from_age::Int, to_age::Int)
