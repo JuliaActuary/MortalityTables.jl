@@ -198,6 +198,13 @@
         @test survival(row, 1, 1) == 1
         @test survival(row, 1, 2) ≈ 0.8
         @test decrement(row, 1, 1) === 0.0
+        # a missing rate at the last age is never used: the expectancy there is zero, and one
+        # year earlier it is the survival to the last age
+        gap = UltimateMortality([0.1, missing])
+        @test life_expectancy(gap, 1) === 0.0
+        @test life_expectancy(gap, 0) ≈ 0.9
+        # a missing rate that is used propagates
+        @test ismissing(life_expectancy(UltimateMortality([missing, 0.2, 0.3]), 0))
     end
 
     @testset "reversed intervals are reverse factors" begin

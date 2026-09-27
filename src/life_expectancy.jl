@@ -11,9 +11,10 @@ Parametric models accept a `DeathDistribution` and ignore it, since they are con
 function life_expectancy(table,age)
     # curtate: sum of the survival probabilities to each later whole age, accumulated in a
     # single pass rather than recomputed from `age` each time. `table[age]` is read first, so
-    # an age outside the table is a BoundsError rather than an empty sum.
+    # an age outside the table is a BoundsError rather than an empty sum. The sum starts from the
+    # rates' numeric type, not from `p`, whose rate can be `missing` at the last age.
     p = one(_rate_type(table)) * (1 - table[age])
-    s = zero(p)
+    s = zero(_rate_type(table))
     for a in (age + 1):lastindex(table)
         s += p
         p *= 1 - table[a]
