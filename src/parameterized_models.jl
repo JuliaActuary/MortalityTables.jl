@@ -48,9 +48,11 @@ _times_age(k, age) = iszero(k) ? zero(k * age) : k * age
 # exponential. Where a·c ≤ e it is evaluated as written: smooth in a at a = 0, and its derivative
 # in a, e / (e + a·c)², is formed without cancellation. Where a·c > e it is also divided by a,
 # 1 / (e/a + c), which stays finite where a·c overflows and keeps its derivatives free of
-# cancellation and of the overflowing (e + a·c)². Under ForwardDiff 1.x the comparison uses the
-# primal values, and `iszero` in the laws' zero-coefficient shortcuts also requires zero partials,
-# so a derivative at a = 0 goes through this form.
+# cancellation and of the overflowing (e + a·c)². The two forms are the same function, so at
+# a·c = e either gives the value and derivatives (a ForwardDiff comparison can break a tie between
+# equal primal values by their partials, which then doesn't matter). Under ForwardDiff 1.x `iszero`
+# in the laws' zero-coefficient shortcuts also requires zero partials, so a derivative at a = 0
+# goes through this form.
 _amplitude_ratio(a, c, e) = a * c <= e ? a / (e + a * c) : inv(e / a + c)
 
 # a·exp(x) / (1 + k·a·exp(x)), the bounded ratio in Beard's and Kannisto's laws. The algebra
