@@ -325,8 +325,8 @@ MortalityTables.survival(::SurvivalOnly, from, to) = exp(-0.1 * (to - from))
         @test q[0] == 0
         @test q[5] == 5
 
-        # mortality_vector is an alias of UltimateMortality
-        @test mortality_vector(v, start_age = 3) == UltimateMortality(v, start_age = 3)
+        # mortality_vector is another name for UltimateMortality
+        @test mortality_vector === UltimateMortality
     end
 
     @testset "UltimateMortality accepts any AbstractVector" begin

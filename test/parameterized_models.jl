@@ -275,6 +275,7 @@ using ForwardDiff
             @test MortalityTables.μ(m, 20) == 0.00022 + 2.7e-6 * 1.124^20
             @test_throws MethodError m[20]  # indexing a model is not supported; call it or use hazard
             @test m(20) == MortalityTables.μ(m, 20)
+            @test MortalityTables.μ === hazard
             
             # vs manually calculated (via QuadGK) integrals
             @test decrement(m, 20, 25) ≈ 0.0012891622754368504

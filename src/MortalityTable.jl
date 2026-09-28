@@ -407,14 +407,6 @@ const ω = omega
 """
     mortality_vector(vec; start_age=0)
 
-A convenience constructor to create an OffsetArray which has the array indexed by attained age rather than always starting from `1`. The package and JuliaActuary ecosystem assume that the rates are indexed by attained age and this allows transformation of tables without a direct dependency on **OffsetArrays.jl**.
-
-Equivalent to doing:
-```
-using OffsetArrays
-OffsetArray(vec,start_age-1)
-```
-
-This is an alias for [`UltimateMortality`](@ref).
+An alias for [`UltimateMortality`](@ref): wraps `vec` in an `OffsetArray` indexed by attained age, starting at `start_age`, rather than always starting from `1`. The package and JuliaActuary ecosystem assume that the rates are indexed by attained age, and this allows transformation of tables without a direct dependency on **OffsetArrays.jl**.
 """
-mortality_vector(vec; start_age = 0) = UltimateMortality(vec; start_age)
+const mortality_vector = UltimateMortality
