@@ -12,6 +12,14 @@ using ForwardDiff
             @test isbits(m)
             @test m isa L{Float64}
             @test (@inferred hazard(m, 50.0)) isa Float64
+            # a Float32 law keeps its type at Float32 ages, including the laws' special cases at
+            # age zero (Weibull, Thiele) and Opperman's floor at zero
+            m32 = L(map(f -> Float32(getfield(m, f)), fieldnames(typeof(m)))...)
+            @test m32 isa L{Float32}
+            for age in (0.0f0, 1.0f0, 50.0f0)
+                @test (@inferred hazard(m32, age)) isa Float32
+                @test (@inferred cumhazard(m32, age)) isa Float32
+            end
         end
         # mixed keyword types are promoted
         @test Makeham(a=1, b=0.5, c=0) isa Makeham{Float64}

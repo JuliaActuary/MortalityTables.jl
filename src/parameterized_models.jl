@@ -124,7 +124,8 @@ Opperman(; a=0.04, b=0.0004, c=0.001) = Opperman(promote(a, b, c)...)
 
 function hazard(m::Opperman,age) 
     (; a, b, c) = m
-    return max(a / √(age+1) - b + c * √(age+1),0.0)
+    h = a / √(age+1) - b + c * √(age+1)
+    return max(h, zero(h))
 end
 
 """
@@ -170,7 +171,7 @@ Thiele(; a=0.02474, b=0.3, c=0.004, d=0.5, e=25, f=0.0001, g=0.13) = Thiele(prom
 function hazard(m::Thiele,age) 
     (; a, b, c, d, e, f, g) = m
     μ₁ = a * exp(-b * age)
-    μ₂ = c * exp(-0.5 * d * (age - e)^2)
+    μ₂ = c * exp(-d * (age - e)^2 / 2)
     μ₃ = f * exp(g * age)
 
     if age == 0 
@@ -245,7 +246,7 @@ Weibull(; m=1.0, σ=2.0) = Weibull(promote(m, σ)...)
 function hazard(model::Weibull,age)
     (; m, σ) = model
     if age == 0
-        return 1.0
+        return one(age / m)
     else 
         return 1 / σ * (age / m)^(m / σ - 1)
     end
