@@ -237,39 +237,17 @@ function survival(v::AbstractArray, from_age, to_age, dd::DeathDistribution)
     # a reversed interval is the reverse factor (see the docstring)
     from_age > to_age && return inv(survival(v, to_age, from_age, dd))
     T = _survival_type(v, from_age, to_age)
-
-    # calculate the survival for the rounded ages, and then the high and low high_residual
+    # the survival over the whole ages, times the partial years before and after them
     age_low = ceil(Int, from_age)
     age_high = floor(Int, to_age)
-
-    # if from_age and to_age are fractional parts of the same attained age, then age_high will round down to 
-    # be below the rounded-up age_low. This line will short circuit the rest and just return the fractional year survival
+    # within one year of age
     age_high < age_low && return 1 - decrement_partial_year(v, from_age, to_age, dd)
-
-    if age_low == from_age
-        low_residual = one(T)
-    else
-        low_residual = 1 - decrement_partial_year(v, from_age, age_low, dd)
-    end
-
-    if age_high == to_age
-        high_residual = one(T)
-    else
-        high_residual = 1 - decrement_partial_year(v, age_high, to_age, dd)
-    end
-
-    if from_age == to_age
-        return one(T)
-    else
-
-        whole = @views reduce(_decrement, v[age_low:(age_high-1)], init = one(T))
-
-        return whole * low_residual * high_residual
-    end
+    low_residual = age_low == from_age ? one(T) : 1 - decrement_partial_year(v, from_age, age_low, dd)
+    high_residual = age_high == to_age ? one(T) : 1 - decrement_partial_year(v, age_high, to_age, dd)
+    # an empty interval reduces to `init`, i.e. one
+    whole = @views reduce(_decrement, v[age_low:(age_high-1)], init = one(T))
+    return whole * low_residual * high_residual
 end
-
-# whole ages need no fractional-year assumption
-survival(v::AbstractArray, from_age::Int, to_age::Int, ::DeathDistribution) = survival(v, from_age, to_age)
 
 # Reference: Experience Study Calculations, 2016, Society of Actuaries
 # https://www.soa.org/globalassets/assets/Files/Research/2016-10-experience-study-calculations.pdf
@@ -363,8 +341,6 @@ function decrement(v::AbstractArray, from_age, to_age, dd::DeathDistribution)
     d = @views reduce(_accumulate_decrement, v[age_low:(age_high-1)], init = d)
     return age_high == to_age ? d : _accumulate_decrement(d, _decrement_piece(v, age_high, to_age, dd))
 end
-
-decrement(v::AbstractArray, from_age::Int, to_age::Int, ::DeathDistribution) = decrement(v, from_age, to_age)
 
 # The decrement over part of one year of age: `decrement_partial_year`, except that the
 # constant force is written as -expm1((t - s)·log1p(-q)), since 1 - (1 - q)^(t - s) rounds a
