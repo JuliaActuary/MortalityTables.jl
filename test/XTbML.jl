@@ -33,6 +33,24 @@ using XML: XML
         pth = joinpath(soa_tbl_dir,"t1076.xml")
         # repeated reads of the same path return the identical object
         @test MortalityTables.readXTbML(pth) === MortalityTables.readXTbML(pth)
+        # the cache holds tables, so a read infers as one
+        @test (@inferred MortalityTable MortalityTables.readXTbML(pth)) isa MortalityTable
+    end
+
+    @testset "read_tables" begin
+        # every XTbML file under the directory, keyed by table name, skipping hidden and other files
+        dir = mktempdir()
+        mkdir(joinpath(dir, "sub"))
+        cp(joinpath(soa_tbl_dir, "t17.xml"), joinpath(dir, "t17.xml"))
+        cp(joinpath(soa_tbl_dir, "t1076.xml"), joinpath(dir, "sub", "t1076.xml"))
+        write(joinpath(dir, "._t17.xml"), "not a table")
+        write(joinpath(dir, "notes.txt"), "not a table")
+        tables = @test_logs (:info, "Loading built-in Mortality Tables...") MortalityTables.read_tables(dir)
+        @test tables isa Dict{String, MortalityTable}
+        t17, t1076 = MortalityTables.table(17), MortalityTables.table(1076)
+        @test sort!(collect(keys(tables))) == sort!([t17.metadata.name, t1076.metadata.name])
+        @test tables[t17.metadata.name].ultimate == t17.ultimate
+        @test tables[t1076.metadata.name].select[35] == t1076.select[35]
     end
 
     @testset "Ultimate Only" begin

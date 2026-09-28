@@ -89,7 +89,7 @@ end
 
 # Tables parsed from disk are cached by path so that repeated lookups of the
 # same table return the same object without re-parsing the file.
-const _TABLE_CACHE = Dict{String,Any}()
+const _TABLE_CACHE = Dict{String,MortalityTable}()
 const _CACHE_LOCK = ReentrantLock()
 
 """
@@ -108,45 +108,29 @@ end
 
 # Load Available Tables ###
 
+# The XTbML files anywhere under `dir`, skipping hidden files (such as macOS `._` files).
+_xtbml_paths(dir) =
+    [joinpath(root, file) for (root, _, files) in walkdir(dir) for file in files if endswith(file, ".xml") && !startswith(file, ".")]
+
 """
     read_tables(dir=nothing)
 
 Loads the [XtbML](https://mort.soa.org/About.aspx) (the SOA XML data format for mortality tables) stored in the given path. If no path is specified, will load the packages in the MortalityTables package directory. To see where your system keeps packages, run `DEPOT_PATH` from a Julia REPL.
 """
 function read_tables(dir=nothing)
-    if isnothing(dir)
-        table_dir = artifact"mort.soa.org"
-    else
-        table_dir = dir
-    end
-    tables = []
+    table_dir = isnothing(dir) ? artifact"mort.soa.org" : dir
     @info "Loading built-in Mortality Tables..."
-    for (root, dirs, files) in walkdir(table_dir)
-        for file in files
-            if endswith(file,".xml") && !startswith(file,".")
-                tbl =  readXTbML(joinpath(root,file))
-                push!(tables,tbl)
-            end
-        end
-    end
-    return Dict(tbl.metadata.name => tbl for tbl in tables if ~isnothing(tbl))
+    tables = MortalityTable[readXTbML(path) for path in _xtbml_paths(table_dir)]
+    return Dict(tbl.metadata.name => tbl for tbl in tables)
 end
 
 
 # this is used to generate the table mapping in table_source_map.jl
 function _write_available_tables()
-    table_dir = artifact"mort.soa.org"
-    tables = []
     @info "Loading built-in Mortality Tables..."
-    for (root, dirs, files) in walkdir(table_dir)
-        for file in files
-            if endswith(file,".xml") && !startswith(file,".")
-                path = joinpath(root, file)
-                doc = XML.parse(open_and_read(path), XML.Node)
-                md = _content_classification(_child(doc, "XTbML"), path)
-                push!(tables, (source="mort.soa.org", name=md.name, id=parse(Int, md.id)))
-            end
-        end
+    tables = map(_xtbml_paths(artifact"mort.soa.org")) do path
+        md = _content_classification(_child(XML.parse(open_and_read(path), XML.Node), "XTbML"), path)
+        (source = "mort.soa.org", name = md.name, id = parse(Int, md.id))
     end
-    return sort!(tables,by=last)
+    return sort!(tables, by = last)
 end
