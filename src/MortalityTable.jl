@@ -92,6 +92,26 @@ function _by_label(labels, values, what, source; first = minimum(labels))
     return first, placed
 end
 
+# A table from its labeled rates, as the file readers (XTbML, and CSV through its extension) parse
+# them: `ultimate` is a vector of `(age, rate)`; `select` is `nothing` for an ultimate-only table, or
+# a vector of `(issue_age, rates)` where `rates` is a vector of `(duration, rate)` for the durations
+# the file gives. Every rate goes to its label (`_by_label`), each select row takes the ultimate
+# rates after its select period (`_select_row`), and `source` names the table in errors.
+function _table_from_labels(tbl, source)
+    start_age, ult_rates = _by_label([v.age for v in tbl.ultimate], [v.rate for v in tbl.ultimate], "the ultimate ages", source)
+    ult = UltimateMortality(ult_rates, start_age = start_age)
+    isnothing(tbl.select) && return MortalityTable(ult, metadata = tbl.metadata)
+    rows = map(tbl.select) do (issue_age, rates)
+        _, select_rates = _by_label(
+            [r.duration for r in rates], [r.rate for r in rates],
+            "the select durations for issue age $issue_age", source; first = 1
+        )
+        return _select_row(issue_age, select_rates, ult)
+    end
+    first_issue_age, sel = _by_label([r.issue_age for r in tbl.select], rows, "the select issue ages", source)
+    return MortalityTable(OffsetArray(sel, first_issue_age - 1), ult, metadata = tbl.metadata)
+end
+
 
 
 """

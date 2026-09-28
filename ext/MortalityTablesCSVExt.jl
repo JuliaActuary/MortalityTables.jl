@@ -1,7 +1,7 @@
 module MortalityTablesCSVExt
 
-using MortalityTables, CSV, OffsetArrays
-import MortalityTables: MortalityTable, TableMetaData, UltimateMortality
+using MortalityTables, CSV
+import MortalityTables: MortalityTable, TableMetaData
 
 """ 
     MortalityTable(CSV.File)
@@ -79,9 +79,9 @@ function MortalityTable(lines::CSV.File)
 	table_ends= [last_values_line(lines,ts) for ts in table_starts]
 
 
-	# Parse into table: rates are placed by their labels (the ages in the first column and the
-	# durations in the header row), as for XTbML, so grouped ages or blank cells keep every rate
-	# at its own age.
+	# Parse into the labeled rates XTbML parses to (the ages in the first column and the durations
+	# in the header row), which `_table_from_labels` places, so grouped ages or blank cells keep
+	# every rate at its own age.
 	source = "CSV table $(something(d.name, "(unnamed)"))"
 	# an ultimate table has one block of rates; a select and ultimate table has two, the select
 	# rates followed by the ultimate rates. Reading any other layout this way would silently
@@ -93,47 +93,31 @@ function MortalityTable(lines::CSV.File)
 		)
 	)
 
-	if length(table_starts) == 1 
+	if length(table_starts) == 1
 		# ultimate only
-		ult = _ultimate(lines, table_starts[1], table_ends[1], source)
-		
-		return MortalityTable(ult; metadata=d)
-	else 
+		ultimate = _ultimate_records(lines, table_starts[1], table_ends[1])
+		select = nothing
+	else
 		# select and ultimate
-		ult = _ultimate(lines, table_starts[2], table_ends[2], source)
-
-		sel_start, sel_end = table_starts[1],table_ends[1]
+		ultimate = _ultimate_records(lines, table_starts[2], table_ends[2])
+		sel_start, sel_end = table_starts[1], table_ends[1]
 		header = lines[sel_start - 1]
 		durations = [ismissing(header[c]) ? missing : parsemaybe(Int, header[c]) for c in 2:length(header)]
 		# a row without any rate has no select period: like an issue age absent from the table
 		# (as in XTbML) it is left `missing`, rather than read as a zero-length select period
 		# that falls straight through to the ultimate rates
 		rate_rows = [r for r in sel_start:sel_end if any(c -> !ismissing(lines[r][c]), 2:length(lines[r]))]
-		issue_ages = [parsemaybe(Int, lines[r][1]) for r in rate_rows]
-		rows = map(issue_ages, rate_rows) do issue_age, r
+		select = map(rate_rows) do r
 			row = lines[r]
-			select_rates = _select_rates(
-				[row[c] for c in 2:length(row)], durations,
-				"the select durations for issue age $issue_age", source
-			)
-			return MortalityTables._select_row(issue_age, select_rates, ult)
+			(issue_age = parsemaybe(Int, row[1]), rates = _select_records([row[c] for c in 2:length(row)], durations))
 		end
-		first_issue_age, sel = MortalityTables._by_label(issue_ages, rows, "the select issue ages", source)
-		
-		return MortalityTable(OffsetArray(sel, first_issue_age - 1),ult,metadata=d)
-
 	end
-
-
+	return MortalityTables._table_from_labels((; select, ultimate, metadata = d), source)
 end
 
-# The ultimate rates between two lines, placed by the ages in the first column.
-function _ultimate(lines, first_line, last_line, source)
-	ages = [parsemaybe(Int, lines[r][1]) for r in first_line:last_line]
-	rates = [parsemaybe(Float64, lines[r][2]) for r in first_line:last_line]
-	start_age, placed = MortalityTables._by_label(ages, rates, "the ultimate ages", source)
-	return UltimateMortality(placed, start_age = start_age)
-end
+# The `(age, rate)` records of the ultimate rates between two lines.
+_ultimate_records(lines, first_line, last_line) =
+	[(age = parsemaybe(Int, lines[r][1]), rate = parsemaybe(Float64, lines[r][2])) for r in first_line:last_line]
 
 function last_values_line(lines,startline)
 	for i in startline:lastindex(lines)
@@ -149,17 +133,11 @@ end
 # (a numeric column makes the header's duration labels floats, such as `4.0`)
 parsemaybe(t,x) = typeof(x) <: AbstractString ? parse(t,x) : convert(t,x)
 
-# The select rates in one CSV row, given the cells after the age column and the duration
-# labels of the table's header row. A blank cell gives no rate: trailing blanks shorten the row,
-# and a leading or interior blank leaves `missing` at its duration, so a row with a gap is
-# neither truncated nor shifted.
-function _select_rates(cells, durations, what = "the select durations", source = "CSV table")
-	given = findall(!ismissing, cells)
-	_, rates = MortalityTables._by_label(
-		[durations[i] for i in given], [parsemaybe(Float64, cells[i]) for i in given], what, source;
-		first = 1
-	)
-	return rates
-end
+# The `(duration, rate)` records of one CSV select row, given the cells after the age column and
+# the duration labels of the table's header row. A blank cell gives no rate, so once placed by
+# label, trailing blanks shorten the row and a leading or interior blank leaves `missing` at its
+# duration: a row with a gap is neither truncated nor shifted.
+_select_records(cells, durations) =
+	[(duration = durations[i], rate = parsemaybe(Float64, cells[i])) for i in eachindex(cells) if !ismissing(cells[i])]
 
 end # module
