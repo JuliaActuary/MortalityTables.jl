@@ -176,5 +176,41 @@ end
             end
         end
 
+        # the metadata is the file's (not a later table block's), stripped as in XTbML
+        for f in (:id, :provider, :content_type)
+            @test getfield(csv.metadata, f) == getfield(xtbml.metadata, f)
+        end
+        if id == 17
+            # t17.csv is CP-1252 encoded, so its en dash is the byte 0x96 rather than UTF-8 "–"
+            @test csv.metadata.name == replace(xtbml.metadata.name, "–" => "\x96")
+            @test csv.metadata.description == replace(xtbml.metadata.description, "–" => "\x96")
+        else
+            @test csv.metadata.name == xtbml.metadata.name
+            @test csv.metadata.description == xtbml.metadata.description
+        end
     end
+end
+
+@testset "CSV metadata" begin
+    read_csv(text) = MortalityTable(CSV.File(IOBuffer(text); header = false, silencewarnings = true))
+    # the metadata rows end at the first table, so the table's own description does not replace
+    # the file's; a blank value is "" (as for an empty XTbML element), and values are stripped
+    mt = read_csv("""
+    Table Name:, padded name ,
+    Table Description:,the file's table,
+    Comments:,,
+
+    Table # ,1,
+    Table Description:,the block's table,
+    Row\\Column,Rate,
+    60,0.1,
+    61,0.2,
+    ,a note after the rates,
+    """)
+    @test mt.metadata.name == "padded name"
+    @test mt.metadata.description == "the file's table"
+    @test mt.metadata.comments == ""
+    @test mt.metadata.provider === nothing
+    # a row with a blank first cell ends the block of rates
+    @test mt.ultimate == UltimateMortality([0.1, 0.2], start_age = 60)
 end

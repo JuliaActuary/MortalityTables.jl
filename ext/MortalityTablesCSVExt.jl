@@ -52,27 +52,28 @@ function MortalityTable(lines::CSV.File)
 	#what lines the table starts at
 	table_starts = findall(line -> ~ismissing(line[1]) && line[1] == "Row\\Column",lines) .+ 1
 
-	# Construct MetaData
+	# Construct MetaData from the rows before the first table, which starts at its "Table #" row or,
+	# in a file without one, at its "Row\Column" header. CSV.jl drops blank rows, so a blank row
+	# can't end the metadata, and the tables' own rows (such as each table's "Table Description:")
+	# would otherwise overwrite the file's.
 	raw_meta = Dict()
 	for line in lines
-		if ismissing(line[1])
+		if ismissing(line[1]) || startswith(line[1], "Table #") || line[1] == "Row\\Column"
 			break
 		end
 		raw_meta[line[1]] = line[2]
 	end
-	
+	field(label) = MortalityTables._metadata_text(get(raw_meta, label, nothing))
 	d = TableMetaData(
-		name = get(raw_meta,"Table Name:",nothing),
-		id = get(raw_meta,"Table Identity:",nothing),
-		provider = get(raw_meta,"Provider Name:",nothing),
-		reference = get(raw_meta,"Table Reference:",nothing),
-		content_type = get(raw_meta,"Content Type:",nothing),
-		description = get(raw_meta,"Table Description:",nothing),
-		comments = get(raw_meta,"Comments:",nothing),
+		name = field("Table Name:"),
+		id = field("Table Identity:"),
+		provider = field("Provider Name:"),
+		reference = field("Table Reference:"),
+		content_type = field("Content Type:"),
+		description = field("Table Description:"),
+		comments = field("Comments:"),
 	)
 
-# 	scale = get(raw_meta,"Scaling Factor:",nothing)
-	
 	# Parse each block of rates, from its first line to where it ends, into the labeled rates XTbML
 	# parses to (the ages in the first column and the durations in the header row), which
 	# `_table_from_labels` places, so grouped ages or blank cells keep every rate at its own age.
@@ -104,7 +105,7 @@ end
 
 function last_values_line(lines,startline)
 	for i in startline:lastindex(lines)
-		if ismissing(lines[i][1]) | startswith(lines[i][1], "Table")
+		if ismissing(lines[i][1]) || startswith(lines[i][1], "Table")
 			return i - 1
 		end
 	end

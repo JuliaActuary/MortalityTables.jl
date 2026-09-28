@@ -42,7 +42,7 @@ end
 
 function _content_classification(root, path)
     md = _child(root, "ContentClassification")
-    field(name) = (s = _text(md, name); s === nothing ? nothing : String(strip(s)))
+    field(name) = _metadata_text(_text(md, name))
     return TableMetaData(
         name = field("TableName"),
         id = field("TableIdentity"),
