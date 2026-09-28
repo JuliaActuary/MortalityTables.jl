@@ -3,9 +3,12 @@ tbl_dir_test = joinpath(pkgdir(MortalityTables), "test", "data", "CSV")
 @testset "CSV select row records" begin
     ext = Base.get_extension(MortalityTables, :MortalityTablesCSVExt)
     @test ext !== nothing
-    # a blank cell gives no rate, string cells are parsed, and each rate keeps its duration label
+    # a blank cell is a missing rate, string cells are parsed, and each rate keeps its duration label
     rec(cells, durations) = ext._select_records(cells, durations)
-    @test rec([0.1, missing, 0.3, missing, missing], 1:5) == [(duration = 1, rate = 0.1), (duration = 3, rate = 0.3)]
+    @test isequal(
+        rec([0.1, missing, 0.3, missing, missing], 1:5),
+        [(duration = d, rate = r) for (d, r) in zip(1:5, [0.1, missing, 0.3, missing, missing])]
+    )
     @test rec(["0.1", "0.2"], 1:2) == [(duration = 1, rate = 0.1), (duration = 2, rate = 0.2)]
     @test rec([0.1, 0.2, 0.4], [1, 2, 4]) == [(duration = 1, rate = 0.1), (duration = 2, rate = 0.2), (duration = 4, rate = 0.4)]
     # placed by the shared assembler: trailing blanks shorten the row and an interior blank is kept
@@ -84,9 +87,9 @@ end
         @test isequal(blank.select[issue_age], csv.select[issue_age])
     end
 
-    # the same labels read as XTbML give the same table
+    # the same labels, as XTbML parses them, give the same table
     md = MortalityTables.TableMetaData(name = "gapped select")
-    xml = MortalityTables.XTbML_Table_To_MortalityTable(
+    xml = MortalityTables._table_from_labels(
         (
             select = [
                 (issue_age = 40, rates = [(duration = d, rate = r) for (d, r) in zip([1, 2, 4], [0.01, 0.02, 0.04])]),
@@ -94,7 +97,8 @@ end
             ],
             ultimate = [(age = a, rate = r) for (a, r) in zip(40:46, [0.2, 0.21, 0.22, 0.23, 0.24, 0.25, 0.26])],
             metadata = md,
-        )
+        ),
+        "XTbML table gapped select"
     )
     @test isequal(csv.ultimate, xml.ultimate)
     @test axes(csv.select) == axes(xml.select)
@@ -117,7 +121,7 @@ end
     45,0.21,,
     46,0.22,,
     """)
-    past_xml = MortalityTables.XTbML_Table_To_MortalityTable(
+    past_xml = MortalityTables._table_from_labels(
         (
             select = [
                 (issue_age = a, rates = [(duration = d, rate = r) for (d, r) in zip(1:3, rs)])
@@ -125,7 +129,8 @@ end
             ],
             ultimate = [(age = a, rate = r) for (a, r) in zip(44:46, [0.2, 0.21, 0.22])],
             metadata = MortalityTables.TableMetaData(name = "long select"),
-        )
+        ),
+        "XTbML table long select"
     )
     @test axes(past.select[45], 1) == 45:47
     @test past.select[45][47] == 0.06

@@ -36,10 +36,7 @@ using XML: XML
     end
 
     @testset "Ultimate Only" begin
-        pth = joinpath(soa_tbl_dir,"t17.xml")
-        xtbl = MortalityTables.parseXTbMLTable(MortalityTables.open_and_read(pth), pth)
-
-        mt = MortalityTables.XTbML_Table_To_MortalityTable(xtbl)
+        mt = MortalityTables._read_xtbml(joinpath(soa_tbl_dir,"t17.xml"))
         @test isa(mt, MortalityTable)
 
         @test mt.ultimate[0] ≈ 0.00245
@@ -49,10 +46,7 @@ using XML: XML
 
     @testset "XTbML to MortalityTable" begin
         @testset "Select and Ultimate" begin
-            pth = joinpath(soa_tbl_dir,"t1076.xml")
-            xtbl = MortalityTables.parseXTbMLTable(MortalityTables.open_and_read(pth), pth)
-
-            mt = MortalityTables.XTbML_Table_To_MortalityTable(xtbl)
+            mt = MortalityTables._read_xtbml(joinpath(soa_tbl_dir,"t1076.xml"))
             @test isa(mt, MortalityTable)
 
             @test mt.select[35][35] ≈ 0.00037
@@ -65,7 +59,7 @@ using XML: XML
             md = MortalityTables.TableMetaData(name = "probe")
             ult = [(age = a, rate = 0.2) for a in 40:50]
             row(durs) = [(issue_age = 40, rates = [(duration = d, rate = d / 100) for d in durs])]
-            build(sel, u = ult) = MortalityTables.XTbML_Table_To_MortalityTable((select = sel, ultimate = u, metadata = md))
+            build(sel, u = ult) = MortalityTables._table_from_labels((select = sel, ultimate = u, metadata = md), "XTbML table probe")
             # consecutive durations run into the ultimate rates at the next attained age
             mt = build(row(1:3))
             @test mt.select[40][40:44] == [0.01, 0.02, 0.03, 0.2, 0.2]
@@ -73,6 +67,11 @@ using XML: XML
             # a missing leading or interior duration keeps every other rate at its own age
             @test isequal(build(row(2:3)).select[40][40:43], [missing, 0.02, 0.03, 0.2])
             @test isequal(build(row([1, 3])).select[40][40:43], [0.01, missing, 0.03, 0.2])
+            # an empty cell is a missing rate: an interior one stays missing, and trailing ones end
+            # the select period, as when the durations are absent
+            cells = [(duration = d, rate = r) for (d, r) in zip(1:5, [0.01, missing, 0.03, missing, missing])]
+            @test isequal(build([(issue_age = 40, rates = cells)]).select[40], build(row([1, 3])).select[40])
+            @test eltype(build([(issue_age = 40, rates = cells[1:1])]).select[40]) == Float64
             # labels, not positions, place the rates
             @test build(row([2, 1])).select[40][40:42] == [0.01, 0.02, 0.2]
             # a repeated label is ambiguous
@@ -89,9 +88,7 @@ using XML: XML
         end
 
         @testset "Ultimate Only, not begin at age 0" begin
-            pth = joinpath(soa_tbl_dir,"t18.xml")
-            xtbl = MortalityTables.parseXTbMLTable(MortalityTables.open_and_read(pth), pth)
-            mt = MortalityTables.XTbML_Table_To_MortalityTable(xtbl)
+            mt = MortalityTables._read_xtbml(joinpath(soa_tbl_dir,"t18.xml"))
             @test isa(mt, MortalityTable)
         end
 

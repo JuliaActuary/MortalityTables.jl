@@ -58,41 +58,34 @@ end
 """
     parseXTbMLTable(str, path)
 
-Parse the XTbML document in `str` (read from `path`, which is recorded in the metadata) into a
-named tuple `(select, ultimate, metadata)`. `ultimate` is a vector of `(age, rate)`; `select` is
-`nothing` for an ultimate-only table, or a vector of `(issue_age, rates)` where `rates` is a vector
-of `(duration, rate)` for the defined durations.
+Parse the XTbML document in `str` (read from `path`, which is recorded in the metadata) into the
+labeled rates `(select, ultimate, metadata)` that `_table_from_labels` assembles. `ultimate` is a
+vector of `(age, rate)`; `select` is `nothing` for an ultimate-only table, or a vector of
+`(issue_age, rates)` where `rates` is a vector of `(duration, rate)`, `missing` for an empty cell.
 """
 function parseXTbMLTable(str::AbstractString, path)
     root = _child(XML.parse(str, XML.Node), "XTbML")
     metadata = _content_classification(root, path)
-    tables = _by_tag(root, "Table")
-    # an ultimate table has one <Table>; a select and ultimate table has two: the select rates
-    # (by issue age, then duration) followed by the ultimate rates. Reading any other layout
-    # this way would silently drop its other tables.
-    length(tables) in (1, 2) || throw(
-        ArgumentError(
-            "$(_xtbml_source(metadata)) has $(length(tables)) <Table> elements; only an ultimate " *
-                "table (one) or a select table followed by its ultimate table (two) can be read."
-        )
-    )
+    # the select rates are by issue age, then duration
+    sel_table, ult_table = _select_and_ultimate(_by_tag(root, "Table"), "<Table> elements", _xtbml_source(metadata))
     ys(tbl) = _by_tag(_child(_child(tbl, "Values"), "Axis"), "Y")
-    ult = [(age = parse(Int, y["t"]), rate = _rate(y)) for y in ys(tables[end])]
-    sel = length(tables) == 1 ? nothing : map(_by_tag(_child(tables[1], "Values"), "Axis")) do ai
+    ult = [(age = parse(Int, y["t"]), rate = _rate(y)) for y in ys(ult_table)]
+    sel = isnothing(sel_table) ? nothing : map(_by_tag(_child(sel_table, "Values"), "Axis")) do ai
+        # the durations are read before the issue age, so a select table without a duration axis
+        # fails on that missing <Axis>, the error test/data/unsupported_tables.txt records
         rates = [(duration = parse(Int, y["t"]), rate = _rate(y)) for y in _by_tag(_child(ai, "Axis"), "Y")]
-        (issue_age = parse(Int, ai["t"]), rates = filter(r -> !ismissing(r.rate), rates))
+        (issue_age = parse(Int, ai["t"]), rates = rates)
     end
     return (select = sel, ultimate = ult, metadata = metadata)
 end
 
-# XTbML labels every rate with its age or duration, so rates are placed by label (see
-# `_table_from_labels`): grouped ages or an empty cell inside a select row keep every value at its
-# own age. Empty cells were dropped when parsing, so durations without a rate are `missing`.
-_xtbml_source(table) = "XTbML table $(something(table.name, table.source_path, "(unnamed)"))"
+# How errors name an XTbML table: by its name, or else by the file it was read from.
+_xtbml_source(metadata) = "XTbML table $(something(metadata.name, metadata.source_path, "(unnamed)"))"
 
-XTbML_Table_To_MortalityTable(tbl) = _table_from_labels(tbl, _xtbml_source(tbl.metadata))
-
-_read_xtbml(path) = XTbML_Table_To_MortalityTable(parseXTbMLTable(open_and_read(path), path))
+function _read_xtbml(path)
+    tbl = parseXTbMLTable(open_and_read(path), path)
+    return _table_from_labels(tbl, _xtbml_source(tbl.metadata))
+end
 
 # Tables parsed from disk are cached by path so that repeated lookups of the
 # same table return the same object without re-parsing the file.
