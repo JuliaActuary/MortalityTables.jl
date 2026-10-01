@@ -1,20 +1,32 @@
+using XML: XML
+
 @testset "XTbML" begin
-    @testset "dict parse" begin
-        g = MortalityTables.get_and_parse
-        d = Dict(:a => "1.2", :c => "a")
+    @testset "node helpers" begin
+        node(s) = only(XML.elements(XML.parse(s, XML.Node)))
 
-        @test g(d, :a) == 1.2
-        @test ismissing(g(d, :b))
-        @test ismissing(g(d, :b))
-        @test_throws Exception g(d, :c)
+        # a rate cell is a Float64, an empty cell is missing, anything else is an error
+        @test MortalityTables._rate(node("<Y t=\"1\">0.5</Y>")) == 0.5
+        @test MortalityTables._rate(node("<Y t=\"1\"></Y>")) === missing
+        @test MortalityTables._rate(node("<Y t=\"1\"> </Y>")) === missing
+        @test_throws ArgumentError MortalityTables._rate(node("<Y t=\"1\">abc</Y>"))
 
+        # a metadata field is nothing when absent, "" when empty, and may carry attributes
+        parent = node("<md><a tc=\"4\">x</a><b></b></md>")
+        @test MortalityTables._text(parent, "zzz") === nothing
+        @test MortalityTables._text(parent, "b") == ""
+        @test MortalityTables._text(parent, "a") == "x"
+
+        # line endings are normalized as XML 1.0 §2.11 requires
+        @test MortalityTables._content(node("<a>a\r\nb</a>")) == "a\nb"
+        @test MortalityTables._content(node("<a>x &amp; y</a>")) == "x & y"
     end
-    
+
     @testset "XTbML loading" begin
         pth = joinpath(soa_tbl_dir,"t1076.xml")
-        file = MortalityTables.open_and_read(pth) |> MortalityTables.getXML
-        xtbl = MortalityTables.parseXTbMLTable(file, pth)
-        @test isa(xtbl, MortalityTables.XTbMLTable)
+        xtbl = MortalityTables.parseXTbMLTable(MortalityTables.open_and_read(pth), pth)
+        @test xtbl isa NamedTuple
+        @test xtbl.metadata.id == "1076"
+        @test xtbl.metadata.content_type == "CSO/CET"
     end
 
     @testset "readXTbML cache" begin
@@ -25,8 +37,7 @@
 
     @testset "Ultimate Only" begin
         pth = joinpath(soa_tbl_dir,"t17.xml")
-        file = MortalityTables.open_and_read(pth) |> MortalityTables.getXML
-        xtbl = MortalityTables.parseXTbMLTable(file, pth)
+        xtbl = MortalityTables.parseXTbMLTable(MortalityTables.open_and_read(pth), pth)
 
         mt = MortalityTables.XTbML_Table_To_MortalityTable(xtbl)
         @test isa(mt, MortalityTable)
@@ -39,8 +50,7 @@
     @testset "XTbML to MortalityTable" begin
         @testset "Select and Ultimate" begin
             pth = joinpath(soa_tbl_dir,"t1076.xml")
-            file = MortalityTables.open_and_read(pth) |> MortalityTables.getXML
-            xtbl = MortalityTables.parseXTbMLTable(file, pth)
+            xtbl = MortalityTables.parseXTbMLTable(MortalityTables.open_and_read(pth), pth)
 
             mt = MortalityTables.XTbML_Table_To_MortalityTable(xtbl)
             @test isa(mt, MortalityTable)
@@ -48,14 +58,14 @@
             @test mt.select[35][35] ≈ 0.00037
             @test mt.ultimate[16] ≈ 0.00041
             @test mt.select[35][59] ≈ 0.00508
-            @test mt.select[35][60] ≈ 0.00621 
+            @test mt.select[35][60] ≈ 0.00621
         end
         
         @testset "rates are placed by their labels" begin
             md = MortalityTables.TableMetaData(name = "probe")
             ult = [(age = a, rate = 0.2) for a in 40:50]
             row(durs) = [(issue_age = 40, rates = [(duration = d, rate = d / 100) for d in durs])]
-            build(sel, u = ult) = MortalityTables.XTbML_Table_To_MortalityTable(MortalityTables.XTbMLTable(sel, u, md))
+            build(sel, u = ult) = MortalityTables.XTbML_Table_To_MortalityTable((select = sel, ultimate = u, metadata = md))
             # consecutive durations run into the ultimate rates at the next attained age
             mt = build(row(1:3))
             @test mt.select[40][40:44] == [0.01, 0.02, 0.03, 0.2, 0.2]
@@ -80,10 +90,14 @@
 
         @testset "Ultimate Only, not begin at age 0" begin
             pth = joinpath(soa_tbl_dir,"t18.xml")
-            file = MortalityTables.open_and_read(pth) |> MortalityTables.getXML
-            xtbl = MortalityTables.parseXTbMLTable(file, pth)
+            xtbl = MortalityTables.parseXTbMLTable(MortalityTables.open_and_read(pth), pth)
             mt = MortalityTables.XTbML_Table_To_MortalityTable(xtbl)
             @test isa(mt, MortalityTable)
+        end
+
+        @testset "empty metadata elements" begin
+            # t217 has an empty metadata element that the 2.x parser could not read
+            @test MortalityTables.table(217) isa MortalityTables.UltimateTable
         end
     end
 end

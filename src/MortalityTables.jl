@@ -2,7 +2,7 @@ module MortalityTables
 using OffsetArrays
 using QuadGK
 import StringDistances
-using XMLDict
+using XML
 using Artifacts
 
 include("table_source_map.jl")
