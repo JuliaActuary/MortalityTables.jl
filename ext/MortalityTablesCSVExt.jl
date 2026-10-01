@@ -1,3 +1,8 @@
+module MortalityTablesCSVExt
+
+using MortalityTables, CSV, OffsetArrays
+import MortalityTables: MortalityTable, TableMetaData, UltimateMortality
+
 """ 
     MortalityTable(CSV.File)
 
@@ -80,20 +85,20 @@ function MortalityTable(lines::CSV.File)
 		# ultimate only
 		ult_start, ult_end = table_starts[1],table_ends[1]
 		ult_rates = map(lines[ult_start:ult_end]) do row
-			Parsers.parse(Float64,row[2])
+			parse(Float64,row[2])
 		end
 		
-		ult = UltimateMortality(ult_rates,start_age=Parsers.parse(Int,lines[ult_start][1]))
+		ult = UltimateMortality(ult_rates,start_age=parse(Int,lines[ult_start][1]))
 		
 		return MortalityTable(ult; metadata=d)
 	else 
 		# select and ultimate
 		ult_start, ult_end = table_starts[2],table_ends[2]
 		ult_rates = map(lines[ult_start:ult_end]) do row
-			Parsers.parse(Float64,row[2])
+			parse(Float64,row[2])
 		end
 		
-		ult = UltimateMortality(ult_rates,start_age=Parsers.parse(Int,lines[ult_start][1]))
+		ult = UltimateMortality(ult_rates,start_age=parse(Int,lines[ult_start][1]))
 
 		ult_end_age = lastindex(ult)
 		
@@ -145,5 +150,6 @@ end
 
 # because of the poor standardization of the CSV formatted tables from mort.SOA.org,
 # sometimes the value comes through as a string, sometimes as a number when CSV.jl parses it
-parsemaybe(t,x) = typeof(x) <: AbstractString ? Parsers.parse(t,x) : x
+parsemaybe(t,x) = typeof(x) <: AbstractString ? parse(t,x) : x
 
+end # module

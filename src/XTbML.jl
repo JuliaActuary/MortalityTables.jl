@@ -26,7 +26,7 @@ end
 # get potentially missing value out of dict
 function get_and_parse(dict, key)
     try
-        return val = Parsers.parse(Float64, dict[key])
+        return val = parse(Float64, dict[key])
     catch y
         if isa(y, KeyError)
             return val = missing
@@ -67,19 +67,19 @@ function parseXTbMLTable(x, path)
         # for a select and ultimate table, will have multiple tables
         # parsed into a vector of tables
         sel = map(x["XTbML"]["Table"][1]["Values"]["Axis"]) do ai
-            (issue_age = Parsers.parse(Int, ai[:t]),
-                rates = [(duration = Parsers.parse(Int, aj[:t]), rate = get_and_parse(aj, "")) for aj in ai["Axis"]["Y"] if !ismissing(get_and_parse(aj, ""))])
+            (issue_age = parse(Int, ai[:t]),
+                rates = [(duration = parse(Int, aj[:t]), rate = get_and_parse(aj, "")) for aj in ai["Axis"]["Y"] if !ismissing(get_and_parse(aj, ""))])
         end
 
         ult = map(x["XTbML"]["Table"][2]["Values"]["Axis"]["Y"]) do ai 
-            (age  = Parsers.parse(Int, ai[:t]), rate = get_and_parse(ai, ""),)
+            (age  = parse(Int, ai[:t]), rate = get_and_parse(ai, ""),)
         end
 
     else
         # a table without select period will just have one set of values
 
         ult = map(x["XTbML"]["Table"]["Values"]["Axis"]["Y"]) do ai
-            (age = Parsers.parse(Int, ai[:t]), 
+            (age = parse(Int, ai[:t]), 
                 rate = get_and_parse(ai, ""))
         end
 
@@ -130,14 +130,27 @@ function XTbML_Table_To_MortalityTable(tbl::XTbMLTable)
     end
 end
 
+function _read_xtbml(path)
+    x = open_and_read(path) |> getXML
+    XTbML_Table_To_MortalityTable(parseXTbMLTable(x, path))
+end
+
+# Tables parsed from disk are cached by path so that repeated lookups of the
+# same table return the same object without re-parsing the file.
+const _TABLE_CACHE = Dict{String,Any}()
+const _CACHE_LOCK = ReentrantLock()
+
 """
     readXTbML(path)
 
 Loads the [XtbML](https://mort.soa.org/About.aspx) (the SOA XML data format for mortality tables) stored at the given path and returns a `MortalityTable`.
+
+The result is cached by `path`, so calling this twice with the same path returns the identical object.
 """
-@memoize function readXTbML(path)
-    x = open_and_read(path) |> getXML
-    XTbML_Table_To_MortalityTable(parseXTbMLTable(x, path))
+function readXTbML(path)
+    lock(_CACHE_LOCK) do
+        get!(() -> _read_xtbml(path), _TABLE_CACHE, path)
+    end
 end
 
 
@@ -181,7 +194,7 @@ function _write_available_tables()
             name = get(md, "TableName", nothing) |> strip
             content_type = get(get(md, "ContentType", nothing), "", nothing) |> strip
             id = get(md, "TableIdentity", nothing) |> strip
-            push!(tables,(source="mort.soa.org",name=name,id=Parsers.parse(Int,id)))
+            push!(tables,(source="mort.soa.org",name=name,id=parse(Int,id)))
             end
         end
     end

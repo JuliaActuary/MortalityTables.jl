@@ -2,7 +2,7 @@ using MortalityTables
 using Test
 using JSON
 using CSV
-using Pkg.Artifacts
+using Artifacts
 
 # This is the path to the Artifacts.toml we will manipulate
 MT_artifact_toml = joinpath(pkgdir(MortalityTables), "Artifacts.toml")
