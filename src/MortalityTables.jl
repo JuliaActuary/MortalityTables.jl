@@ -19,10 +19,6 @@ include("get_SOA_table.jl")
 include("parameterized_models.jl")
 include("life_expectancy.jl")
 
-table_dirs = Dict(
-    "mort.soa.org" => artifact"mort.soa.org",
-)
-
 export MortalityTable,
     survival,
     decrement,
