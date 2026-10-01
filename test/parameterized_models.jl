@@ -37,6 +37,16 @@
 
     end
 
+    @testset "table stand-in semantics" begin
+        m = Makeham()
+        # a DeathDistribution is accepted and ignored by continuous models
+        @test survival(m, 65, Uniform()) == survival(m, 65)
+        @test survival(m, 60, 65, Uniform()) == survival(m, 60, 65)
+        @test decrement(m, 60, 65) == 1 - survival(m, 60, 65)
+        @test decrement(m, 65, Uniform()) == 1 - survival(m, 65)
+        @test omega(m) == Inf
+    end
+
     @testset "Gompertz and Makeham equality" begin
 
         # Gompertz is Makeham's where c = 0
