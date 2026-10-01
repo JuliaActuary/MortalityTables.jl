@@ -42,7 +42,7 @@ end
 
 function _content_classification(root, path)
     md = _child(root, "ContentClassification")
-    field(name) = (s = _text(md, name); s === nothing ? nothing : String(strip(s)))
+    field(name) = _metadata_text(_text(md, name))
     return TableMetaData(
         name = field("TableName"),
         id = field("TableIdentity"),
@@ -58,64 +58,38 @@ end
 """
     parseXTbMLTable(str, path)
 
-Parse the XTbML document in `str` (read from `path`, which is recorded in the metadata) into a
-named tuple `(select, ultimate, metadata)`. `ultimate` is a vector of `(age, rate)`; `select` is
-`nothing` for an ultimate-only table, or a vector of `(issue_age, rates)` where `rates` is a vector
-of `(duration, rate)` for the defined durations.
+Parse the XTbML document in `str` (read from `path`, which is recorded in the metadata) into the
+labeled rates `(select, ultimate, metadata)` that `_table_from_labels` assembles. `ultimate` is a
+vector of `(age, rate)`; `select` is `nothing` for an ultimate-only table, or a vector of
+`(issue_age, rates)` where `rates` is a vector of `(duration, rate)`, `missing` for an empty cell.
 """
 function parseXTbMLTable(str::AbstractString, path)
     root = _child(XML.parse(str, XML.Node), "XTbML")
     metadata = _content_classification(root, path)
-    tables = _by_tag(root, "Table")
-    # an ultimate table has one <Table>; a select and ultimate table has two: the select rates
-    # (by issue age, then duration) followed by the ultimate rates. Reading any other layout
-    # this way would silently drop its other tables.
-    length(tables) in (1, 2) || throw(
-        ArgumentError(
-            "$(_xtbml_source(metadata)) has $(length(tables)) <Table> elements; only an ultimate " *
-                "table (one) or a select table followed by its ultimate table (two) can be read."
-        )
-    )
+    # the select rates are by issue age, then duration
+    sel_table, ult_table = _select_and_ultimate(_by_tag(root, "Table"), "<Table> elements", _xtbml_source(metadata))
     ys(tbl) = _by_tag(_child(_child(tbl, "Values"), "Axis"), "Y")
-    ult = [(age = parse(Int, y["t"]), rate = _rate(y)) for y in ys(tables[end])]
-    sel = length(tables) == 1 ? nothing : map(_by_tag(_child(tables[1], "Values"), "Axis")) do ai
+    ult = [(age = parse(Int, y["t"]), rate = _rate(y)) for y in ys(ult_table)]
+    sel = isnothing(sel_table) ? nothing : map(_by_tag(_child(sel_table, "Values"), "Axis")) do ai
+        # the durations are read before the issue age, so a select table without a duration axis
+        # fails on that missing <Axis>, the error test/data/unsupported_tables.txt records
         rates = [(duration = parse(Int, y["t"]), rate = _rate(y)) for y in _by_tag(_child(ai, "Axis"), "Y")]
-        (issue_age = parse(Int, ai["t"]), rates = filter(r -> !ismissing(r.rate), rates))
+        (issue_age = parse(Int, ai["t"]), rates = rates)
     end
     return (select = sel, ultimate = ult, metadata = metadata)
 end
 
-# XTbML labels every rate with its age or duration, so rates are placed by label (see
-# `_by_label`): grouped ages or an empty cell inside a select row keep every value at its own age.
-_xtbml_source(table) = "XTbML table $(something(table.name, table.source_path, "(unnamed)"))"
+# How errors name an XTbML table: by its name, or else by the file it was read from.
+_xtbml_source(metadata) = "XTbML table $(something(metadata.name, metadata.source_path, "(unnamed)"))"
 
-function XTbML_Table_To_MortalityTable(tbl)
-    start_age, ult_rates = _by_label([v.age for v in tbl.ultimate], [v.rate for v in tbl.ultimate], "the ultimate ages", _xtbml_source(tbl.metadata))
-    ult = UltimateMortality(ult_rates, start_age = start_age)
-
-    if !isnothing(tbl.select)
-        rows = map(tbl.select) do (issue_age, rates)
-            # empty cells were dropped when parsing: durations without a rate are `missing`
-            _, select_rates = _by_label(
-                [r.duration for r in rates], [r.rate for r in rates],
-                "the select durations for issue age $issue_age", _xtbml_source(tbl.metadata); first = 1
-            )
-            return _select_row(issue_age, select_rates, ult)
-        end
-        first_issue_age, sel = _by_label([r.issue_age for r in tbl.select], rows, "the select issue ages", _xtbml_source(tbl.metadata))
-        sel = OffsetArray(sel, first_issue_age - 1)
-
-        return MortalityTable(sel, ult, metadata=tbl.metadata)
-    else
-        return MortalityTable(ult, metadata=tbl.metadata)
-    end
+function _read_xtbml(path)
+    tbl = parseXTbMLTable(open_and_read(path), path)
+    return _table_from_labels(tbl, _xtbml_source(tbl.metadata))
 end
-
-_read_xtbml(path) = XTbML_Table_To_MortalityTable(parseXTbMLTable(open_and_read(path), path))
 
 # Tables parsed from disk are cached by path so that repeated lookups of the
 # same table return the same object without re-parsing the file.
-const _TABLE_CACHE = Dict{String,Any}()
+const _TABLE_CACHE = Dict{String,MortalityTable}()
 const _CACHE_LOCK = ReentrantLock()
 
 """
@@ -134,45 +108,29 @@ end
 
 # Load Available Tables ###
 
+# The XTbML files anywhere under `dir`, skipping hidden files (such as macOS `._` files).
+_xtbml_paths(dir) =
+    [joinpath(root, file) for (root, _, files) in walkdir(dir) for file in files if endswith(file, ".xml") && !startswith(file, ".")]
+
 """
     read_tables(dir=nothing)
 
 Loads the [XtbML](https://mort.soa.org/About.aspx) (the SOA XML data format for mortality tables) stored in the given path. If no path is specified, will load the packages in the MortalityTables package directory. To see where your system keeps packages, run `DEPOT_PATH` from a Julia REPL.
 """
 function read_tables(dir=nothing)
-    if isnothing(dir)
-        table_dir = artifact"mort.soa.org"
-    else
-        table_dir = dir
-    end
-    tables = []
+    table_dir = isnothing(dir) ? artifact"mort.soa.org" : dir
     @info "Loading built-in Mortality Tables..."
-    for (root, dirs, files) in walkdir(table_dir)
-        for file in files
-            if endswith(file,".xml") && !startswith(file,".")
-                tbl =  readXTbML(joinpath(root,file))
-                push!(tables,tbl)
-            end
-        end
-    end
-    return Dict(tbl.metadata.name => tbl for tbl in tables if ~isnothing(tbl))
+    tables = MortalityTable[readXTbML(path) for path in _xtbml_paths(table_dir)]
+    return Dict(tbl.metadata.name => tbl for tbl in tables)
 end
 
 
 # this is used to generate the table mapping in table_source_map.jl
 function _write_available_tables()
-    table_dir = artifact"mort.soa.org"
-    tables = []
     @info "Loading built-in Mortality Tables..."
-    for (root, dirs, files) in walkdir(table_dir)
-        for file in files
-            if endswith(file,".xml") && !startswith(file,".")
-                path = joinpath(root, file)
-                doc = XML.parse(open_and_read(path), XML.Node)
-                md = _content_classification(_child(doc, "XTbML"), path)
-                push!(tables, (source="mort.soa.org", name=md.name, id=parse(Int, md.id)))
-            end
-        end
+    tables = map(_xtbml_paths(artifact"mort.soa.org")) do path
+        md = _content_classification(_child(XML.parse(open_and_read(path), XML.Node), "XTbML"), path)
+        (source = "mort.soa.org", name = md.name, id = parse(Int, md.id))
     end
-    return sort!(tables,by=last)
+    return sort!(tables, by = last)
 end

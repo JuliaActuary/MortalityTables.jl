@@ -10,10 +10,13 @@ include("MetaData.jl")
 include("death_distribution.jl")
 include("MortalityTable.jl")
 include("dukes_macdonald.jl")
+include("labeled_tables.jl")
 include("XTbML.jl")
 include("get_SOA_table.jl")
 include("parametric_interface.jl")
+include("parametric_kernels.jl")
 include("parameterized_models.jl")
+include("ratio_laws.jl")
 include("life_expectancy.jl")
 
 export MortalityTable,

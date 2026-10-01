@@ -33,42 +33,6 @@ function hazard(m::Makeham,age)
     return growth + c
 end
 
-# expm1(x)/x and log1p(x)/x, both 1 at x = 0: smooth there, so the closed forms below keep
-# their zero-growth limits (and derivatives) instead of evaluating 0/0. They are used only
-# near b·age = 0: at large |b·age| and infinite ages the factored forms would evaluate
-# Inf/Inf or 0·Inf, so the plain closed forms apply there.
-_exprel(x) = abs(x) < 1e-5 ? 1 + x / 2 + x^2 / 6 + x^3 / 24 : expm1(x) / x
-_log1pdivx(x) = abs(x) < 1e-5 ? 1 - x / 2 + x^2 / 3 - x^3 / 4 : log1p(x) / x
-
-# k·age, which is 0 for k = 0 even at an infinite age: a law's zero coefficient contributes
-# nothing there (b = 0 is a constant hazard, c = 0 the Gompertz law).
-_times_age(k, age) = iszero(k) ? zero(k * age) : k * age
-
-# a / (e + a·c) for e > 0 and c ≥ 0, the form the ratio laws take once divided through by their
-# exponential. Where a·c ≤ e it is evaluated as written: smooth in a at a = 0, and its derivative
-# in a, e / (e + a·c)², is formed without cancellation. Where a·c > e it is also divided by a,
-# 1 / (e/a + c), which stays finite where a·c overflows and keeps its derivatives free of
-# cancellation and of the overflowing (e + a·c)². The two forms are the same function, so at
-# a·c = e either gives the value and derivatives (a ForwardDiff comparison can break a tie between
-# equal primal values by their partials, which then doesn't matter). Under ForwardDiff 1.x `iszero`
-# in the laws' zero-coefficient shortcuts also requires zero partials, so a derivative at a = 0
-# goes through this form.
-_amplitude_ratio(a, c, e) = a * c <= e ? a / (e + a * c) : inv(e / a + c)
-
-# a·exp(x) / (1 + k·a·exp(x)), the bounded ratio in Beard's and Kannisto's laws. The algebra
-# follows the sign of x: for x > 0 it is divided through by exp(x), a / (exp(-x) + k·a), finite
-# where exp(x) overflows and tending to 1/k; for x ≤ 0 the numerator z = a·exp(x) is formed
-# directly, z / (1 + k·z), since there it is exp(-x) that can overflow.
-function _logistic_ratio(a, k, x)
-    iszero(a) && return zero(a * x)   # no hazard, even at an infinite age
-    x > 0 && return _amplitude_ratio(a, k, exp(-x))
-    z = a * exp(x)
-    return _amplitude_ratio(z, k, one(z))
-end
-
-# log(1 + exp(y)), without overflow for large y
-_log1pexp(y) = y > 0 ? y + log1p(exp(-y)) : log1p(exp(y))
-
 function cumhazard(m::Makeham,age)
     (; a, b, c) = m
     x = _times_age(b, age)
@@ -160,7 +124,8 @@ Opperman(; a=0.04, b=0.0004, c=0.001) = Opperman(promote(a, b, c)...)
 
 function hazard(m::Opperman,age) 
     (; a, b, c) = m
-    return max(a / √(age+1) - b + c * √(age+1),0.0)
+    h = a / √(age+1) - b + c * √(age+1)
+    return max(h, zero(h))
 end
 
 """
@@ -206,7 +171,7 @@ Thiele(; a=0.02474, b=0.3, c=0.004, d=0.5, e=25, f=0.0001, g=0.13) = Thiele(prom
 function hazard(m::Thiele,age) 
     (; a, b, c, d, e, f, g) = m
     μ₁ = a * exp(-b * age)
-    μ₂ = c * exp(-0.5 * d * (age - e)^2)
+    μ₂ = c * exp(-d * (age - e)^2 / 2)
     μ₃ = f * exp(g * age)
 
     if age == 0 
@@ -281,7 +246,7 @@ Weibull(; m=1.0, σ=2.0) = Weibull(promote(m, σ)...)
 function hazard(model::Weibull,age)
     (; m, σ) = model
     if age == 0
-        return 1.0
+        return one(age / m)
     else 
         return 1 / σ * (age / m)^(m / σ - 1)
     end
@@ -463,62 +428,6 @@ function hazard(m::StrehlerMildvan,age)
 end
 
 """
-    Beard(;a,b,k)
-
-Construct a mortality model following Beard's law of mortality.
-
-``
-\\mathrm{hazard} \\left( {\\rm age} \\right) = \\frac{a \\cdot e^{b \\cdot {\\rm age}}}{1 + k \\cdot a \\cdot e^{b \\cdot {\\rm age}}}
-``
-
-Default args:
-    
-    a = 0.002
-    b = 0.13
-    k = 1.
-"""
-struct Beard{T<:Real} <: ParametricMortality
-    a::T
-    b::T
-    k::T
-end
-Beard(; a=0.002, b=0.13, k=1.) = Beard(promote(a, b, k)...)
-
-function hazard(m::Beard,age)
-    (; a, b, k) = m
-    return _logistic_ratio(a, k, _times_age(b, age))
-end
-
-"""
-    MakehamBeard(;a,b,c,k)
-
-Construct a mortality model following MakehamBeard's law of mortality.
-
-``
-\\mathrm{hazard} \\left( {\\rm age} \\right) =\\left( {\\rm age} \\right) = \\frac{a \\cdot e^{b \\cdot {\\rm age}}}{1 + k \\cdot a \\cdot e^{b \\cdot {\\rm age}}} + c
-``
-
-Default args:
-
-    a = 0.002
-    b = 0.13
-    c = 0.01
-    k = 1.
-"""
-struct MakehamBeard{T<:Real} <: ParametricMortality
-    a::T
-    b::T
-    c::T
-    k::T
-end
-MakehamBeard(; a=0.002, b=0.13, c=0.01, k=1.) = MakehamBeard(promote(a, b, c, k)...)
-
-function hazard(m::MakehamBeard,age)
-    (; a, b, c, k) = m
-    return _logistic_ratio(a, k, _times_age(b, age)) + c
-end
-
-"""
     Quadratic(;a,b,c)
 
 Construct a mortality model following Quadratic law of mortality.
@@ -543,43 +452,6 @@ Quadratic(; a=0.01, b=1., c=0.01) = Quadratic(promote(a, b, c)...)
 function hazard(m::Quadratic,age)
     (; a, b, c) = m
     return  a + b * age + c * age^2
-end
-
-"""
-    GammaGompertz(;a,b,γ)
-
-Construct a mortality model following GammaGompertz law of mortality.
-
-``
-\\mathrm{hazard} \\left( {\\rm age} \\right) = \\frac{a \\cdot e^{b \\cdot {\\rm age}}}{1 + \\frac{a \\cdot \\gamma}{b} \\cdot \\left( e^{b \\cdot {\\rm age}} - 1 \\right)}
-``
-
-Default args:
-
-    a = 0.002
-    b = 0.13
-    γ = 1
-"""
-struct GammaGompertz{T<:Real} <: ParametricMortality
-    a::T
-    b::T
-    γ::T
-end
-GammaGompertz(; a=0.002, b=0.13, γ=1) = GammaGompertz(promote(a, b, γ)...)
-
-function hazard(m::GammaGompertz,age)
-    (; a, b, γ) = m
-    iszero(a) && return zero(a * age)   # no hazard, even at an infinite age
-    x = _times_age(b, age)
-    # a·exp(x) / (1 + a·γ/b·expm1(x)), evaluated as a ratio in a (see `_amplitude_ratio`). Near
-    # b·age = 0 it is a / (exp(-x) + a·γ·age·expm1(-x)/(-x)), with `_exprel`, which also gives the
-    # b = 0 limit a / (1 + a·γ·age). Away from it the algebra follows the sign of x: for x > 0 it
-    # is divided through by exp(x), a / (exp(-x) + a·γ/b·(1 - exp(-x))), finite where exp(x)
-    # overflows (tending to b/γ); for x < 0 it is exp(x)·a / (1 + a·γ/b·expm1(x)), since there
-    # exp(-x) can overflow (and a·γ/b·expm1(-x) would be 0·Inf when γ = 0).
-    abs(x) < 1 && return _amplitude_ratio(a, _times_age(γ, age) * _exprel(-x), exp(-x))
-    x > 0 && return _amplitude_ratio(a, -γ / b * expm1(-x), exp(-x))
-    return exp(x) * _amplitude_ratio(a, γ / b * expm1(x), one(a))
 end
 
 """
@@ -842,42 +714,6 @@ end
 
 
 """
-    Martinelle(;a,b,c,d,k)
-
-Construct a mortality model following Martinelle's law of mortality.
-
-``
-\\mathrm{hazard}\\left( {\\rm age} \\right) = \\frac{a \\cdot e^{b \\cdot {\\rm age}} + c}{1 + d \\cdot e^{b \\cdot {\\rm age}}} + k \\cdot e^{b \\cdot {\\rm age}}
-``
-
-Default args:
-
-    a = 0.001
-    b = 0.13
-    c = 0.001
-    d = 0.1
-    k = 0.001
-"""
-struct Martinelle{T<:Real} <: ParametricMortality
-    a::T
-    b::T
-    c::T
-    d::T
-    k::T
-end
-Martinelle(; a=0.001, b=0.13, c=0.001, d=0.1, k=0.001) = Martinelle(promote(a, b, c, d, k)...)
-
-function hazard(m::Martinelle,age)
-    (; a, b, c, d, k) = m
-    x = _times_age(b, age)
-    # (a·exp(x) + c) / (1 + d·exp(x)) is bounded (it tends to a/d); for x > 0 it is divided
-    # through by exp(x) so that it stays finite where exp(x) overflows
-    bounded = x > 0 ? (a + c * exp(-x)) / (exp(-x) + d) : (a * exp(x) + c) / (1 + d * exp(x))
-    return bounded + (iszero(k) ? zero(k * x) : k * exp(x))
-end
-
-
-"""
     Kostaki(;a,b,c,d,e1,e2,f,g,h)
 
 Construct a mortality model following Kostaki's law of mortality. A nine-parameter adaptation of `HeligmanPollard`.
@@ -941,79 +777,4 @@ function hazard(m::Kostaki,age)
     η = age == 0 ? μ₁ : μ₁ + μ₂
 
     return η / (1+η)
-end
-
-"""
-    Kannisto(;a,b)
-
-Construct a mortality model following Kannisto's law of mortality.
-
-```math
-\\begin{aligned}
-\\mathrm{hazard}\\left( {\\rm age} \\right) &= \\frac{a \\cdot e^{b \\cdot {\\rm age}}}{1 + a \\cdot e^{b \\cdot {\\rm age}}}
-\\\\
-\\mathrm{cumhazard}\\left( {\\rm age} \\right) &= \\frac{1}{b} \\log\\left( \\frac{1 + a \\cdot e^{b \\cdot {\\rm age}}}{1 + a} \\right)
-\\\\
-\\mathrm{survival}\\left( {\\rm age} \\right) &= e^{ - \\mathrm{cumhazard}\\left( m, {\\rm age} \\right)}
-\\end{aligned}
-```
-
-Default args:
-
-    a = 0.5
-    b = 0.13
-"""
-struct Kannisto{T<:Real} <: ParametricMortality
-    a::T
-    b::T
-end
-Kannisto(; a=0.5, b=0.13) = Kannisto(promote(a, b)...)
-
-function hazard(m::Kannisto,age)
-    (; a, b) = m
-    return _logistic_ratio(a, one(a), _times_age(b, age))
-end
-
-function cumhazard(m::Kannisto,age)
-    (; a, b) = m
-    iszero(a) && return zero(a * age)   # no hazard, even at an infinite age
-    x = _times_age(b, age)
-    # log((1 + a·exp(b·age)) / (1 + a)) / b. Away from b·age = 0, log(1 + v) with v = a·exp(x)
-    # is log1p(v) where v ≤ 1, which is smooth in a at a = 0, and log1pexp(log(a) + x) where
-    # v > 1, which cannot overflow and keeps the derivatives free of the large v. Near b·age = 0
-    # it is log1p(u) / b with u = a·expm1(b·age) / (1 + a), which is a·age/(1 + a) at b = 0.
-    if abs(x) >= 1
-        v = a * exp(x)
-        return ((v <= 1 ? log1p(v) : _log1pexp(log(a) + x)) - log1p(a)) / b
-    end
-    u = a / (1 + a) * expm1(x)
-    return a / (1 + a) * age * _exprel(x) * _log1pdivx(u)
-end
-
-
-"""
-    KannistoMakeham(;a,b,c)
-
-Construct a mortality model following KannistoMakeham's law of mortality.
-
-``
-\\mathrm{hazard}\\left( {\\rm age} \\right) = \\frac{a \\cdot e^{b \\cdot {\\rm age}}}{1 + a \\cdot e^{b \\cdot {\\rm age}}} + c
-``
-
-Default args:
-
-    a = 0.5
-    b = 0.13
-    c = 0.001
-"""
-struct KannistoMakeham{T<:Real} <: ParametricMortality
-    a::T
-    b::T
-    c::T
-end
-KannistoMakeham(; a=0.5, b=0.13, c=0.001) = KannistoMakeham(promote(a, b, c)...)
-
-function hazard(m::KannistoMakeham,age)
-    (; a, b, c) = m
-    return _logistic_ratio(a, one(a), _times_age(b, age)) + c
 end

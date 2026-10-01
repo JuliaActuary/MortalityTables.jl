@@ -22,13 +22,11 @@ The generic method integrates `hazard` numerically from age zero. A law may over
 function cumhazard end
 
 """
-    μ(;m::ParametricMortality,age)
+    μ(model,age)
 
-``\\mu_x``: Return the force of mortality at the given age.
+``\\mu_x``: the force of mortality at `age`. An alias for [`hazard`](@ref).
 """
-function μ(m::ParametricMortality, age)
-    return hazard(m,age)
-end
+const μ = hazard
 
 cumhazard(m::ParametricMortality, to)       = quadgk(age -> hazard(m, age), 0, to)[1]
 cumhazard(m::ParametricMortality, from, to) = cumhazard(m, to) - cumhazard(m, from)
@@ -49,5 +47,5 @@ decrement(m::ParametricMortality, from, to, ::DeathDistribution) = decrement(m, 
 # `omega` docstring and the methods beside `Wittstein`, `VanderMaen` and `VanderMaen2`).
 omega(::ParametricMortality) = Inf
 
-(m::ParametricMortality)(x) = μ(m, x)
+(m::ParametricMortality)(x) = hazard(m, x)
 Base.broadcastable(pm::ParametricMortality) = Ref(pm)

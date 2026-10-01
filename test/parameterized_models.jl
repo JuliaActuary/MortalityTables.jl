@@ -12,6 +12,14 @@ using ForwardDiff
             @test isbits(m)
             @test m isa L{Float64}
             @test (@inferred hazard(m, 50.0)) isa Float64
+            # a Float32 law keeps its type at Float32 ages, including the laws' special cases at
+            # age zero (Weibull, Thiele) and Opperman's floor at zero
+            m32 = L(map(f -> Float32(getfield(m, f)), fieldnames(typeof(m)))...)
+            @test m32 isa L{Float32}
+            for age in (0.0f0, 1.0f0, 50.0f0)
+                @test (@inferred hazard(m32, age)) isa Float32
+                @test (@inferred cumhazard(m32, age)) isa Float32
+            end
         end
         # mixed keyword types are promoted
         @test Makeham(a=1, b=0.5, c=0) isa Makeham{Float64}
@@ -275,6 +283,7 @@ using ForwardDiff
             @test MortalityTables.μ(m, 20) == 0.00022 + 2.7e-6 * 1.124^20
             @test_throws MethodError m[20]  # indexing a model is not supported; call it or use hazard
             @test m(20) == MortalityTables.μ(m, 20)
+            @test MortalityTables.μ === hazard
             
             # vs manually calculated (via QuadGK) integrals
             @test decrement(m, 20, 25) ≈ 0.0012891622754368504

@@ -1,21 +1,24 @@
 tbl_dir_test = joinpath(pkgdir(MortalityTables), "test", "data", "CSV")
 
-@testset "CSV select row parsing" begin
+@testset "CSV select row records" begin
     ext = Base.get_extension(MortalityTables, :MortalityTablesCSVExt)
     @test ext !== nothing
-    # trailing blanks are trimmed; an interior blank is kept, not truncated at
-    rates = ext._select_rates([0.1, missing, 0.3, missing, missing], 1:5)
-    @test length(rates) == 3
-    @test rates[1] == 0.1
-    @test rates[2] === missing
-    @test rates[3] == 0.3
-    # string cells are parsed, and a row with no blanks stays Float64
-    @test ext._select_rates(["0.1", "0.2"], 1:2) == [0.1, 0.2]
-    @test eltype(ext._select_rates([0.1, 0.2, missing], 1:3)) == Float64
-    # rates go to their duration labels, not their column positions
-    @test isequal(ext._select_rates([0.1, 0.2, 0.4], [1, 2, 4]), [0.1, 0.2, missing, 0.4])
-    @test ext._select_rates([0.2, 0.1], [2, 1]) == [0.1, 0.2]
-    @test_throws "repeat" ext._select_rates([0.1, 0.2], [1, 1])
+    # a blank cell is a missing rate, string cells are parsed, and each rate keeps its duration label
+    rec(cells, durations) = ext._select_records(cells, durations)
+    @test isequal(
+        rec([0.1, missing, 0.3, missing, missing], 1:5),
+        [(duration = d, rate = r) for (d, r) in zip(1:5, [0.1, missing, 0.3, missing, missing])]
+    )
+    @test rec(["0.1", "0.2"], 1:2) == [(duration = 1, rate = 0.1), (duration = 2, rate = 0.2)]
+    @test rec([0.1, 0.2, 0.4], [1, 2, 4]) == [(duration = 1, rate = 0.1), (duration = 2, rate = 0.2), (duration = 4, rate = 0.4)]
+    # placed by the shared assembler: trailing blanks shorten the row and an interior blank is kept
+    md = MortalityTables.TableMetaData(name = "records")
+    ult = [(age = a, rate = 0.5) for a in 40:50]
+    build(rates) = MortalityTables._table_from_labels((select = [(issue_age = 40, rates)], ultimate = ult, metadata = md), "CSV table records")
+    @test isequal(build(rec([0.1, missing, 0.3, missing, missing], 1:5)).select[40][40:43], [0.1, missing, 0.3, 0.5])
+    @test eltype(build(rec([0.1, 0.2, missing], 1:3)).select[40]) == Float64
+    @test build(rec([0.2, 0.1], [2, 1])).select[40][40:41] == [0.1, 0.2]
+    @test_throws "repeat" build(rec([0.1, 0.2], [1, 1]))
 end
 
 @testset "CSV rates are placed by their labels" begin
@@ -84,9 +87,9 @@ end
         @test isequal(blank.select[issue_age], csv.select[issue_age])
     end
 
-    # the same labels read as XTbML give the same table
+    # the same labels, as XTbML parses them, give the same table
     md = MortalityTables.TableMetaData(name = "gapped select")
-    xml = MortalityTables.XTbML_Table_To_MortalityTable(
+    xml = MortalityTables._table_from_labels(
         (
             select = [
                 (issue_age = 40, rates = [(duration = d, rate = r) for (d, r) in zip([1, 2, 4], [0.01, 0.02, 0.04])]),
@@ -94,12 +97,46 @@ end
             ],
             ultimate = [(age = a, rate = r) for (a, r) in zip(40:46, [0.2, 0.21, 0.22, 0.23, 0.24, 0.25, 0.26])],
             metadata = md,
-        )
+        ),
+        "XTbML table gapped select"
     )
     @test isequal(csv.ultimate, xml.ultimate)
     @test axes(csv.select) == axes(xml.select)
     for issue_age in eachindex(xml.select)
         @test isequal(csv.select[issue_age], xml.select[issue_age])
+    end
+
+    # a select period that runs past the ultimate omega has no ultimate tail, read either way
+    past = read_csv("""
+    Table Name:,long select,,
+    Table Identity:,995,,
+
+    Row\\Column,1,2,3
+    44,0.01,0.02,0.03
+    45,0.04,0.05,0.06
+
+    Table # ,2,,
+    Row\\Column,1,,
+    44,0.2,,
+    45,0.21,,
+    46,0.22,,
+    """)
+    past_xml = MortalityTables._table_from_labels(
+        (
+            select = [
+                (issue_age = a, rates = [(duration = d, rate = r) for (d, r) in zip(1:3, rs)])
+                    for (a, rs) in ((44, [0.01, 0.02, 0.03]), (45, [0.04, 0.05, 0.06]))
+            ],
+            ultimate = [(age = a, rate = r) for (a, r) in zip(44:46, [0.2, 0.21, 0.22])],
+            metadata = MortalityTables.TableMetaData(name = "long select"),
+        ),
+        "XTbML table long select"
+    )
+    @test axes(past.select[45], 1) == 45:47
+    @test past.select[45][47] == 0.06
+    @test isequal(past.ultimate, past_xml.ultimate)
+    for issue_age in (44, 45)
+        @test isequal(past.select[issue_age], past_xml.select[issue_age])
     end
 
     # a third block of rates would be dropped
@@ -139,5 +176,41 @@ end
             end
         end
 
+        # the metadata is the file's (not a later table block's), stripped as in XTbML
+        for f in (:id, :provider, :content_type)
+            @test getfield(csv.metadata, f) == getfield(xtbml.metadata, f)
+        end
+        if id == 17
+            # t17.csv is CP-1252 encoded, so its en dash is the byte 0x96 rather than UTF-8 "–"
+            @test csv.metadata.name == replace(xtbml.metadata.name, "–" => "\x96")
+            @test csv.metadata.description == replace(xtbml.metadata.description, "–" => "\x96")
+        else
+            @test csv.metadata.name == xtbml.metadata.name
+            @test csv.metadata.description == xtbml.metadata.description
+        end
     end
+end
+
+@testset "CSV metadata" begin
+    read_csv(text) = MortalityTable(CSV.File(IOBuffer(text); header = false, silencewarnings = true))
+    # the metadata rows end at the first table, so the table's own description does not replace
+    # the file's; a blank value is "" (as for an empty XTbML element), and values are stripped
+    mt = read_csv("""
+    Table Name:, padded name ,
+    Table Description:,the file's table,
+    Comments:,,
+
+    Table # ,1,
+    Table Description:,the block's table,
+    Row\\Column,Rate,
+    60,0.1,
+    61,0.2,
+    ,a note after the rates,
+    """)
+    @test mt.metadata.name == "padded name"
+    @test mt.metadata.description == "the file's table"
+    @test mt.metadata.comments == ""
+    @test mt.metadata.provider === nothing
+    # a row with a blank first cell ends the block of rates
+    @test mt.ultimate == UltimateMortality([0.1, 0.2], start_age = 60)
 end

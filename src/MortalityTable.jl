@@ -73,25 +73,6 @@ function _select_row(issue_age::Integer, select_rates::AbstractVector, ultimate:
     return OffsetArray([select_rates; ultimate[last_select_age+1:end]], issue_age - 1)
 end
 
-# Table files label every rate with its age or duration (XTbML elements, CSV row and column
-# headers). Each value goes to its label, so a table whose labels skip (rates at grouped ages,
-# or an empty cell inside a select row) keeps its values at the right ages, with `missing` where
-# it gives no rate. The element type widens only when there are such gaps. A repeated label is
-# ambiguous and throws; `source` names the table in that error. `first` is the label of the
-# first position (durations start at 1; ages at the smallest label).
-function _by_label(labels, values, what, source; first = minimum(labels))
-    allunique(labels) || throw(
-        ArgumentError("$source: $what repeat a label, so their rates cannot be placed: $(labels)")
-    )
-    n = maximum(labels) - first + 1
-    labels == first:(first + n - 1) && return first, collect(values)
-    placed = Vector{Union{Missing, eltype(values)}}(missing, n)
-    for (label, value) in zip(labels, values)
-        placed[label - first + 1] = value
-    end
-    return first, placed
-end
-
 
 
 """
@@ -199,9 +180,11 @@ Returns the survival through attained age `to_age`. The start of the calculation
     survival(mortality_vector,to_age,::DeathDistribution)
     survival(mortality_vector,from_age,to_age,::DeathDistribution)
 
-If given a negative `to_age`, it will return `1.0`. Aside from simplifying the code, this makes sense as for something to exist in order to decrement in the first place, it must have existed and survived to the point of  being able to be decremented.
+Survival from a fractional `from_age` is conditional on surviving to `from_age`: it equals `survival(v, to_age, dd) / survival(v, from_age, dd)` under the same assumption, so survival over consecutive intervals multiplies. Where the assumption gives zero survival to a fractional `from_age` (after a rate of one under `Constant` or `Balducci`) there is nothing to condition on; the formulas are still evaluated as written and give finite values.
 
-Survival from a fractional `from_age` is conditional on surviving to `from_age`: it equals `survival(v, to_age, dd) / survival(v, from_age, dd)` under the same assumption, so survival over consecutive intervals multiplies.
+When `to_age` is before `from_age`, the result is the reverse factor `1 / survival(v, to_age, from_age)`: the number expected alive at the earlier age for each life alive at the later one, as used to project a population backward or to accumulate with the benefit of survivorship. It is not a probability (it can exceed one, and the corresponding `decrement` is negative), and it is an expected-value back-calculation rather than a reconstruction of realized deaths. It is defined where the forward survival is positive; a zero forward survival gives `Inf`. With it, survival composes over any three ages whose factors are positive and representable: `survival(v, a, c) == survival(v, a, b) * survival(v, b, c)`, whatever their order. (A zero factor has no inverse: `0 * Inf` is not one.) Ages outside the table (such as a negative `to_age` for a table starting at zero) are a `BoundsError`.
+
+Results have the numeric type of the rates, promoted with the ages' type for fractional ages, including the exact one of an empty interval: a `BigFloat` table gives `BigFloat` survival, and a `Float32` table gives `Float32` survival at whole ages. A vector whose element type doesn't name the rates' number type (such as `Any`, `Real`, or `Missing` for a column with no rates) has `Float64` identities, as in version 2: an empty interval gives `1.0`, and a nonempty result takes the type its rates' arithmetic gives. Use a concretely typed vector for type-consistent and fast results.
 
 Parametric models (see `ParametricMortality`) are continuous and need no fractional-age assumption, so they accept a trailing `DeathDistribution` and ignore it.
 
@@ -231,44 +214,40 @@ function survival(v::AbstractArray, to_age, dd::DeathDistribution)
 end
 
 _decrement(surv, q) = surv * (1 - q)
+
+# The numeric type of survival and decrement: that of the rates (ignoring `missing`, as in a
+# select row with a gap), promoted with the ages' type for fractional ages. Identities such as
+# the survival over an empty interval have this type too, so a BigFloat or Float32 table keeps
+# its precision whether or not an interval is empty. An element type that isn't concrete says
+# nothing about the rates' numbers (`Any`, `Real`, or `Union{}` for an all-`missing` vector), so
+# the identities are Float64's, as before v3. A concrete non-number, such as a `String` rate,
+# still fails where it is converted.
+_rate_type(v) = _rate_type(nonmissingtype(eltype(v)))
+_rate_type(::Type{T}) where {T} = isconcretetype(T) ? float(T) : Float64
+_survival_type(v, ages...) = float(promote_type(_rate_type(v), map(typeof, ages)...))
+
 function survival(v::AbstractArray, from_age::Int, to_age::Int)
-    # an empty age range (from_age >= to_age) reduces to `init`, i.e. 1.0
-    return @views reduce(_decrement, v[from_age:(to_age-1)], init = 1.0)
+    # a reversed interval is the reverse factor (see the docstring)
+    from_age > to_age && return inv(survival(v, to_age, from_age))
+    # an empty age range (from_age == to_age) reduces to `init`, i.e. one
+    return @views reduce(_decrement, v[from_age:(to_age-1)], init = one(_rate_type(v)))
 end
 
 function survival(v::AbstractArray, from_age, to_age, dd::DeathDistribution)
-    # calculate the survival for the rounded ages, and then the high and low high_residual
+    # a reversed interval is the reverse factor (see the docstring)
+    from_age > to_age && return inv(survival(v, to_age, from_age, dd))
+    T = _survival_type(v, from_age, to_age)
+    # the survival over the whole ages, times the partial years before and after them
     age_low = ceil(Int, from_age)
     age_high = floor(Int, to_age)
-
-    # if from_age and to_age are fractional parts of the same attained age, then age_high will round down to 
-    # be below the rounded-up age_low. This line will short circuit the rest and just return the fractional year survival
+    # within one year of age
     age_high < age_low && return 1 - decrement_partial_year(v, from_age, to_age, dd)
-
-    if age_low == from_age
-        low_residual = 1.0
-    else
-        low_residual = 1 - decrement_partial_year(v, from_age, age_low, dd)
-    end
-
-    if age_high == to_age
-        high_residual = 1.0
-    else
-        high_residual = 1 - decrement_partial_year(v, age_high, to_age, dd)
-    end
-
-    if from_age == to_age
-        return 1.0
-    else
-
-        whole = @views reduce(_decrement, v[age_low:(age_high-1)], init = 1.0)
-
-        return whole * low_residual * high_residual
-    end
+    low_residual = age_low == from_age ? one(T) : 1 - decrement_partial_year(v, from_age, age_low, dd)
+    high_residual = age_high == to_age ? one(T) : 1 - decrement_partial_year(v, age_high, to_age, dd)
+    # an empty interval reduces to `init`, i.e. one
+    whole = @views reduce(_decrement, v[age_low:(age_high-1)], init = one(T))
+    return whole * low_residual * high_residual
 end
-
-# whole ages need no fractional-year assumption
-survival(v::AbstractArray, from_age::Int, to_age::Int, ::DeathDistribution) = survival(v, from_age, to_age)
 
 # Reference: Experience Study Calculations, 2016, Society of Actuaries
 # https://www.soa.org/globalassets/assets/Files/Research/2016-10-experience-study-calculations.pdf
@@ -321,8 +300,53 @@ julia> decrement(qs,1,2)
 julia> decrement(qs,0.5,Uniform())
 0.05
 ```
+
+The decrement is accumulated directly (``d \\leftarrow q + d(1 - q)``) rather than computed as one minus the survival product, so a small decrement keeps its precision. A reversed interval gives the negative decrement `1 - survival(v, from_age, to_age)` of the reverse factor, computed as `-d / S` from the forward decrement `d` and forward survival `S`, so it keeps its precision both for a small decrement and for a small forward survival.
+
+A type that defines only `survival` gets `decrement` as `1 - survival`; define `decrement` too where that complement would lose precision.
 """
+decrement(v::AbstractArray, to_age) = decrement(v, firstindex(v), to_age)
+decrement(v::AbstractArray, to_age, dd::DeathDistribution) = decrement(v, firstindex(v), to_age, dd)
+
+# the extension contract: a type that defines `survival` has the complementary `decrement`
 decrement(v, args...) = 1 - survival(v, args...)
+
+# d ← q + d·(1 - q), i.e. 1 - (1 - d)(1 - q): the complement of the survival product without
+# the cancellation in 1 - ∏(1 - q), so a small decrement is not rounded away. For rates in
+# [0, 1] both terms are non-negative, so the sum is accurate to a few ulps; `1 - q` does not
+# depend on d, so each step is one fused multiply-add, as fast as the product. Values above one
+# (claim costs or factors, which some bundled tables hold) are not probabilities; the same
+# expression is evaluated for them, and it can round more than the product would.
+_accumulate_decrement(d, q) = muladd(d, 1 - q, q)
+
+# The decrement of a reversed interval, 1 - 1/S = -d/S for the forward decrement d and survival
+# S. Both are accurate to a few ulps, so the quotient is too: rebuilding S as 1 - d would round it
+# to zero once d rounds to one, although S (say 2^-60) is representable.
+_reverse_decrement(v, args...) = -decrement(v, args...) / survival(v, args...)
+
+function decrement(v::AbstractArray, from_age::Int, to_age::Int)
+    from_age > to_age && return _reverse_decrement(v, to_age, from_age)
+    return @views reduce(_accumulate_decrement, v[from_age:(to_age-1)], init = zero(_rate_type(v)))
+end
+
+function decrement(v::AbstractArray, from_age, to_age, dd::DeathDistribution)
+    from_age > to_age && return _reverse_decrement(v, to_age, from_age, dd)
+    T = _survival_type(v, from_age, to_age)
+    from_age == to_age && return zero(T)
+    age_low = ceil(Int, from_age)
+    age_high = floor(Int, to_age)
+    # within one year of age
+    age_high < age_low && return _decrement_piece(v, from_age, to_age, dd)
+    d = age_low == from_age ? zero(T) : _decrement_piece(v, from_age, age_low, dd)
+    d = @views reduce(_accumulate_decrement, v[age_low:(age_high-1)], init = d)
+    return age_high == to_age ? d : _accumulate_decrement(d, _decrement_piece(v, age_high, to_age, dd))
+end
+
+# The decrement over part of one year of age: `decrement_partial_year`, except that the
+# constant force is written as -expm1((t - s)·log1p(-q)), since 1 - (1 - q)^(t - s) rounds a
+# small rate away. (`survival` keeps `1 - decrement_partial_year`, so its values are unchanged.)
+_decrement_piece(v, from_age, to_age, dd::DeathDistribution) = decrement_partial_year(v, from_age, to_age, dd)
+_decrement_piece(v, from_age, to_age, ::Constant) = -expm1((to_age - from_age) * log1p(-v[floor(Int, from_age)]))
 
 """
     omega(x)
@@ -359,14 +383,6 @@ const ω = omega
 """
     mortality_vector(vec; start_age=0)
 
-A convenience constructor to create an OffsetArray which has the array indexed by attained age rather than always starting from `1`. The package and JuliaActuary ecosystem assume that the rates are indexed by attained age and this allows transformation of tables without a direct dependency on **OffsetArrays.jl**.
-
-Equivalent to doing:
-```
-using OffsetArrays
-OffsetArray(vec,start_age-1)
-```
-
-This is an alias for [`UltimateMortality`](@ref).
+An alias for [`UltimateMortality`](@ref): wraps `vec` in an `OffsetArray` indexed by attained age, starting at `start_age`, rather than always starting from `1`. The package and JuliaActuary ecosystem assume that the rates are indexed by attained age, and this allows transformation of tables without a direct dependency on **OffsetArrays.jl**.
 """
-mortality_vector(vec; start_age = 0) = UltimateMortality(vec; start_age)
+const mortality_vector = UltimateMortality
