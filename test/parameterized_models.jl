@@ -1,4 +1,21 @@
+using InteractiveUtils: subtypes
+
 @testset "Parameterized Models" begin
+
+    @testset "concrete field types" begin
+        # the subtypes are UnionAlls (e.g. Makeham{T}), so iterate them directly
+        laws = subtypes(MortalityTables.ParametricMortality)
+        @test length(laws) == 25
+        for L in laws
+            m = L()
+            @test isbits(m)
+            @test m isa L{Float64}
+            @test (@inferred hazard(m, 50.0)) isa Float64
+        end
+        # mixed keyword types are promoted
+        @test Makeham(a=1, b=0.5, c=0) isa Makeham{Float64}
+        @test Gompertz() isa Makeham{Float64}
+    end
 
     @testset "Makeham" begin
 
