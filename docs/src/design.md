@@ -44,6 +44,8 @@ With MortalityTables.jl, virtually transparent to the user of the package, you c
 survival(MortalityTables.Makeham(),25,50) # 25 to 50 year old survival
 ```
 
+The functions that accept either a vector of rates or a parametric model are `survival`, `decrement`, `life_expectancy`, and `omega`. A parametric model also accepts (and ignores) a `DeathDistribution` argument, since it is continuous, and its `omega` is `Inf`. Indexing is *not* interchangeable: `rates[65]` is the annual rate ``q_{65}``, whereas a model is queried with `hazard(m, 65)` (or `m(65)`) for the instantaneous force of mortality; a model cannot be indexed.
+
 ### Table metadata
 
 When you display a table, you get to see related metadata, which can be lost if simply parsing into a matrix or dataframe:

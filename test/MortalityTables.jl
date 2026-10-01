@@ -12,11 +12,11 @@
         @testset "Ultimate Only SOA table" begin
             cso1980 = MortalityTables.table("1980 CSO Basic Table – Male, ANB")
             @test cso1980.ultimate[35] ≈ 0.00118
-            @test cso1980[35] ≈ 0.00118
-            @test cso1980[35:36] ≈ [0.00118, 0.00128]
-            @test cso1980[35 + 60] ≈ 0.27302
-            @test cso1980[95] ≈ 0.27302
-            @test_throws BoundsError cso1980[125]
+            @test cso1980.ultimate[35:36] ≈ [0.00118, 0.00128]
+            @test cso1980.ultimate[35 + 60] ≈ 0.27302
+            @test cso1980.ultimate[95] ≈ 0.27302
+            @test_throws BoundsError cso1980.ultimate[125]
+            @test_throws MethodError cso1980[35]  # tables are opaque containers
             @test_throws ArgumentError survival(cso1980,10,15)
             @test_throws ArgumentError decrement(cso1980,10,15)
             @test_throws ArgumentError survival(cso1980, 10, Uniform())
@@ -24,7 +24,7 @@
             @test_throws ArgumentError decrement(cso1980, 10, Uniform())
             @test_throws ArgumentError decrement(cso1980, 10, 15, Uniform())
             @test omega(cso1980.ultimate) == 100
-            @test MortalityTables.ω(cso1980) == 100
+            @test MortalityTables.ω(cso1980.ultimate) == 100
         end
 
         @testset "2001 VBT" begin

@@ -310,7 +310,7 @@ Now some examples with `m`, but could use `g` interchangeably:
 
 ```julia
 age = 20
-m[20]                 # the mortality rate at age 20
+hazard(m,20)          # the force of mortality at age 20 (equivalently `m(20)`)
 decrement(m,20,25)    # the five year cumulative mortality rate
 survival(m,20,25) # the five year survival rate
 ```

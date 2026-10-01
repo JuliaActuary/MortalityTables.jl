@@ -108,7 +108,7 @@ using InteractiveUtils: subtypes
             m = Makeham(a=2.7e-6, b=log(1.124), c=0.00022)
 
             @test MortalityTables.μ(m, 20) == 0.00022 + 2.7e-6 * 1.124^20
-            @test m[20] == MortalityTables.μ(m, 20)
+            @test_throws MethodError m[20]  # indexing a model is not supported; call it or use hazard
             @test m(20) == MortalityTables.μ(m, 20)
             
             # vs manually calculated (via QuadGK) integrals
@@ -238,7 +238,7 @@ using InteractiveUtils: subtypes
                 @test survival(model.juliamodel, 50, 51) < 1.0
             end
             
-            @test model.juliamodel[20] >= 0
+            @test model.juliamodel(20) >= 0
 
         end
 
