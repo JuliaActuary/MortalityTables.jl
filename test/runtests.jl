@@ -2,6 +2,7 @@ using MortalityTables
 using Test
 using JSON
 using CSV
+using QuadGK
 using Artifacts
 
 # This is the path to the Artifacts.toml we will manipulate
