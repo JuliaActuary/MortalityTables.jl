@@ -2,7 +2,6 @@
 # https://mortality.org/File/GetDocument/Public/HMD_4th_Symposium/Pascariu_poster.pdf
 # https://github.com/mpascariu/MortalityLaws/blob/master/R/MortalityLaw_models.R
 
-abstract type ParametricMortality end
 """
     Makeham(;a,b,c)
 
@@ -938,28 +937,3 @@ function hazard(m::KannistoMakeham,age)
     (; a, b, c) = m
     return  a * exp(b * age) / (1 + a * exp(b*age)) + c
 end
-
-### Generic Functions
-
-"""
-    μ(;m::ParametricMortality,age)
-
-``\\mu_x``: Return the force of mortality at the given age. 
-"""
-function μ(m::ParametricMortality, age) 
-    return hazard(m,age)
-end
-
-survival(m::ParametricMortality,to_age) = exp(-quadgk(age->μ(m, age), 0, to_age)[1])
-survival(m::ParametricMortality,from,to) = survival(m,to) / survival(m,from)
-
-# Continuous models need no fractional-age assumption; accept and ignore one.
-survival(m::ParametricMortality, to, ::DeathDistribution) = survival(m, to)
-survival(m::ParametricMortality, from, to, ::DeathDistribution) = survival(m, from, to)
-
-# A parametric model has no last defined age.
-omega(::ParametricMortality) = Inf
-
-(m::ParametricMortality)(x) = μ(m, x)
-Base.getindex(m::ParametricMortality,x) = m(x)
-Base.broadcastable(pm::ParametricMortality) = Ref(pm)
