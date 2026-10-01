@@ -174,6 +174,8 @@ Returns the survival through attained age `to_age`. The start of the calculation
 
 If given a negative `to_age`, it will return `1.0`. Aside from simplifying the code, this makes sense as for something to exist in order to decrement in the first place, it must have existed and survived to the point of  being able to be decremented.
 
+Parametric models (see `ParametricMortality`) are continuous and need no fractional-age assumption, so they accept a trailing `DeathDistribution` and ignore it.
+
 # Examples
 ```julia-repl
 julia> qs = UltimateMortality([0.1,0.3,0.6,1]);
@@ -192,23 +194,20 @@ julia> survival(qs,0.5,Uniform())
 0.95
 ```
 """
-function survival(v, to_age)
+function survival(v::AbstractArray, to_age)
     return survival(v, firstindex(v), to_age)
 end
-function survival(v, to_age, dd::DeathDistribution)
+function survival(v::AbstractArray, to_age, dd::DeathDistribution)
     return survival(v, firstindex(v), to_age, dd)
 end
 
 _decrement(surv, q) = surv * (1 - q)
-function survival(v::T, from_age::Int, to_age::Int) where {T<:AbstractArray}
-    if from_age == to_age
-        return 1.0
-    else
-        return @views reduce(_decrement, v[from_age:(to_age-1)], init = 1.0)
-    end
+function survival(v::AbstractArray, from_age::Int, to_age::Int)
+    # an empty age range (from_age >= to_age) reduces to `init`, i.e. 1.0
+    return @views reduce(_decrement, v[from_age:(to_age-1)], init = 1.0)
 end
 
-function survival(v::T, from_age, to_age, dd::DeathDistribution) where {T<:AbstractArray}
+function survival(v::AbstractArray, from_age, to_age, dd::DeathDistribution)
     # calculate the survival for the rounded ages, and then the high and low high_residual
     age_low = ceil(Int, from_age)
     age_high = floor(Int, to_age)
@@ -239,10 +238,8 @@ function survival(v::T, from_age, to_age, dd::DeathDistribution) where {T<:Abstr
     end
 end
 
-function survival(v::T, from_age::Int, to_age::Int, dd::DeathDistribution) where {T<:AbstractArray}
-
-    return @views reduce(_decrement, v[from_age:to_age-1], init = 1.0)
-end
+# whole ages need no fractional-year assumption
+survival(v::AbstractArray, from_age::Int, to_age::Int, ::DeathDistribution) = survival(v, from_age, to_age)
 
 survival(v::MortalityTable, args...) = throw(ArgumentError("The first argument should be a vector of rates instead of an entire table. E.g. `table.ultimate` or `table.select[age]`."))
 
@@ -289,11 +286,7 @@ julia> decrement(qs,0.5,Uniform())
 0.05
 ```
 """
-decrement(v, to_age) = 1 - survival(v, to_age)
-decrement(v, to_age, dd::DeathDistribution) = 1 - survival(v, to_age, dd)
-decrement(v, from_age, to_age) = 1 - survival(v, from_age, to_age)
-decrement(v, from_age, to_age, dd::DeathDistribution) = 1 - survival(v, from_age, to_age, dd)
-decrement(v::MortalityTable, args...) = throw(ArgumentError("The first argument should be a vector of rates instead of an entire table. E.g. `table.ultimate` or `table.select[age]`."))
+decrement(v, args...) = 1 - survival(v, args...)
 
 """
     omega(x)
@@ -302,6 +295,8 @@ decrement(v::MortalityTable, args...) = throw(ArgumentError("The first argument 
 Returns the last index of the given vector. For mortality vectors this means the last attained age for which a rate is defined.
 
 Note that `omega` can vary depending on the issue age for a select table, and that a select `omega` may differ from the table's ultimate `omega`.
+
+A parametric model (see `ParametricMortality`) has no last age, so `omega` of a parametric model returns `Inf`.
 
 ω is aliased to omega, but un-exported. To use, do `using MortalityTables: ω` when importing or call `MortalityTables.ω()`
 

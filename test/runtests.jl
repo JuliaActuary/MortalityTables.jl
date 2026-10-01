@@ -2,11 +2,16 @@ using MortalityTables
 using Test
 using JSON
 using CSV
+using QuadGK
 using Artifacts
 
 # This is the path to the Artifacts.toml we will manipulate
 MT_artifact_toml = joinpath(pkgdir(MortalityTables), "Artifacts.toml")
 soa_tbl_dir = artifact_hash("mort.soa.org", MT_artifact_toml) |> artifact_path
+
+@testset "method ambiguities" begin
+    @test isempty(Test.detect_ambiguities(MortalityTables; recursive=true))
+end
 
 include("CSV.jl")
 include("basic.jl")

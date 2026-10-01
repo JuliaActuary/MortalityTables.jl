@@ -12,6 +12,7 @@ include("MortalityTable.jl")
 include("dukes_macdonald.jl")
 include("XTbML.jl")
 include("get_SOA_table.jl")
+include("parametric_interface.jl")
 include("parameterized_models.jl")
 include("life_expectancy.jl")
 

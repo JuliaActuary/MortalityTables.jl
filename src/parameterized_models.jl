@@ -2,7 +2,6 @@
 # https://mortality.org/File/GetDocument/Public/HMD_4th_Symposium/Pascariu_poster.pdf
 # https://github.com/mpascariu/MortalityLaws/blob/master/R/MortalityLaw_models.R
 
-abstract type ParametricMortality end
 """
     Makeham(;a,b,c)
 
@@ -19,33 +18,36 @@ Default args:
     c = 0.001
 
 """
-Base.@kwdef struct Makeham <: ParametricMortality
-    a = 0.0002
-    b = 0.13
-    c = 0.001
+struct Makeham{T<:Real} <: ParametricMortality
+    a::T
+    b::T
+    c::T
 end
+Makeham(; a=0.0002, b=0.13, c=0.001) = Makeham(promote(a, b, c)...)
 
-"""
-    hazard(model,age)
-
-The force of mortality at `age`. More precisely: the ratio of the probability of failure/death to the survival function.
-"""
-function hazard(m::Makeham,age) 
+function hazard(m::Makeham,age)
     (; a, b, c) = m
     return a*exp(b*age) + c
 end
 
-"""
-    cumhazard(model,age)
+# expm1(x)/x and log1p(x)/x, both 1 at x = 0: smooth there, so the closed forms below keep
+# their zero-growth limits (and derivatives) instead of evaluating 0/0. They are used only
+# near b·age = 0: at large |b·age| and infinite ages the factored forms would evaluate
+# Inf/Inf or 0·Inf, so the plain closed forms apply there.
+_exprel(x) = abs(x) < 1e-5 ? 1 + x / 2 + x^2 / 6 + x^3 / 24 : expm1(x) / x
+_log1pdivx(x) = abs(x) < 1e-5 ? 1 - x / 2 + x^2 / 3 - x^3 / 4 : log1p(x) / x
 
-The cumulative force of mortality at `age`. More precisely: the ratio of the cumulative probability of failure/death to the survival function.
-"""
-function cumhazard(m::Makeham,age) 
+# k·age, which is 0 for k = 0 even at an infinite age: a law's zero coefficient contributes
+# nothing there (b = 0 is a constant hazard, c = 0 the Gompertz law).
+_times_age(k, age) = iszero(k) ? zero(k * age) : k * age
+
+function cumhazard(m::Makeham,age)
     (; a, b, c) = m
-    return a / b * (exp(b*age) - 1) + age * c
+    x = _times_age(b, age)
+    # a/b·(exp(b·age) - 1), which is a·age at b = 0, plus c·age
+    growth = iszero(a) ? zero(a * age) : abs(x) < 1 ? a * age * _exprel(x) : a / b * expm1(x)
+    return growth + _times_age(c, age)
 end
-
-survival(m::Makeham,age) = exp(-cumhazard(m,age))
 
 
 """
@@ -88,10 +90,11 @@ Default args:
     σ = 7.7
 
 """
-Base.@kwdef struct InverseGompertz <: ParametricMortality
-    m = 49
-    σ = 7.7
+struct InverseGompertz{T<:Real} <: ParametricMortality
+    m::T
+    σ::T
 end
+InverseGompertz(; m=49, σ=7.7) = InverseGompertz(promote(m, σ)...)
 
 
 function hazard(model::InverseGompertz,age)
@@ -99,11 +102,10 @@ function hazard(model::InverseGompertz,age)
     return 1 / σ * exp(-(age - m)/σ) / (exp(exp(-(age - m)/σ)) - 1)
 end
 
-cumhazard(m::InverseGompertz,age) = -log(survival(m,age))
-
-function survival(model::InverseGompertz,age) 
+function cumhazard(model::InverseGompertz,age)
     (; m, σ) = model
-    return (1 - exp(-exp(-(age - m)/σ))) / (1 - exp(-exp(m/σ)))
+    # negative log of the closed-form survival function
+    return -log((1 - exp(-exp(-(age - m)/σ))) / (1 - exp(-exp(m/σ))))
 end
 
 """
@@ -121,11 +123,12 @@ Default args:
     b = 0.0004
     c = 0.001
 """
-Base.@kwdef struct Opperman <: ParametricMortality
-    a = 0.04
-    b = 0.0004
-    c = 0.001
+struct Opperman{T<:Real} <: ParametricMortality
+    a::T
+    b::T
+    c::T
 end
+Opperman(; a=0.04, b=0.0004, c=0.001) = Opperman(promote(a, b, c)...)
 
 function hazard(m::Opperman,age) 
     (; a, b, c) = m
@@ -161,15 +164,16 @@ Default args:
     f = 0.0001
     g = 0.13
 """
-Base.@kwdef struct Thiele <: ParametricMortality
-    a = 0.02474 
-    b = 0.3
-    c = 0.004
-    d = 0.5
-    e = 25
-    f = 0.0001
-    g = 0.13
+struct Thiele{T<:Real} <: ParametricMortality
+    a::T
+    b::T
+    c::T
+    d::T
+    e::T
+    f::T
+    g::T
 end
+Thiele(; a=0.02474, b=0.3, c=0.004, d=0.5, e=25, f=0.0001, g=0.13) = Thiele(promote(a, b, c, d, e, f, g)...)
 
 function hazard(m::Thiele,age) 
     (; a, b, c, d, e, f, g) = m
@@ -199,12 +203,13 @@ Default args:
     m = 100
 
 """
-Base.@kwdef struct Wittstein <: ParametricMortality
-    a = 1.5
-    b = 1.
-    n = 0.5
-    m = 100
+struct Wittstein{T<:Real} <: ParametricMortality
+    a::T
+    b::T
+    n::T
+    m::T
 end
+Wittstein(; a=1.5, b=1., n=0.5, m=100) = Wittstein(promote(a, b, n, m)...)
 
 function hazard(model::Wittstein,age)
     (; a, b, m, n) = model
@@ -235,10 +240,11 @@ Note that if σ > m, then the mode of the density is 0 and hx is a non-increasin
     m = 1
     σ = 2
 """
-Base.@kwdef struct Weibull <: ParametricMortality
-    m = 1
-    σ = 2
+struct Weibull{T<:Real} <: ParametricMortality
+    m::T
+    σ::T
 end
+Weibull(; m=1.0, σ=2.0) = Weibull(promote(m, σ)...)
 
 function hazard(model::Weibull,age)
     (; m, σ) = model
@@ -252,10 +258,6 @@ end
 function cumhazard(model::Weibull,age)
     (; m, σ) = model
     return (age / m) ^ (m / σ)
-end
-
-function survival(m::Weibull,age) 
-    return exp(-cumhazard(m,age))
 end
 
 """
@@ -283,10 +285,11 @@ The Inverse-Weibull proves useful for modelling the childhood and teenage years,
     σ = 10
 
 """
-Base.@kwdef struct InverseWeibull <: ParametricMortality
-    m = 5
-    σ = 10
+struct InverseWeibull{T<:Real} <: ParametricMortality
+    m::T
+    σ::T
 end
+InverseWeibull(; m=5.0, σ=10.0) = InverseWeibull(promote(m, σ)...)
 
 function hazard(model::InverseWeibull,age)
     (; m, σ) = model
@@ -296,10 +299,6 @@ end
 function cumhazard(model::InverseWeibull,age)
     (; m, σ) = model
     return -log(1 - exp(-(age/m)^(-m/σ)))
-end
-
-function survival(m::InverseWeibull,age) 
-    return exp(-cumhazard(m,age))
 end
 
 """
@@ -318,12 +317,13 @@ Default args:
     c = 0.01
     d = 0.01
 """
-Base.@kwdef struct Perks <: ParametricMortality
-    a = 0.002
-    b = 0.13
-    c = 0.01
-    d = 0.01
+struct Perks{T<:Real} <: ParametricMortality
+    a::T
+    b::T
+    c::T
+    d::T
 end
+Perks(; a=0.002, b=0.13, c=0.01, d=0.01) = Perks(promote(a, b, c, d)...)
 
 function hazard(m::Perks,age) 
     (; a, b, c, d) = m
@@ -347,13 +347,14 @@ Default args:
     i = 100
     n = 200
 """
-Base.@kwdef struct VanderMaen <: ParametricMortality
-    a = 0.01
-    b = 1.
-    c = 0.01
-    i = 100.
-    n = 200.
+struct VanderMaen{T<:Real} <: ParametricMortality
+    a::T
+    b::T
+    c::T
+    i::T
+    n::T
 end
+VanderMaen(; a=0.01, b=1., c=0.01, i=100., n=200.) = VanderMaen(promote(a, b, c, i, n)...)
 
 function hazard(m::VanderMaen,age)
     (; a, b, c, i, n) = m
@@ -377,12 +378,13 @@ Default args:
     n = 200
 
 """
-Base.@kwdef struct VanderMaen2 <: ParametricMortality
-    a = 0.01
-    b = 1.
-    i = 100.
-    n = 200.
+struct VanderMaen2{T<:Real} <: ParametricMortality
+    a::T
+    b::T
+    i::T
+    n::T
 end
+VanderMaen2(; a=0.01, b=1., i=100., n=200.) = VanderMaen2(promote(a, b, i, n)...)
 
 function hazard(m::VanderMaen2,age)
     (; a, b, i, n) = m
@@ -406,12 +408,13 @@ Default args:
     d   = 6.0
 
 """
-Base.@kwdef struct StrehlerMildvan <: ParametricMortality
-    k   = 0.01
-    v₀  = 2.5
-    b   = 0.2
-    d   = 6.0
+struct StrehlerMildvan{T<:Real} <: ParametricMortality
+    k::T
+    v₀::T
+    b::T
+    d::T
 end
+StrehlerMildvan(; k=0.01, v₀=2.5, b=0.2, d=6.0) = StrehlerMildvan(promote(k, v₀, b, d)...)
 
 function hazard(m::StrehlerMildvan,age)
     (; k, v₀, b, d) = m
@@ -433,11 +436,12 @@ Default args:
     b = 0.13
     k = 1.
 """
-Base.@kwdef struct Beard <: ParametricMortality
-    a = 0.002
-    b = 0.13
-    k = 1.
+struct Beard{T<:Real} <: ParametricMortality
+    a::T
+    b::T
+    k::T
 end
+Beard(; a=0.002, b=0.13, k=1.) = Beard(promote(a, b, k)...)
 
 function hazard(m::Beard,age)
     (; a, b, k) = m
@@ -460,12 +464,13 @@ Default args:
     c = 0.01
     k = 1.
 """
-Base.@kwdef struct MakehamBeard <: ParametricMortality
-    a = 0.002
-    b = 0.13
-    c = 0.01
-    k = 1.
+struct MakehamBeard{T<:Real} <: ParametricMortality
+    a::T
+    b::T
+    c::T
+    k::T
 end
+MakehamBeard(; a=0.002, b=0.13, c=0.01, k=1.) = MakehamBeard(promote(a, b, c, k)...)
 
 function hazard(m::MakehamBeard,age)
     (; a, b, c, k) = m
@@ -487,11 +492,12 @@ Default args:
     b = 1.
     c = 0.01
 """
-Base.@kwdef struct Quadratic <: ParametricMortality
-    a = 0.01
-    b = 1.
-    c = 0.01
+struct Quadratic{T<:Real} <: ParametricMortality
+    a::T
+    b::T
+    c::T
 end
+Quadratic(; a=0.01, b=1., c=0.01) = Quadratic(promote(a, b, c)...)
 
 function hazard(m::Quadratic,age)
     (; a, b, c) = m
@@ -513,11 +519,12 @@ Default args:
     b = 0.13
     γ = 1
 """
-Base.@kwdef struct GammaGompertz <: ParametricMortality
-    a = 0.002
-    b = 0.13
-    γ = 1
+struct GammaGompertz{T<:Real} <: ParametricMortality
+    a::T
+    b::T
+    γ::T
 end
+GammaGompertz(; a=0.002, b=0.13, γ=1) = GammaGompertz(promote(a, b, γ)...)
 
 function hazard(m::GammaGompertz,age)
     (; a, b, γ) = m
@@ -541,13 +548,14 @@ Default args:
     d = 0.001
     e = 0.013
 """
-Base.@kwdef struct Siler <: ParametricMortality
-    a = 0.0002
-    b = 0.13
-    c = 0.001
-    d = 0.001
-    e = 0.013
+struct Siler{T<:Real} <: ParametricMortality
+    a::T
+    b::T
+    c::T
+    d::T
+    e::T
 end
+Siler(; a=0.0002, b=0.13, c=0.001, d=0.001, e=0.013) = Siler(promote(a, b, c, d, e)...)
 
 function hazard(m::Siler,age)
     (; a, b, c, d, e) = m
@@ -572,16 +580,17 @@ Default args:
     d = 0.001
     e = 0.013
 """
-Base.@kwdef struct HeligmanPollard <: ParametricMortality
-    a = .0005
-    b = .004
-    c = .08
-    d = .001
-    e = 10
-    f = 17
-    g = .00005
-    h = 1.1
+struct HeligmanPollard{T<:Real} <: ParametricMortality
+    a::T
+    b::T
+    c::T
+    d::T
+    e::T
+    f::T
+    g::T
+    h::T
 end
+HeligmanPollard(; a=.0005, b=.004, c=.08, d=.001, e=10, f=17, g=.00005, h=1.1) = HeligmanPollard(promote(a, b, c, d, e, f, g, h)...)
 
 function hazard(m::HeligmanPollard,age)
     (; a, b, c, d, e, f, g, h) = m
@@ -621,16 +630,17 @@ Default args:
     g = .00005
     h = 1.1
 """
-Base.@kwdef struct HeligmanPollard2 <: ParametricMortality
-    a = 0.0005
-    b = 0.004
-    c = 0.08
-    d = 0.001
-    e = 10.
-    f = 17.
-    g = 0.00005
-    h = 1.1
+struct HeligmanPollard2{T<:Real} <: ParametricMortality
+    a::T
+    b::T
+    c::T
+    d::T
+    e::T
+    f::T
+    g::T
+    h::T
 end
+HeligmanPollard2(; a=0.0005, b=0.004, c=0.08, d=0.001, e=10., f=17., g=0.00005, h=1.1) = HeligmanPollard2(promote(a, b, c, d, e, f, g, h)...)
 
 function hazard(m::HeligmanPollard2,age)
     (; a, b, c, d, e, f, g, h) = m
@@ -669,17 +679,18 @@ Default args:
     h = 1.1
     k= 1.
 """
-Base.@kwdef struct HeligmanPollard3 <: ParametricMortality
-    a = .0005
-    b = .004
-    c = .08
-    d = .001
-    e = 10
-    f = 17
-    g = .00005
-    h = 1.1
-    k = 1.
+struct HeligmanPollard3{T<:Real} <: ParametricMortality
+    a::T
+    b::T
+    c::T
+    d::T
+    e::T
+    f::T
+    g::T
+    h::T
+    k::T
 end
+HeligmanPollard3(; a=.0005, b=.004, c=.08, d=.001, e=10, f=17, g=.00005, h=1.1, k=1.) = HeligmanPollard3(promote(a, b, c, d, e, f, g, h, k)...)
 
 function hazard(m::HeligmanPollard3,age)
     (; a, b, c, d, e, f, g, h, k) = m
@@ -718,17 +729,18 @@ Default args:
     h = 1.1
     k= 1.
 """
-Base.@kwdef struct HeligmanPollard4 <: ParametricMortality
-    a = .0005
-    b = .004
-    c = .08
-    d = .001
-    e = 10
-    f = 17
-    g = .00005
-    h = 1.1
-    k = 1.
+struct HeligmanPollard4{T<:Real} <: ParametricMortality
+    a::T
+    b::T
+    c::T
+    d::T
+    e::T
+    f::T
+    g::T
+    h::T
+    k::T
 end
+HeligmanPollard4(; a=.0005, b=.004, c=.08, d=.001, e=10, f=17, g=.00005, h=1.1, k=1.) = HeligmanPollard4(promote(a, b, c, d, e, f, g, h, k)...)
 
 function hazard(m::HeligmanPollard4,age)
     (; a, b, c, d, e, f, g, h, k) = m
@@ -759,17 +771,18 @@ Default args:
     u  = 0.33
 
 """
-Base.@kwdef struct RogersPlanck <: ParametricMortality
-    a₀ = 0.0001
-    a₁ = 0.02
-    a₂ = 0.001
-    a₃ = 0.0001
-    a  = 2.
-    b  = 0.001
-    c  = 100.
-    d  = 0.1
-    u  = 0.33
+struct RogersPlanck{T<:Real} <: ParametricMortality
+    a₀::T
+    a₁::T
+    a₂::T
+    a₃::T
+    a::T
+    b::T
+    c::T
+    d::T
+    u::T
 end
+RogersPlanck(; a₀=0.0001, a₁=0.02, a₂=0.001, a₃=0.0001, a=2., b=0.001, c=100., d=0.1, u=0.33) = RogersPlanck(promote(a₀, a₁, a₂, a₃, a, b, c, d, u)...)
 
 function hazard(m::RogersPlanck,age) 
     (; a₀, a₁, a₂, a₃, a, b, c, d, u) = m
@@ -794,13 +807,14 @@ Default args:
     d = 0.1
     k = 0.001
 """
-Base.@kwdef struct Martinelle <: ParametricMortality
-    a = 0.001
-    b = 0.13
-    c = 0.001
-    d = 0.1
-    k = 0.001
+struct Martinelle{T<:Real} <: ParametricMortality
+    a::T
+    b::T
+    c::T
+    d::T
+    k::T
 end
+Martinelle(; a=0.001, b=0.13, c=0.001, d=0.1, k=0.001) = Martinelle(promote(a, b, c, d, k)...)
 
 function hazard(m::Martinelle,age)
     (; a, b, c, d, k) = m
@@ -847,17 +861,18 @@ Default args:
 
 > Kostaki, A. (1992). A nine‐parameter version of the Heligman‐Pollard formula. Mathematical Population Studies, 3(4), 277–288. doi:10.1080/08898489209525346 
 """
-Base.@kwdef struct Kostaki <: ParametricMortality
-    a = 0.0005
-    b = 0.01
-    c = 0.10
-    d = 0.001
-    e1 = 3.
-    e2 = 0.1
-    f = 25.
-    g = .00005
-    h = 1.1
+struct Kostaki{T<:Real} <: ParametricMortality
+    a::T
+    b::T
+    c::T
+    d::T
+    e1::T
+    e2::T
+    f::T
+    g::T
+    h::T
 end
+Kostaki(; a=0.0005, b=0.01, c=0.10, d=0.001, e1=3., e2=0.1, f=25., g=.00005, h=1.1) = Kostaki(promote(a, b, c, d, e1, e2, f, g, h)...)
 
 function hazard(m::Kostaki,age) 
     (; a, b, c, d, e1, e2, f, g, h) = m
@@ -882,7 +897,7 @@ Construct a mortality model following Kannisto's law of mortality.
 \\begin{aligned}
 \\mathrm{hazard}\\left( {\\rm age} \\right) &= \\frac{a \\cdot e^{b \\cdot {\\rm age}}}{1 + a \\cdot e^{b \\cdot {\\rm age}}}
 \\\\
-\\mathrm{cumhazard}\\left( {\\rm age} \\right) &= 1/a * log((1 + b*exp(b*age)) / (1 + a))
+\\mathrm{cumhazard}\\left( {\\rm age} \\right) &= \\frac{1}{b} \\log\\left( \\frac{1 + a \\cdot e^{b \\cdot {\\rm age}}}{1 + a} \\right)
 \\\\
 \\mathrm{survival}\\left( {\\rm age} \\right) &= e^{ - \\mathrm{cumhazard}\\left( m, {\\rm age} \\right)}
 \\end{aligned}
@@ -893,10 +908,11 @@ Default args:
     a = 0.5
     b = 0.13
 """
-Base.@kwdef struct Kannisto <: ParametricMortality
-    a = 0.5
-    b = 0.13
+struct Kannisto{T<:Real} <: ParametricMortality
+    a::T
+    b::T
 end
+Kannisto(; a=0.5, b=0.13) = Kannisto(promote(a, b)...)
 
 function hazard(m::Kannisto,age)
     (; a, b) = m
@@ -905,11 +921,13 @@ end
 
 function cumhazard(m::Kannisto,age)
     (; a, b) = m
-    return  1/a * log((1 + b*exp(b*age)) / (1 + a))
-end
-
-function  survival(m::Kannisto,age)
-    return exp(-cumhazard(m,age))
+    iszero(a) && return zero(a * age)   # no hazard, even at an infinite age
+    x = _times_age(b, age)
+    # log((1 + a·exp(b·age)) / (1 + a)) / b. Near b·age = 0 it is log1p(u) / b with
+    # u = a·expm1(b·age) / (1 + a), which is a·age/(1 + a) at b = 0.
+    abs(x) < 1 || return (log1p(a * exp(x)) - log1p(a)) / b
+    u = a * expm1(x) / (1 + a)
+    return a / (1 + a) * age * _exprel(x) * _log1pdivx(u)
 end
 
 
@@ -928,33 +946,14 @@ Default args:
     b = 0.13
     c = 0.001
 """
-Base.@kwdef struct KannistoMakeham <: ParametricMortality
-    a = 0.5
-    b = 0.13
-    c = 0.001
+struct KannistoMakeham{T<:Real} <: ParametricMortality
+    a::T
+    b::T
+    c::T
 end
+KannistoMakeham(; a=0.5, b=0.13, c=0.001) = KannistoMakeham(promote(a, b, c)...)
 
 function hazard(m::KannistoMakeham,age)
     (; a, b, c) = m
     return  a * exp(b * age) / (1 + a * exp(b*age)) + c
 end
-
-### Generic Functions
-
-"""
-    μ(;m::ParametricMortality,age)
-
-``\\mu_x``: Return the force of mortality at the given age. 
-"""
-function μ(m::ParametricMortality, age) 
-    return hazard(m,age)
-end
-
-survival(m::ParametricMortality,to_age) = exp(-quadgk(age->μ(m, age), 0, to_age)[1])
-survival(m::ParametricMortality,from,to) = survival(m,to) / survival(m,from)
-decrement(m::ParametricMortality,from_age,to_age) = 1 - survival(m, from_age, to_age)
-decrement(m::ParametricMortality,to_age) = 1 - survival(m, to_age)
-
-(m::ParametricMortality)(x) = μ(m, x)
-Base.getindex(m::ParametricMortality,x) = m(x)
-Base.broadcastable(pm::ParametricMortality) = Ref(pm)
