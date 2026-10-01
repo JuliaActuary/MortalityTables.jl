@@ -44,7 +44,7 @@ With MortalityTables.jl, virtually transparent to the user of the package, you c
 survival(MortalityTables.Makeham(),25,50) # 25 to 50 year old survival
 ```
 
-The functions that accept either a vector of rates or a parametric model are `survival`, `decrement`, `life_expectancy`, and `omega`. A parametric model also accepts (and ignores) a `DeathDistribution` argument, since it is continuous, and its `omega` is `Inf`. Indexing is *not* interchangeable: `rates[65]` is the annual rate ``q_{65}``, whereas a model is queried with `hazard(m, 65)` (or `m(65)`) for the instantaneous force of mortality; a model cannot be indexed.
+The functions that accept either a vector of rates or a parametric model are `survival`, `decrement`, `life_expectancy`, and `omega`. A parametric model also accepts (and ignores) a `DeathDistribution` argument, since it is continuous. Its `omega` is the last age at which its law is defined: `Inf` for most laws, but finite for a law whose formula ends, such as `Wittstein` (see the `omega` docstring). Survival need not be zero there, so a projection over a parametric law needs a horizon of its own rather than a fixed age cap. Indexing is *not* interchangeable: `rates[65]` is the annual rate ``q_{65}``, whereas a model is queried with `hazard(m, 65)` (or `m(65)`) for the instantaneous force of mortality; a model cannot be indexed.
 
 ### Table metadata
 

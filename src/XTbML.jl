@@ -65,41 +65,32 @@ of `(duration, rate)` for the defined durations.
 """
 function parseXTbMLTable(str::AbstractString, path)
     root = _child(XML.parse(str, XML.Node), "XTbML")
+    metadata = _content_classification(root, path)
     tables = _by_tag(root, "Table")
+    # an ultimate table has one <Table>; a select and ultimate table has two: the select rates
+    # (by issue age, then duration) followed by the ultimate rates. Reading any other layout
+    # this way would silently drop its other tables.
+    length(tables) in (1, 2) || throw(
+        ArgumentError(
+            "$(_xtbml_source(metadata)) has $(length(tables)) <Table> elements; only an ultimate " *
+                "table (one) or a select table followed by its ultimate table (two) can be read."
+        )
+    )
     ys(tbl) = _by_tag(_child(_child(tbl, "Values"), "Axis"), "Y")
     ult = [(age = parse(Int, y["t"]), rate = _rate(y)) for y in ys(tables[end])]
-    # a select and ultimate table has two <Table>s: the select rates (by issue
-    # age, then duration) followed by the ultimate rates
     sel = length(tables) == 1 ? nothing : map(_by_tag(_child(tables[1], "Values"), "Axis")) do ai
         rates = [(duration = parse(Int, y["t"]), rate = _rate(y)) for y in _by_tag(_child(ai, "Axis"), "Y")]
         (issue_age = parse(Int, ai["t"]), rates = filter(r -> !ismissing(r.rate), rates))
     end
-    return (select = sel, ultimate = ult, metadata = _content_classification(root, path))
+    return (select = sel, ultimate = ult, metadata = metadata)
 end
 
-# XTbML labels every rate with its age or duration. Each value goes to its label, so a table
-# whose labels skip (rates at grouped ages, or an empty cell inside a select row) keeps its
-# values at the right ages, with `missing` where it gives no rate. The element type widens only
-# when there are such gaps. A repeated label is ambiguous and throws. `first` is the label of
-# the first position (durations start at 1; ages at the smallest label).
-function _by_label(labels, values, what, table; first = minimum(labels))
-    allunique(labels) || throw(
-        ArgumentError(
-            "XTbML table $(something(table.name, table.source_path, "(unnamed)")): $what repeat a " *
-                "label, so their rates cannot be placed: $(labels)"
-        )
-    )
-    n = maximum(labels) - first + 1
-    labels == first:(first + n - 1) && return first, collect(values)
-    placed = Vector{Union{Missing, eltype(values)}}(missing, n)
-    for (label, value) in zip(labels, values)
-        placed[label - first + 1] = value
-    end
-    return first, placed
-end
+# XTbML labels every rate with its age or duration, so rates are placed by label (see
+# `_by_label`): grouped ages or an empty cell inside a select row keep every value at its own age.
+_xtbml_source(table) = "XTbML table $(something(table.name, table.source_path, "(unnamed)"))"
 
 function XTbML_Table_To_MortalityTable(tbl)
-    start_age, ult_rates = _by_label([v.age for v in tbl.ultimate], [v.rate for v in tbl.ultimate], "the ultimate ages", tbl.metadata)
+    start_age, ult_rates = _by_label([v.age for v in tbl.ultimate], [v.rate for v in tbl.ultimate], "the ultimate ages", _xtbml_source(tbl.metadata))
     ult = UltimateMortality(ult_rates, start_age = start_age)
 
     if !isnothing(tbl.select)
@@ -107,11 +98,11 @@ function XTbML_Table_To_MortalityTable(tbl)
             # empty cells were dropped when parsing: durations without a rate are `missing`
             _, select_rates = _by_label(
                 [r.duration for r in rates], [r.rate for r in rates],
-                "the select durations for issue age $issue_age", tbl.metadata; first = 1
+                "the select durations for issue age $issue_age", _xtbml_source(tbl.metadata); first = 1
             )
             return _select_row(issue_age, select_rates, ult)
         end
-        first_issue_age, sel = _by_label([r.issue_age for r in tbl.select], rows, "the select issue ages", tbl.metadata)
+        first_issue_age, sel = _by_label([r.issue_age for r in tbl.select], rows, "the select issue ages", _xtbml_source(tbl.metadata))
         sel = OffsetArray(sel, first_issue_age - 1)
 
         return MortalityTable(sel, ult, metadata=tbl.metadata)

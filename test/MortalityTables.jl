@@ -17,12 +17,13 @@
             @test cso1980.ultimate[95] ≈ 0.27302
             @test_throws BoundsError cso1980.ultimate[125]
             @test_throws MethodError cso1980[35]  # tables are opaque containers
-            @test_throws ArgumentError survival(cso1980,10,15)
-            @test_throws ArgumentError decrement(cso1980,10,15)
-            @test_throws ArgumentError survival(cso1980, 10, Uniform())
-            @test_throws ArgumentError survival(cso1980, 10, 15, Uniform())
-            @test_throws ArgumentError decrement(cso1980, 10, Uniform())
-            @test_throws ArgumentError decrement(cso1980, 10, 15, Uniform())
+            # rates come from `table.ultimate` or `table.select[age]`, not the table itself
+            @test_throws MethodError survival(cso1980,10,15)
+            @test_throws MethodError decrement(cso1980,10,15)
+            @test_throws MethodError survival(cso1980, 10, Uniform())
+            @test_throws MethodError survival(cso1980, 10, 15, Uniform())
+            @test_throws MethodError decrement(cso1980, 10, Uniform())
+            @test_throws MethodError decrement(cso1980, 10, 15, Uniform())
             @test omega(cso1980.ultimate) == 100
             @test MortalityTables.ω(cso1980.ultimate) == 100
         end

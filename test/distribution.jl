@@ -95,6 +95,44 @@
     @testset "Issue #88 - Stackoverflow" begin
         @test survival(MortalityTables.mortality_vector([0.5,0.5],start_age=50),50,50.5,MortalityTables.Uniform()) ≈ 1 - 0.5 * 0.5
     end
+
+    @testset "fractional starting ages condition on survival to the start" begin
+        # survival from age 0 to y, built from whole-year products and the
+        # within-year fraction starting at a birthday (independent of `survival`)
+        within(::Uniform, q, u) = 1 - u * q
+        within(::Constant, q, u) = (1 - q)^u
+        within(::Balducci, q, u) = (1 - q) / (1 - (1 - u) * q)
+        function S0(v, y, dd)
+            x = floor(Int, y)
+            return prod(1 - v[k] for k in firstindex(v):(x - 1); init = 1.0) * (y == x ? 1.0 : within(dd, v[x], y - x))
+        end
+
+        q = UltimateMortality([0.2, 0.3, 1.0])
+        @test survival(q, 0.5, 1, Uniform()) ≈ 0.8 / 0.9
+        @test survival(q, 0.5, 1, Balducci()) ≈ 0.9
+        @test survival(q, 0.5, 1, Constant()) ≈ sqrt(0.8)
+        for dd in (Uniform(), Balducci(), Constant())
+            @test survival(q, 0, 0.5, dd) * survival(q, 0.5, 1, dd) ≈ 0.8
+        end
+
+        # a select row whose select period (ages 40:42) runs into the ultimate rates
+        ult = UltimateMortality([0.01 * k for k in 1:20], start_age = 40)
+        row = MortalityTables._select_row(40, [0.005, 0.02, 0.07], ult)
+        ages = [0.0, 0.25, 0.5, 1.0, 1.4, 2.75]
+        for (v, offset) in ((q, 0), (row, 40)), dd in (Uniform(), Balducci(), Constant())
+            points = offset .+ ages
+            for (i, a) in enumerate(points), c in points[(i + 1):end]
+                @test survival(v, a, c, dd) ≈ S0(v, c, dd) / S0(v, a, dd)
+                @test decrement(v, a, c, dd) ≈ 1 - S0(v, c, dd) / S0(v, a, dd)
+                for b in points
+                    a < b < c || continue
+                    @test survival(v, a, c, dd) ≈ survival(v, a, b, dd) * survival(v, b, c, dd)
+                end
+            end
+        end
+        # crossing from the select period (age 42.5) into the ultimate rates (age 43.5)
+        @test survival(row, 42.5, 43.5, Uniform()) ≈ (1 - 0.07) / (1 - 0.5 * 0.07) * (1 - 0.5 * ult[43])
+    end
  
 end
 
