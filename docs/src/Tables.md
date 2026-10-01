@@ -253,3 +253,18 @@ MortalityTables.Balducci
 MortalityTables.Uniform
 MortalityTables.Constant
 ```
+## Select-period deterioration (Dukes-MacDonald)
+
+The Dukes-MacDonald methods estimate how the mortality of a select cohort deteriorates
+when excess lapses remove the healthier lives. Three variants are provided, following
+[Doll (2003)](https://www.soa.org/globalassets/assets/library/newsletters/product-development-news/2003/july/pdn-2003-iss56-doll-a.pdf).
+Each has two methods: one taking the point-in-scale and select rates directly, and one
+taking a `SelectUltimateTable` together with the issue and attained ages.
+
+These functions are not exported; call them as `MortalityTables.dukes_macdonald1` etc.
+
+```@docs; canonical=false
+MortalityTables.dukes_macdonald1
+MortalityTables.dukes_macdonald2
+MortalityTables.dukes_macdonald3
+```

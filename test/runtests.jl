@@ -13,6 +13,12 @@ soa_tbl_dir = artifact_hash("mort.soa.org", MT_artifact_toml) |> artifact_path
     @test isempty(Test.detect_ambiguities(MortalityTables; recursive=true))
 end
 
+@testset "every export is defined" begin
+    for n in names(MortalityTables)
+        @test isdefined(MortalityTables, n)
+    end
+end
+
 include("CSV.jl")
 include("basic.jl")
 include("XTbML.jl")

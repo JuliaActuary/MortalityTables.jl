@@ -29,7 +29,7 @@ export MortalityTable,
     Constant,
     DeathDistribution,
     get_SOA_table,
-    Makeham, Gompertz, MakehamGompertz,
+    Makeham, Gompertz,
     hazard, cumhazard,
     mortality_vector
 
