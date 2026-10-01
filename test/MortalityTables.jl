@@ -41,6 +41,8 @@
             @test_throws BoundsError vbt2001.select[150]
             @test omega(vbt2001.select[20]) == 120
             @test omega(vbt2001.ultimate) == 120
+            # a select row with no leading missing keeps a Float64 element type
+            @test eltype(vbt2001.select[35]) == Float64
 
             # this tests when there are ultimate rates available
             # but no select rates for the issue age
@@ -59,6 +61,9 @@
             @test cso2001.ultimate[120] ≈ 1.0
             @test cso2001.select[85][120] ≈ 1.0
             @test ismissing(cso2001.select[15][15]) # age before table defines rates
+            # only rows with leading missing values are widened
+            @test eltype(cso2001.select[15]) == Union{Missing,Float64}
+            @test eltype(cso2001.select[35]) == Float64
             @test_throws BoundsError cso2001.select[150]
             @test_throws BoundsError cso2001.select[70][150]
             @test omega(cso2001.select[16]) == 120
