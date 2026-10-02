@@ -55,12 +55,15 @@ function age_last_to_age_nearest(rates::AbstractVector{<:Real})
 
     for i in (lastindex(last_birthday)-1):-1:firstindex(last_birthday)
         q = last_birthday[i]
-        q_next = nearest[i+1]
-        nearest[i] = ((one(q) + one(q)) * q - q_next) / (one(q) + q - q_next)
+        d = 2q - nearest[i+1]
+        if d < zero(d)
+            # Allow tiny negative values from roundoff, but reject incompatible rates.
+            d >= -8eps(one(q)) ||
+                throw(ArgumentError("rates do not produce valid age-nearest-birthday probabilities"))
+            d = zero(d)
+        end
+        nearest[i] = d / (d + (one(q) - q))
     end
-
-    all(q -> zero(q) <= q <= one(q), nearest) ||
-        throw(ArgumentError("rates do not produce valid age-nearest-birthday probabilities"))
 
     return _with_same_ages(nearest, rates)
 end
