@@ -38,7 +38,7 @@ end
 Construct a mortality model following MakehamBeard's law of mortality.
 
 ``
-\\mathrm{hazard} \\left( {\\rm age} \\right) =\\left( {\\rm age} \\right) = \\frac{a \\cdot e^{b \\cdot {\\rm age}}}{1 + k \\cdot a \\cdot e^{b \\cdot {\\rm age}}} + c
+\\mathrm{hazard} \\left( {\\rm age} \\right) = \\frac{a \\cdot e^{b \\cdot {\\rm age}}}{1 + k \\cdot a \\cdot e^{b \\cdot {\\rm age}}} + c
 ``
 
 Default args:

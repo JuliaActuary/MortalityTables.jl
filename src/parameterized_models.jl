@@ -64,15 +64,15 @@ function Gompertz(;a=0.0002, b=0.13)
 end
 
 """
-    InverseGompertz(;a,b,c)
+    InverseGompertz(;m,σ)
 
 Construct a mortality model following InverseGompertz's law.
 
 ```math
 \\begin{aligned}
-\\mathrm{hazard} \\left( {\\rm age} \\right) &= \\frac{1}{\\sigma}e^\\frac{age-m}{\\sigma}/e^{e^\\frac{-(age-m)}{\\sigma}-1}``
+\\mathrm{hazard} \\left( {\\rm age} \\right) &= \\frac{1}{\\sigma} \\cdot \\frac{e^{\\frac{ - \\left( {\\rm age} - m \\right)}{\\sigma}}}{e^{e^{\\frac{ - \\left( {\\rm age} - m \\right)}{\\sigma}}} - 1}
 \\\\
-\\mathrm{survival} \\left( {\\rm age} \\right) &= \\frac{1 - e^{ - e^{\\frac{ - \\left( {\\rm age} - m \\right)}{\\sigma}}}}{1 - e^{ - e^{\\frac{m}{\\sigma}}}}``
+\\mathrm{survival} \\left( {\\rm age} \\right) &= \\frac{1 - e^{ - e^{\\frac{ - \\left( {\\rm age} - m \\right)}{\\sigma}}}}{1 - e^{ - e^{\\frac{m}{\\sigma}}}}
 \\end{aligned}
 ```
 
@@ -106,7 +106,7 @@ end
 Construct a mortality model following Opperman's law of mortality.
 
 ``
-\\mathrm{hazard} \\left( {\\rm age} \\right) = \\frac{a}{\\sqrt{age}} + b +c\\sqrt[3]{age}
+\\mathrm{hazard} \\left( {\\rm age} \\right) = \\max\\left( \\frac{a}{\\sqrt{{\\rm age} + 1}} - b + c \\cdot \\sqrt{{\\rm age} + 1}, 0 \\right)
 ``
 
 Default args:
@@ -131,7 +131,7 @@ end
 """
     Thiele(;a,b,c,d,e,f,g)
 
-Construct a mortality model following Opperman's law of mortality.
+Construct a mortality model following Thiele's law of mortality.
 
 ```math
 \\begin{aligned}
@@ -260,7 +260,7 @@ end
 """
     InverseWeibull(;m,σ)
 
-Construct a mortality model following Weibull's law of mortality.
+Construct a mortality model following the Inverse-Weibull law of mortality.
 
 The Inverse-Weibull proves useful for modelling the childhood and teenage years, because the logarithm of h(x) is a concave function.
  - `m >0` is a measure of location
@@ -490,18 +490,31 @@ end
 
 Construct a mortality model following HeligmanPollard law of mortality with 8 parameters.
 
-``
-\\mathrm{hazard} \\left( {\\rm age} \\right) = a \\cdot e^{\\left(  - b \\right) \\cdot {\\rm age}} + c + d \\cdot e^{e \\cdot {\\rm age}}
-``
-
+```math
+\\begin{aligned}
+\\mu_1 &= a^{\\left( {\\rm age} + b \\right)^{c}} + g \\cdot h^{{\\rm age}}
+\\\\
+\\mu_2 &= d \\cdot e^{\\left(  - e \\right) \\cdot \\left( \\log\\left( \\frac{{\\rm age}}{f} \\right) \\right)^{2}}
+\\\\
+\\eta &= \\begin{cases}
+\\mu_1 & \\text{if } \\left( {\\rm age} = 0 \\right)\\\\
+\\mu_1 + \\mu_2 & \\text{otherwise}
+\\end{cases}
+\\\\
+\\mathrm{hazard}\\left( {\\rm age} \\right) &= \\frac{\\eta}{1 + \\eta}
+\\end{aligned}
+```
 
 Default args:
 
-    a = 0.0002
-    b = 0.13
-    c = 0.001
-    d = 0.001
-    e = 0.013
+    a = .0005
+    b = .004
+    c = .08
+    d = .001
+    e = 10
+    f = 17
+    g = .00005
+    h = 1.1
 """
 struct HeligmanPollard{T<:Real} <: ParametricMortality
     a::T
