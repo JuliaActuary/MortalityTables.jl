@@ -10,6 +10,39 @@
 
         # a DeathDistribution is accepted and ignored by continuous models
         @test life_expectancy(m, 50, MortalityTables.Uniform()) == life_expectancy(m, 50)
+
+        # a law defined at every age (omega = Inf) gives the same bits as integrating the
+        # remaining lifetime from zero, as before omega bounded the integral
+        for law in (m, Makeham()), age in (0, 40, 50.5)
+            @test life_expectancy(law, age) === quadgk(to -> survival(law, age, to + age), 0, Inf)[1]
+        end
+    end
+
+    @testset "parametric, to omega" begin
+        # Wittstein's formula ends at m = 100, where survival from 40 is still about 4.7e-6.
+        # Reference: 256-bit quadrature of the hazard written out independently.
+        w = MortalityTables.Wittstein()
+        @test life_expectancy(w, 40) ≈ 8.480415927762158 rtol = 1.0e-8
+
+        # a hazard of 1/(100 - age) makes the remaining lifetime from 40 uniform on [40, 100]
+        v = MortalityTables.VanderMaen(a = 0.0, b = 0.0, c = 0.0, i = 1.0, n = 100.0)
+        v2 = MortalityTables.VanderMaen2(a = 0.0, b = 0.0, i = 1.0, n = 100.0)
+        @test life_expectancy(v, 40) ≈ 30
+        @test life_expectancy(v2, 40) ≈ 30
+
+        # nothing remains at omega, in the type of the integral
+        for law in (w, v, v2), age in (100, 100.0)
+            @test life_expectancy(law, age) === 0.0
+        end
+        w32 = MortalityTables.Wittstein(a = 1.5f0, b = 1.0f0, n = 0.5f0, m = 100.0f0)
+        @test life_expectancy(w32, 40.0f0) isa Float32
+        @test life_expectancy(w32, 100.0f0) === 0.0f0
+
+        # past omega the law is not defined: Wittstein's (m - age)^n is not real, and VanderMaen's
+        # cumulative hazard runs into the pole at n
+        @test_throws DomainError life_expectancy(w, 101)
+        @test_throws DomainError life_expectancy(v, 101)
+        @test_throws DomainError life_expectancy(v2, 101)
     end
 
     @testset "vector" begin

@@ -6,6 +6,8 @@ Calcuate the remaining life expectancy. Assumes curtate life expectancy for tabl
 
 The life_expectancy of the last age defined in the table is set to be `0.0`, even if the table does not end with a rate of `1.0`. An age outside the table is a `BoundsError`.
 
+For a parametric model, survival is integrated from `age` to the model's `omega`: `Inf` for most laws, but finite for a law whose formula ends, such as `Wittstein`. This is the expected remaining lifetime capped at `omega`. If survival is still positive just before `omega`, the remaining probability of death is placed at `omega`, the same convention as a table's last age, whose life_expectancy is `0` even if its last rate is below `1`.
+
 Parametric models accept a `DeathDistribution` and ignore it, since they are continuous.
 """
 function life_expectancy(table,age)
@@ -33,7 +35,9 @@ function life_expectancy(table,age,dist)
 end
 
 function life_expectancy(table::ParametricMortality,age)
-    QuadGK.quadgk(to -> survival(table,age,to+age),0,Inf)[1]
+    # over the remaining lifetime t, as for an unbounded law before omega was used; integrating over
+    # attained ages [age, omega] gives the same bits but is about 10% slower
+    return QuadGK.quadgk(t -> survival(table, age, age + t), 0, omega(table) - age)[1]
 end
 
 # continuous models need no fractional-age assumption; accept and ignore one
