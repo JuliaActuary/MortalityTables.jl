@@ -135,11 +135,11 @@ Construct a mortality model following Thiele's law of mortality.
 
 ```math
 \\begin{aligned}
-\\mu_1 &= a \\cdot e^{\\left(  - b \\right) \\cdot {\\rm age}}
+\\mu_1 &= a \\cdot \\exp\\left( -b \\cdot {\\rm age} \\right)
 \\\\
-\\mu_2 &= c \\cdot e^{-0.5 \\cdot d \\cdot \\left( {\\rm age} - e \\right)^{2}}
+\\mu_2 &= c \\cdot \\exp\\left( -\\frac{d}{2} \\left( {\\rm age} - e \\right)^{2} \\right)
 \\\\
-\\mu_3 &= f \\cdot e^{g \\cdot {\\rm age}}
+\\mu_3 &= f \\cdot \\exp\\left( g \\cdot {\\rm age} \\right)
 \\\\
 \\mathrm{hazard} \\left( {\\rm age} \\right) &= \\begin{cases}
 \\mu_1 + \\mu_3 & \\text{if } \\left( {\\rm age} = 0 \\right)\\\\
@@ -229,7 +229,7 @@ Note that if σ > m, then the mode of the density is 0 and hx is a non-increasin
 \\\\
 \\mathrm{cumhazard} \\left( {\\rm age} \\right) = \\left( \\frac{{\\rm age}}{m} \\right)^{\\frac{m}{\\sigma}}
 \\\\
-\\mathrm{survival} \\left( {\\rm age} \\right) =  e^{ - \\mathrm{cumhazard} \\left( m, {\\rm age} \\right)}
+\\mathrm{survival} \\left( {\\rm age} \\right) =  e^{ - \\mathrm{cumhazard} \\left( {\\rm age} \\right)}
 \\end{aligned}
 ```
 
@@ -269,7 +269,7 @@ The Inverse-Weibull proves useful for modelling the childhood and teenage years,
 \\\\
 \\mathrm{cumhazard}\\left( {\\rm age} \\right) &=  - \\log\\left( 1 - e^{ - \\left( \\frac{{\\rm age}}{m} \\right)^{\\frac{ - m}{\\sigma}}} \\right)
 \\\\
-\\mathrm{survival}\\left( {\\rm age} \\right) &=  e^{ - \\mathrm{cumhazard}\\left( m, {\\rm age} \\right)}
+\\mathrm{survival}\\left( {\\rm age} \\right) &=  e^{ - \\mathrm{cumhazard}\\left( {\\rm age} \\right)}
 \\end{aligned}
 ```
 
@@ -459,7 +459,7 @@ end
 Construct a mortality model following Siler law of mortality.
 
 ``
-\\mathrm{hazard} \\left( {\\rm age} \\right) = a \\cdot e^{\\left(  - b \\right) \\cdot {\\rm age}} + c + d \\cdot e^{e \\cdot {\\rm age}}
+\\mathrm{hazard} \\left( {\\rm age} \\right) = a \\cdot \\exp\\left( -b \\cdot {\\rm age} \\right) + c + d \\cdot \\exp\\left( e \\cdot {\\rm age} \\right)
 ``
 
 Default args:
@@ -493,7 +493,7 @@ Construct a mortality model following HeligmanPollard law of mortality with 8 pa
 \\begin{aligned}
 \\mu_1 &= a^{\\left( {\\rm age} + b \\right)^{c}} + g \\cdot h^{{\\rm age}}
 \\\\
-\\mu_2 &= d \\cdot e^{\\left(  - e \\right) \\cdot \\left( \\log\\left( \\frac{{\\rm age}}{f} \\right) \\right)^{2}}
+\\mu_2 &= d \\cdot \\exp\\left( -e \\cdot \\left( \\log\\left( \\frac{{\\rm age}}{f} \\right) \\right)^{2} \\right)
 \\\\
 \\eta &= \\begin{cases}
 \\mu_1 & \\text{if } \\left( {\\rm age} = 0 \\right)\\\\
@@ -545,7 +545,7 @@ Construct a mortality model following HeligmanPollard (alternate) law of mortali
 \\begin{aligned}
 \\mu_1 &= a^{\\left( {\\rm age} + b \\right)^{c}} + \\frac{g \\cdot h^{{\\rm age}}}{1 + g \\cdot h^{{\\rm age}}}
 \\\\
-\\mu_2 &= d \\cdot e^{\\left(  - e \\right) \\cdot \\left( \\log\\left( \\frac{{\\rm age}}{f} \\right) \\right)^{2}}
+\\mu_2 &= d \\cdot \\exp\\left( -e \\cdot \\left( \\log\\left( \\frac{{\\rm age}}{f} \\right) \\right)^{2} \\right)
 \\\\
 \\mathrm{hazard}\\left( {\\rm age} \\right) &= \\begin{cases}
 \\mu_1 & \\text{if } \\left( {\\rm age} = 0 \\right)\\\\
@@ -593,7 +593,7 @@ Construct a mortality model following HeligmanPollard (alternate) law of mortali
 \\begin{aligned}
 \\mu_1 &= a^{\\left( {\\rm age} + b \\right)^{c}} + \\frac{g \\cdot h^{{\\rm age}}}{1 + k \\cdot g \\cdot h^{{\\rm age}}}
 \\\\
-\\mu_2 &= d \\cdot e^{\\left(  - e \\right) \\cdot \\left( \\log\\left( \\frac{{\\rm age}}{f} \\right) \\right)^{2}}
+\\mu_2 &= d \\cdot \\exp\\left( -e \\cdot \\left( \\log\\left( \\frac{{\\rm age}}{f} \\right) \\right)^{2} \\right)
 \\\\
 \\mathrm{hazard}\\left( {\\rm age} \\right) &= \\begin{cases}
 \\mu_1 & \\text{if } \\left( {\\rm age} = 0 \\right)\\\\
@@ -643,7 +643,7 @@ Construct a mortality model following HeligmanPollard (alternate) law of mortali
 \\begin{aligned}
 \\mu_1 &= a^{\\left( {\\rm age} + b \\right)^{c}} + \\frac{g \\cdot h^{{\\rm age}^{k}}}{1 + g \\cdot h^{{\\rm age}^{k}}}
 \\\\
-\\mu_2 &= d \\cdot e^{\\left(  - e \\right) \\cdot \\left( \\log\\left( \\frac{{\\rm age}}{f} \\right) \\right)^{2}}
+\\mu_2 &= d \\cdot \\exp\\left( -e \\cdot \\left( \\log\\left( \\frac{{\\rm age}}{f} \\right) \\right)^{2} \\right)
 \\\\
 \\mathrm{hazard}\\left( {\\rm age} \\right) &= \\begin{cases}
 \\mu_1 & \\text{if } \\left( {\\rm age} = 0 \\right)\\\\

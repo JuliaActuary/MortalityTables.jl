@@ -2,11 +2,11 @@
     life_expectancy(table,age)
     life_expectancy(table,age,DeathDistribution)
 
-Calcuate the remaining life expectancy. Assumes curtate life expectancy for tables if not Parametric or DeathDistribution given.
+Calculate the remaining life expectancy: curtate for a table without a `DeathDistribution`, complete otherwise.
 
 The life_expectancy of the last age defined in the table is set to be `0.0`, even if the table does not end with a rate of `1.0`. An age outside the table is a `BoundsError`.
 
-For a parametric model, survival is integrated from `age` to the model's `omega`: `Inf` for most laws, but finite for a law whose formula ends, such as `Wittstein`. This is the expected remaining lifetime capped at `omega`. If survival is still positive just before `omega`, the remaining probability of death is placed at `omega`, the same convention as a table's last age, whose life_expectancy is `0` even if its last rate is below `1`. An age past `omega` is a `DomainError`.
+For a parametric model, survival is integrated from `age` to the model's `omega`. `omega` is `Inf` for most laws and finite for a law whose formula ends, such as `Wittstein`. The result is the expected remaining lifetime capped at `omega`. Survival left at `omega` counts as death there, as at a table's last age. An age past `omega` is a `DomainError`.
 
 Parametric models accept a `DeathDistribution` and ignore it, since they are continuous.
 """
@@ -35,8 +35,8 @@ function life_expectancy(table,age,dist)
 end
 
 function life_expectancy(table::ParametricMortality,age)
-    # over the remaining lifetime t, as for an unbounded law before omega was used; integrating over
-    # attained ages [age, omega] gives the same bits but is about 10% slower
+    # Integrate over the remaining lifetime t. Integrating over ages [age, omega] gives the same bits
+    # but is about 10% slower.
     return QuadGK.quadgk(t -> survival(table, age, age + t), 0, omega(table) - age)[1]
 end
 
