@@ -1,7 +1,7 @@
 # MortalityTables
 
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaActuary.github.io/MortalityTables.jl/stable)
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://JuliaActuary.github.io/MortalityTables.jl/dev)
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://docs.juliaactuary.org/MortalityTables/stable/)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://docs.juliaactuary.org/MortalityTables/dev/)
 [![CI](https://github.com/JuliaActuary/MortalityTables.jl/workflows/CI/badge.svg)](https://github.com/JuliaActuary/MortalityTables.jl/actions?query=workflow%3ACI)
 [![codecov](https://codecov.io/gh/JuliaActuary/MortalityTables.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaActuary/MortalityTables.jl)
 [![lifecycle](https://img.shields.io/badge/LifeCycle-Stable-green)](https://www.tidyverse.org/lifecycle/)
