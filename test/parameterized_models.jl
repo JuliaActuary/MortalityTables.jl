@@ -12,8 +12,8 @@ using ForwardDiff
             @test isbits(m)
             @test m isa L{Float64}
             @test (@inferred hazard(m, 50.0)) isa Float64
-            # a Float32 law keeps its type at Float32 ages, including the laws' special cases at
-            # age zero (Weibull, Thiele) and Opperman's floor at zero
+            # a Float32 law keeps its type at Float32 ages, including Thiele's special case at age
+            # zero and Opperman's floor at zero
             m32 = L(map(f -> Float32(getfield(m, f)), fieldnames(typeof(m)))...)
             @test m32 isa L{Float32}
             for age in (0.0f0, 1.0f0, 50.0f0)
@@ -327,6 +327,16 @@ using ForwardDiff
         @test omega(MortalityTables.VanderMaen()) == 200
         @test omega(MortalityTables.VanderMaen2(n = 150)) == 150
         @test omega(MortalityTables.Wittstein(m = 90.0)) === 90.0
+    end
+
+    @testset "Weibull's hazard at age zero is the formula's limit" begin
+        # Inf for m < σ, 1/σ for m = σ and 0 for m > σ, in the law's type
+        for T in (Float64, Float32)
+            @test hazard(MortalityTables.Weibull(m = T(1), σ = T(2)), zero(T)) === T(Inf)
+            @test hazard(MortalityTables.Weibull(m = T(3), σ = T(3)), zero(T)) === 1 / T(3)
+            @test hazard(MortalityTables.Weibull(m = T(2), σ = T(1)), zero(T)) === zero(T)
+        end
+        @test hazard(MortalityTables.Weibull(), 0) === Inf
     end
 
     @testset "an age past omega is a DomainError" begin

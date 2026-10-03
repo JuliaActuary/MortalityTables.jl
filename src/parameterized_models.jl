@@ -246,11 +246,7 @@ Weibull(; m=1.0, σ=2.0) = Weibull(promote(m, σ)...)
 
 function hazard(model::Weibull,age)
     (; m, σ) = model
-    if age == 0
-        return one(age / m)
-    else 
-        return 1 / σ * (age / m)^(m / σ - 1)
-    end
+    return 1 / σ * (age / m)^(m / σ - 1)
 end
 
 function cumhazard(model::Weibull,age)
