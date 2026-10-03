@@ -45,7 +45,7 @@
         # also where Wittstein's formula still evaluates (a whole-number n), and just past omega
         for n in (1.0, 2.0)
             wn = MortalityTables.Wittstein(n = n)
-            for age in (101, 100.01, 100 + 1e-9)
+            for age in (101, 100.01, 100 + 1.0e-9)
                 @test_throws DomainError life_expectancy(wn, age)
             end
             # at and below omega, the integral of survival as before

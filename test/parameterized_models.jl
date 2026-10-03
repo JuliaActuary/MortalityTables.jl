@@ -342,9 +342,11 @@ using ForwardDiff
     @testset "an age past omega is a DomainError" begin
         # Wittstein's formula still evaluates past m for a whole-number n, and VanderMaen's past
         # its pole. Ages just past omega throw too, although quadrature never evaluates its end age.
-        laws = (MortalityTables.Wittstein(), MortalityTables.Wittstein(n = 1.0), MortalityTables.Wittstein(n = 2.0),
-                MortalityTables.VanderMaen(), MortalityTables.VanderMaen2(a = 0.001, b = 0.0001, i = 0.5, n = 90.0))
-        for law in laws, past in omega(law) .+ (1, 0.01, 1e-9)
+        laws = (
+            MortalityTables.Wittstein(), MortalityTables.Wittstein(n = 1.0), MortalityTables.Wittstein(n = 2.0),
+            MortalityTables.VanderMaen(), MortalityTables.VanderMaen2(a = 0.001, b = 0.0001, i = 0.5, n = 90.0),
+        )
+        for law in laws, past in omega(law) .+ (1, 0.01, 1.0e-9)
             @test_throws DomainError hazard(law, past)
             @test_throws DomainError cumhazard(law, past)
             @test_throws DomainError survival(law, past)
