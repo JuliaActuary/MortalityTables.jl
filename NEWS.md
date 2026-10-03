@@ -33,11 +33,12 @@
 
 ### Other changes
 
+- `age_nearest_to_age_last` and `age_last_to_age_nearest` convert ultimate rates between age-nearest-birthday and age-last-birthday bases, assuming a uniform distribution of deaths over each year of age, and keep the rates' ages. The last rate must be one.
 - `cumhazard` is defined for every parametric law. It integrates `hazard` numerically unless the law provides a closed form, and `survival` follows from it.
 - Parametric models accept and ignore a `DeathDistribution` in `survival`, `decrement`, and `life_expectancy`, so a model works wherever a table's rate vector does. `omega` of a parametric model is the last age at which its law is defined: `Inf` for most laws, `m` for `Wittstein`, and `n` for `VanderMaen` and `VanderMaen2`. Survival need not be zero there, so a projection over a parametric law needs its own horizon.
 - `decrement` on a parametric model is `-expm1(-cumhazard(...))`, and on a rate vector the decrement is accumulated directly (`d ← d + q(1 - d)`) rather than computed as one minus the survival product, so a small decrement is not rounded away: a rate of `1e-18` gave `0.0`, and `1e-6` kept only about 11 digits. Survival values are unchanged. A type that defines only `survival` still gets `decrement` as `1 - survival`.
 - `life_expectancy` on a rate vector is linear rather than quadratic in the number of remaining ages and allocation free. An age past omega is a `BoundsError`.
 - `UltimateMortality` accepts any `AbstractVector` (ranges, views, vectors containing `missing`, or a vector already indexed by age) and wraps it without copying; `start_age` sets the first age whatever the input's own axes. `mortality_vector` is another name for it (`mortality_vector === UltimateMortality`), as `MortalityTables.μ` is for `hazard`.
-- XTbML parsing uses [XML.jl](https://github.com/JuliaData/XML.jl): loading a table is about 2 to 3 times faster and `using MortalityTables` no longer loads libxml2.
+- XTbML parsing uses [XML.jl](https://github.com/JuliaData/XML.jl), and `using MortalityTables` no longer loads libxml2. Parsing a table from disk is 2.4 times faster for the 1980 CSO ultimate table and 23 times faster for the 2001 VBT select and ultimate table. (Loading a table twice returns the cached table, in 2.x as well.)
 - `Pkg`, `UnPack`, `Requires`, `Memoize`, `Parsers`, and `XMLDict` are no longer dependencies.
 - The Dukes-MacDonald functions are documented on the Tables page.
