@@ -28,7 +28,10 @@ function cumhazard end
 """
 const μ = hazard
 
-cumhazard(m::ParametricMortality, to)       = quadgk(age -> hazard(m, age), 0, to)[1]
+function cumhazard(m::ParametricMortality, to)
+    _check_age(m, to)
+    return quadgk(age -> hazard(m, age), 0, to)[1]
+end
 cumhazard(m::ParametricMortality, from, to) = cumhazard(m, to) - cumhazard(m, from)
 survival(m::ParametricMortality, to)        = exp(-cumhazard(m, to))
 survival(m::ParametricMortality, from, to)  = exp(-cumhazard(m, from, to))
@@ -46,6 +49,12 @@ decrement(m::ParametricMortality, from, to, ::DeathDistribution) = decrement(m, 
 # The last age at which a law is defined: every age, unless the law's formula ends (see the
 # `omega` docstring and the methods beside `Wittstein`, `VanderMaen` and `VanderMaen2`).
 omega(::ParametricMortality) = Inf
+
+# Past omega a law's formula can still return a number (Wittstein's with a whole-number `n`,
+# VanderMaen's beyond its pole), so an age past omega is a DomainError. A bounded law's `hazard`
+# checks its age, and `cumhazard` checks its end age, which quadrature never evaluates; survival,
+# decrement and life expectancy go through `cumhazard`.
+_check_age(m, age) = age > omega(m) ? throw(DomainError(age, "the law is defined up to omega = $(omega(m))")) : nothing
 
 (m::ParametricMortality)(x) = hazard(m, x)
 Base.broadcastable(pm::ParametricMortality) = Ref(pm)

@@ -38,11 +38,21 @@
         @test life_expectancy(w32, 40.0f0) isa Float32
         @test life_expectancy(w32, 100.0f0) === 0.0f0
 
-        # past omega the law is not defined: Wittstein's (m - age)^n is not real, and VanderMaen's
-        # cumulative hazard runs into the pole at n
+        # past omega the law ends, and life_expectancy throws
         @test_throws DomainError life_expectancy(w, 101)
         @test_throws DomainError life_expectancy(v, 101)
         @test_throws DomainError life_expectancy(v2, 101)
+        # also where Wittstein's formula still evaluates (a whole-number n), and just past omega
+        for n in (1.0, 2.0)
+            wn = MortalityTables.Wittstein(n = n)
+            for age in (101, 100.01, 100 + 1e-9)
+                @test_throws DomainError life_expectancy(wn, age)
+            end
+            # at and below omega, the integral of survival as before
+            H(x) = cumhazard(wn, x)
+            @test life_expectancy(wn, 99) === quadgk(t -> exp(-(H(99 + t) - H(99))), 0, omega(wn) - 99)[1]
+            @test life_expectancy(wn, 100) === 0.0
+        end
     end
 
     @testset "vector" begin

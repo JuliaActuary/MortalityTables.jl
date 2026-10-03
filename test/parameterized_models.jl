@@ -329,6 +329,33 @@ using ForwardDiff
         @test omega(MortalityTables.Wittstein(m = 90.0)) === 90.0
     end
 
+    @testset "an age past omega is a DomainError" begin
+        # Wittstein's formula still evaluates past m for a whole-number n, and VanderMaen's past
+        # its pole. Ages just past omega throw too, although quadrature never evaluates its end age.
+        laws = (MortalityTables.Wittstein(), MortalityTables.Wittstein(n = 1.0), MortalityTables.Wittstein(n = 2.0),
+                MortalityTables.VanderMaen(), MortalityTables.VanderMaen2(a = 0.001, b = 0.0001, i = 0.5, n = 90.0))
+        for law in laws, past in omega(law) .+ (1, 0.01, 1e-9)
+            @test_throws DomainError hazard(law, past)
+            @test_throws DomainError cumhazard(law, past)
+            @test_throws DomainError survival(law, past)
+            @test_throws DomainError survival(law, omega(law) - 10, past)
+            @test_throws DomainError decrement(law, omega(law) - 10, past)
+        end
+        # at and below omega, the values are those of Wittstein's formula
+        for n in (1.0, 2.0)
+            w = MortalityTables.Wittstein(n = n)
+            (; a, b, m) = w
+            h(x) = (1 / b) * a^-((b * x)^n) + a^-((m - x)^n)
+            H(x) = quadgk(h, 0, x)[1]
+            for age in (0.5, 50, 99.5, 100)
+                @test hazard(w, age) === h(age)
+                @test cumhazard(w, age) === H(age)
+            end
+            @test survival(w, 90, 100) === exp(-(H(100) - H(90)))
+            @test decrement(w, 90, 100) === -expm1(-(H(100) - H(90)))
+        end
+    end
+
     @testset "Gompertz and Makeham equality" begin
 
         # Gompertz is Makeham's where c = 0

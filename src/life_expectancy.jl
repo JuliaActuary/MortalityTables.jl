@@ -6,7 +6,7 @@ Calcuate the remaining life expectancy. Assumes curtate life expectancy for tabl
 
 The life_expectancy of the last age defined in the table is set to be `0.0`, even if the table does not end with a rate of `1.0`. An age outside the table is a `BoundsError`.
 
-For a parametric model, survival is integrated from `age` to the model's `omega`: `Inf` for most laws, but finite for a law whose formula ends, such as `Wittstein`. This is the expected remaining lifetime capped at `omega`. If survival is still positive just before `omega`, the remaining probability of death is placed at `omega`, the same convention as a table's last age, whose life_expectancy is `0` even if its last rate is below `1`.
+For a parametric model, survival is integrated from `age` to the model's `omega`: `Inf` for most laws, but finite for a law whose formula ends, such as `Wittstein`. This is the expected remaining lifetime capped at `omega`. If survival is still positive just before `omega`, the remaining probability of death is placed at `omega`, the same convention as a table's last age, whose life_expectancy is `0` even if its last rate is below `1`. An age past `omega` is a `DomainError`.
 
 Parametric models accept a `DeathDistribution` and ignore it, since they are continuous.
 """

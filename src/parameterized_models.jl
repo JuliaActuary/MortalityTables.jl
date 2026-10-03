@@ -195,7 +195,7 @@ Default args:
     n = 0.5
     m = 100
 
-The law is defined up to age `m`, which `omega` returns.
+The law is defined up to age `m`, which `omega` returns. An age past `m` is a `DomainError`.
 """
 struct Wittstein{T<:Real} <: ParametricMortality
     a::T
@@ -206,11 +206,12 @@ end
 Wittstein(; a=1.5, b=1., n=0.5, m=100) = Wittstein(promote(a, b, n, m)...)
 
 function hazard(model::Wittstein,age)
+    _check_age(model, age)
     (; a, b, m, n) = model
     return (1/b) * a ^ -((b * age) ^ n) + a^ -((m -  age) ^ n) 
 end
 
-# `(m - age)^n` is not real beyond age `m`
+# the law ends at age `m`
 omega(model::Wittstein) = model.m
 
 """
@@ -344,7 +345,7 @@ Default args:
     i = 100
     n = 200
 
-The law is defined up to age `n`, where the hazard has a pole; `omega` returns `n`.
+The law is defined up to age `n`, where the hazard has a pole; `omega` returns `n`. An age past `n` is a `DomainError`.
 """
 struct VanderMaen{T<:Real} <: ParametricMortality
     a::T
@@ -356,6 +357,7 @@ end
 VanderMaen(; a=0.01, b=1., c=0.01, i=100., n=200.) = VanderMaen(promote(a, b, c, i, n)...)
 
 function hazard(m::VanderMaen,age)
+    _check_age(m, age)
     (; a, b, c, i, n) = m
     return a + b*age + c*(age^2) + i/(n - age)
 end
@@ -379,7 +381,7 @@ Default args:
     i = 100
     n = 200
 
-The law is defined up to age `n`, where the hazard has a pole; `omega` returns `n`.
+The law is defined up to age `n`, where the hazard has a pole; `omega` returns `n`. An age past `n` is a `DomainError`.
 """
 struct VanderMaen2{T<:Real} <: ParametricMortality
     a::T
@@ -390,6 +392,7 @@ end
 VanderMaen2(; a=0.01, b=1., i=100., n=200.) = VanderMaen2(promote(a, b, i, n)...)
 
 function hazard(m::VanderMaen2,age)
+    _check_age(m, age)
     (; a, b, i, n) = m
     return a + b * age + i/(n - age)
 end
