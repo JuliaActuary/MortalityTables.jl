@@ -163,5 +163,34 @@
             @test cso2001_a == cso2001_b
         end
 
+        @testset "isequal and hash agree for independently built tables" begin
+            # equal tables are equal under isequal and hash alike, so they work as Dict keys
+            function check_contract(a, b)
+                @test a !== b
+                @test a == b
+                @test isequal(a, b)
+                @test hash(a) == hash(b)
+                @test length(Set([a, b])) == 1
+                @test Dict(a => 1)[b] == 1
+            end
+            # parsed twice from the same file, without the cache
+            for id in (17, 1076)
+                path = joinpath(soa_tbl_dir, "t$id.xml")
+                check_contract(MortalityTables._read_xtbml(path), MortalityTables._read_xtbml(path))
+            end
+            # built from separate, equal vectors (one a range, one a Vector, with missing rates)
+            # and separately built metadata
+            md() = TableMetaData(name = string("My ", "Table"), comments = string("Rates"))
+            ult_a = UltimateMortality(0.1:0.1:1.0, start_age = 5)
+            ult_b = UltimateMortality(collect(0.1:0.1:1.0), start_age = 5)
+            check_contract(MortalityTable(ult_a, metadata = md()), MortalityTable(ult_b, metadata = md()))
+            sel(ult) = SelectMortality([missing 0.02 0.03; 0.04 0.05 0.06], ult, start_age = 5)
+            check_contract(MortalityTable(sel(ult_a), ult_a, metadata = md()), MortalityTable(sel(ult_b), ult_b, metadata = md()))
+            # different rates, ages or metadata are different tables
+            @test MortalityTable(ult_a) != MortalityTable(UltimateMortality(0.1:0.1:1.0, start_age = 6))
+            @test MortalityTable(ult_a) != MortalityTable(ult_a, metadata = md())
+            @test MortalityTable(ult_a) != MortalityTable(sel(ult_a), ult_a)
+        end
+
     end
 end

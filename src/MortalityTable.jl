@@ -119,10 +119,15 @@ end
 Base.:(==)(tbl1::UltimateTable, tbl2::UltimateTable) = tbl1.metadata == tbl2.metadata && isequal(tbl1.ultimate, tbl2.ultimate)
 function Base.:(==)(tbl1::SelectUltimateTable, tbl2::SelectUltimateTable)
     return (
-        tbl1.metadata == tbl2.metadata && 
+        tbl1.metadata == tbl2.metadata &&
         isequal(tbl1.ultimate, tbl2.ultimate) &&
         isequal(tbl1.select, tbl2.select)
     )
+end
+# equal tables (`==`, and so `isequal`) hash alike: the same fields, hashed as `isequal` compares them
+Base.hash(tbl::UltimateTable, h::UInt) = hash(tbl.ultimate, hash(tbl.metadata, hash(UltimateTable, h)))
+function Base.hash(tbl::SelectUltimateTable, h::UInt)
+    return hash(tbl.select, hash(tbl.ultimate, hash(tbl.metadata, hash(SelectUltimateTable, h))))
 end
 
 

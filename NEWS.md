@@ -32,6 +32,7 @@
 - `Makeham`, `Gompertz`, and `Kannisto` with `b = 0` return the constant-hazard limit instead of `NaN`. At an infinite age a zero coefficient no longer turns the result into `NaN`: `survival(Gompertz(), Inf)` and a constant hazard's survival there are `0`, a law with no hazard keeps survival `1`, and `hazard(Makeham(b = 0), Inf)` is `a + c`.
 - 34 additional mort.SOA.org tables with an empty metadata element now load (for example `table(217)`). The 760 bundled tables that still do not load (other layouts, such as claim termination rates or projection scales, and select durations labelled from 0) are listed in `test/data/unsupported_tables.txt`.
 - An XTbML or CSV table with more than two tables of rates raises an `ArgumentError` naming the table, rather than loading with its middle table dropped. Four bundled tables have three (t357, t359, t754, and t755); they did not load in 2.x either.
+- Equal tables (`==`, and so `isequal`) now have equal hashes, so tables work as `Dict` keys and in `Set`s. 2.x defined `==` without `hash`, so two equal tables built separately hashed differently.
 - The `get_SOA_table` "not found" error message now includes the requested table name.
 - Showing a custom table no longer prints a broken mort.SOA.org link.
 
