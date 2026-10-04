@@ -225,12 +225,15 @@ MortalityTables.decrement
 ```
 ## Life Expectancy
 
-Calculate curtate or complete life expectancy.
+`curtate_life_expectancy` gives the expected number of whole years lived after an age;
+`complete_life_expectancy` gives the expected remaining lifetime, with survival within each year
+of age following a fractional year assumption (see below).
 
 ### Docstrings
 
 ```@docs; canonical=false
-MortalityTables.life_expectancy
+MortalityTables.curtate_life_expectancy
+MortalityTables.complete_life_expectancy
 ```
 
 ## Fractional Year Assumptions

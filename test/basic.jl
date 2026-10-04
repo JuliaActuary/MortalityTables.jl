@@ -177,10 +177,10 @@ MortalityTables.survival(::SurvivalOnly, from, to) = exp(-0.1 * (to - from))
             @test decrement(q, 1, 1) == 0
             @test decrement(q, 0, 2) isa T
             @test decrement(q, 2, 0) isa T
-            @test life_expectancy(q, 2) isa T
-            @test life_expectancy(q, 2) == 0
-            @test life_expectancy(q, 0) isa T
-            @test life_expectancy(q, 0) ≈ 0.9 + 0.9 * 0.7
+            @test curtate_life_expectancy(q, 2) isa T
+            @test curtate_life_expectancy(q, 2) == 0
+            @test curtate_life_expectancy(q, 0) isa T
+            @test curtate_life_expectancy(q, 0) ≈ 0.9 + 0.9 * 0.7
             # fractional ages promote with the ages' type
             S = promote_type(T, Float64)
             for dd in (UniformDeaths(), Balducci(), ConstantForce())
@@ -189,9 +189,9 @@ MortalityTables.survival(::SurvivalOnly, from, to) = exp(-0.1 * (to - from))
                 @test decrement(q, 0.5, 0.5, dd) isa S
                 @test decrement(q, 0.5, 1.5, dd) isa S
             end
-            @test life_expectancy(q, 2, UniformDeaths()) isa S
-            @test life_expectancy(q, 2, UniformDeaths()) == 0
-            @test life_expectancy(q, 0, UniformDeaths()) isa S
+            @test complete_life_expectancy(q, 2, UniformDeaths()) isa S
+            @test complete_life_expectancy(q, 2, UniformDeaths()) == 0
+            @test complete_life_expectancy(q, 0, UniformDeaths()) isa S
         end
         # Float32 rates and Float32 ages stay Float32
         @test survival(q32, 0.5f0, 1.5f0, UniformDeaths()) isa Float32
@@ -205,10 +205,10 @@ MortalityTables.survival(::SurvivalOnly, from, to) = exp(-0.1 * (to - from))
         # a missing rate at the last age is never used: the expectancy there is zero, and one
         # year earlier it is the survival to the last age
         gap = UltimateMortality([0.1, missing])
-        @test life_expectancy(gap, 1) === 0.0
-        @test life_expectancy(gap, 0) ≈ 0.9
+        @test curtate_life_expectancy(gap, 1) === 0.0
+        @test curtate_life_expectancy(gap, 0) ≈ 0.9
         # a missing rate that is used propagates
-        @test ismissing(life_expectancy(UltimateMortality([missing, 0.2, 0.3]), 0))
+        @test ismissing(curtate_life_expectancy(UltimateMortality([missing, 0.2, 0.3]), 0))
         # an element type that doesn't name the rates' numbers gives Float64 identities, as
         # before v3, and nonempty results take the type of the rates' arithmetic
         for v in (Any[0.1, 0.2], Real[0.1, 0.2])
@@ -219,8 +219,8 @@ MortalityTables.survival(::SurvivalOnly, from, to) = exp(-0.1 * (to - from))
             @test survival(qa, 1, 1) === 1.0
             @test decrement(qa, 1, 1) === 0.0
             @test survival(qa, 0.5, 1.5, UniformDeaths()) ≈ (1 - 0.05 / 0.95) * 0.9 rtol = 1e-15
-            @test life_expectancy(qa, 0) ≈ 0.9
-            @test life_expectancy(qa, 1) === 0.0
+            @test curtate_life_expectancy(qa, 0) ≈ 0.9
+            @test curtate_life_expectancy(qa, 1) === 0.0
         end
         @test survival(UltimateMortality(Any[big"0.1", big"0.2"]), 0, 2) isa BigFloat
         # a column with no rates propagates `missing`; an empty interval is the identity
