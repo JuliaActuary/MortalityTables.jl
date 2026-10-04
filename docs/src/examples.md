@@ -65,10 +65,10 @@ julia> decrement(vbt2001.ultimate,30,40) # the decrement between ages 30 and 40
 0.010559533456509618
 ```
 
-Non-whole periods of time are supported when you specify the assumption (`Constant()`, `Uniform()`, or `Balducci()`) for fractional periods:
+Non-whole periods of time are supported when you specify the assumption (`ConstantForce()`, `UniformDeaths()`, or `Balducci()`) for fractional periods:
 
 ```julia
-julia> survival(vbt2001.ultimate,30,40.5,Uniform()) # the survival between ages 30 and 40.5
+julia> survival(vbt2001.ultimate,30,40.5,UniformDeaths()) # the survival between ages 30 and 40.5
 0.9887676470262408
 ```
 

@@ -309,11 +309,11 @@ using ForwardDiff
     @testset "table stand-in semantics" begin
         m = Makeham()
         # a DeathDistribution is accepted and ignored by continuous models
-        @test survival(m, 65, Uniform()) == survival(m, 65)
-        @test survival(m, 60, 65, Uniform()) == survival(m, 60, 65)
+        @test survival(m, 65, UniformDeaths()) == survival(m, 65)
+        @test survival(m, 60, 65, UniformDeaths()) == survival(m, 60, 65)
         @test decrement(m, 60, 65) ≈ 1 - survival(m, 60, 65)
-        @test decrement(m, 65, Uniform()) == decrement(m, 65)
-        @test decrement(m, 60, 65, Uniform()) == decrement(m, 60, 65)
+        @test decrement(m, 65, UniformDeaths()) == decrement(m, 65)
+        @test decrement(m, 60, 65, UniformDeaths()) == decrement(m, 60, 65)
         # a small decrement is not rounded to zero by 1 - survival
         tiny = Makeham(a = 1e-12, b = 0.1, c = 0.0)
         @test decrement(tiny, 1e-6) ≈ cumhazard(tiny, 1e-6) rtol = 1e-12

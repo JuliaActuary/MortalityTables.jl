@@ -20,10 +20,10 @@
             # rates come from `table.ultimate` or `table.select[age]`, not the table itself
             @test_throws MethodError survival(cso1980,10,15)
             @test_throws MethodError decrement(cso1980,10,15)
-            @test_throws MethodError survival(cso1980, 10, Uniform())
-            @test_throws MethodError survival(cso1980, 10, 15, Uniform())
-            @test_throws MethodError decrement(cso1980, 10, Uniform())
-            @test_throws MethodError decrement(cso1980, 10, 15, Uniform())
+            @test_throws MethodError survival(cso1980, 10, UniformDeaths())
+            @test_throws MethodError survival(cso1980, 10, 15, UniformDeaths())
+            @test_throws MethodError decrement(cso1980, 10, UniformDeaths())
+            @test_throws MethodError decrement(cso1980, 10, 15, UniformDeaths())
             @test omega(cso1980.ultimate) == 100
             @test MortalityTables.ω(cso1980.ultimate) == 100
         end

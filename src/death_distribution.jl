@@ -2,7 +2,7 @@
     DeathDistribution
 
 An abstract type used to form an assumption of how deaths occur throughout a
-    year. See `Balducci()`, `Uniform()`, and `Constant()` for concrete
+    year. See `Balducci()`, `UniformDeaths()`, and `ConstantForce()` for concrete
     assumption types.
 """
 abstract type DeathDistribution end
@@ -16,17 +16,17 @@ over the year.
 struct Balducci <: DeathDistribution end
 
 """
-    Uniform()
+    UniformDeaths()
 
 A `DeathDistribution` type that assumes an increasing force of mortality
 over the year.
 """
-struct Uniform <: DeathDistribution end
+struct UniformDeaths <: DeathDistribution end
 
 """
-    Constant()
+    ConstantForce()
 
 A `DeathDistribution` type that assumes a constant force of mortality
 over the year.
 """
-struct Constant <: DeathDistribution end
+struct ConstantForce <: DeathDistribution end

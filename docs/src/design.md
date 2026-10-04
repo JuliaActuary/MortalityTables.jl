@@ -57,7 +57,7 @@ MortalityTables.table("2001 VBT Residual Standard Select and Ultimate - Male Non
 
 ### Partial Year assumptions
 
-Built in are partial year assumptions, making it easy to use more realistic assumptions like Uniform death distribution. The types `Balducci()`, `Uniform()`, and `Constant()` are used to dispatch to the appropriate function without any runtime overhead.
+Built in are partial year assumptions, making it easy to use more realistic assumptions like a uniform distribution of deaths. The types `Balducci()`, `UniformDeaths()`, and `ConstantForce()` are used to dispatch to the appropriate function without any runtime overhead.
 
 ## Where MortalityTables.jl falls short
 

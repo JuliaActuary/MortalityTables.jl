@@ -10,7 +10,7 @@ A Julia package for working with MortalityTables. Has:
 
 - Full set of SOA mort.soa.org tables included
 - `survival` and `decrement` functions to calculate decrements over period of time
-- Partial year mortality calculations (Uniform, Constant, Balducci)
+- Partial year mortality calculations (UniformDeaths, ConstantForce, Balducci)
 - Friendly syntax and flexible usage
 - Extensive set of parametric mortality models.
 
@@ -92,10 +92,10 @@ julia> decrement(vbt2001.ultimate,30,40) # the decrement between ages 30 and 40
 0.010559533456509618
 ```
 
-Non-whole periods of time are supported when you specify the assumption (`Constant()`, `Uniform()`, or `Balducci()`) for fractional periods:
+Non-whole periods of time are supported when you specify the assumption (`ConstantForce()`, `UniformDeaths()`, or `Balducci()`) for fractional periods:
 
 ```julia
-julia> survival(vbt2001.ultimate,30,40.5,Uniform()) # the survival between ages 30 and 40.5
+julia> survival(vbt2001.ultimate,30,40.5,UniformDeaths()) # the survival between ages 30 and 40.5
 0.9887676470262408
 ```
 
@@ -172,8 +172,8 @@ from the [2016 Experience Study Calculations paper from the SOA](https://www.soa
 
 The three assumptions are:
 
-- `Uniform()` which assumes an increasing force of mortality throughout the year.
-- `Constant()` which assumes a level force of mortality throughout the year.
+- `UniformDeaths()` which assumes an increasing force of mortality throughout the year.
+- `ConstantForce()` which assumes a level force of mortality throughout the year.
 - `Balducci()` which assumes a decreasing force of mortality over the year. It seems [to
 be for making it easier](https://www.soa.org/globalassets/assets/library/research/actuarial-research-clearing-house/1978-89/1988/arch-1/arch88v17.pdf) to calculate successive months by hand rather than any theoretical basis.
 

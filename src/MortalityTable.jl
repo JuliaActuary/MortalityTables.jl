@@ -180,7 +180,7 @@ Returns the survival through attained age `to_age`. The start of the calculation
     survival(mortality_vector,to_age,::DeathDistribution)
     survival(mortality_vector,from_age,to_age,::DeathDistribution)
 
-Survival from a fractional `from_age` is conditional on surviving to `from_age`: it equals `survival(v, to_age, dd) / survival(v, from_age, dd)` under the same assumption, so survival over consecutive intervals multiplies. Where the assumption gives zero survival to a fractional `from_age` (after a rate of one under `Constant` or `Balducci`) there is nothing to condition on; the formulas are still evaluated as written and give finite values.
+Survival from a fractional `from_age` is conditional on surviving to `from_age`: it equals `survival(v, to_age, dd) / survival(v, from_age, dd)` under the same assumption, so survival over consecutive intervals multiplies. Where the assumption gives zero survival to a fractional `from_age` (after a rate of one under `ConstantForce` or `Balducci`) there is nothing to condition on; the formulas are still evaluated as written and give finite values.
 
 When `to_age` is before `from_age`, the result is the reverse factor `1 / survival(v, to_age, from_age)`: the number expected alive at the earlier age for each life alive at the later one, as used to project a population backward or to accumulate with the benefit of survivorship. It is not a probability (it can exceed one, and the corresponding `decrement` is negative), and it is an expected-value back-calculation rather than a reconstruction of realized deaths. It is defined where the forward survival is positive; a zero forward survival gives `Inf`. With it, survival composes over any three ages whose factors are positive and representable: `survival(v, a, c) == survival(v, a, b) * survival(v, b, c)`, whatever their order. (A zero factor has no inverse: `0 * Inf` is not one.) Ages outside the table (such as a negative `to_age` for a table starting at zero) are a `BoundsError`.
 
@@ -202,7 +202,7 @@ julia> survival(qs,1,1)
 julia> survival(qs,1,2)
 0.7
 
-julia> survival(qs,0.5,Uniform())
+julia> survival(qs,0.5,UniformDeaths())
 0.95
 ```
 """
@@ -254,16 +254,16 @@ end
 #
 # The decrement between `from_age` and `to_age` within one year of age x = ⌊from_age⌋,
 # conditional on surviving to `from_age`. With s = from_age - x and t = to_age - x, it is
-# 1 - S(x+t)/S(x+s), where S(x+u)/S(x) is 1 - u·q (Uniform), (1-q)^u (Constant), or
+# 1 - S(x+t)/S(x+s), where S(x+u)/S(x) is 1 - u·q (UniformDeaths), (1-q)^u (ConstantForce), or
 # (1-q)/(1-(1-u)·q) (Balducci).
-function decrement_partial_year(v, from_age, to_age, dd::Uniform)
+function decrement_partial_year(v, from_age, to_age, dd::UniformDeaths)
     x = floor(Int, from_age)
     q = v[x]
     s, t = from_age - x, to_age - x
     return q * (t - s) / (1 - s * q)
 end
 
-function decrement_partial_year(v, from_age, to_age, dd::Constant)
+function decrement_partial_year(v, from_age, to_age, dd::ConstantForce)
     return 1 - (1 - v[floor(Int, from_age)])^(to_age - from_age)
 end
 
@@ -297,7 +297,7 @@ julia> decrement(qs,1,1)
 julia> decrement(qs,1,2)
 0.3
 
-julia> decrement(qs,0.5,Uniform())
+julia> decrement(qs,0.5,UniformDeaths())
 0.05
 ```
 
@@ -346,7 +346,7 @@ end
 # constant force is written as -expm1((t - s)·log1p(-q)), since 1 - (1 - q)^(t - s) rounds a
 # small rate away. (`survival` keeps `1 - decrement_partial_year`, so its values are unchanged.)
 _decrement_piece(v, from_age, to_age, dd::DeathDistribution) = decrement_partial_year(v, from_age, to_age, dd)
-_decrement_piece(v, from_age, to_age, ::Constant) = -expm1((to_age - from_age) * log1p(-v[floor(Int, from_age)]))
+_decrement_piece(v, from_age, to_age, ::ConstantForce) = -expm1((to_age - from_age) * log1p(-v[floor(Int, from_age)]))
 
 """
     omega(x)

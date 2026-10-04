@@ -242,16 +242,16 @@ from the [2016 Experience Study Calculations paper from the SOA](https://www.soa
 
 The three assumptions are:
 
-- `Uniform()` which assumes an increasing force of mortality throughout the year.
-- `Constant()` which assumes a level force of mortality throughout the year.
+- `UniformDeaths()` which assumes an increasing force of mortality throughout the year.
+- `ConstantForce()` which assumes a level force of mortality throughout the year.
 - `Balducci()` which assumes a decreasing force of mortality over the year. It seems [to
 be for making it easier](https://www.soa.org/globalassets/assets/library/research/actuarial-research-clearing-house/1978-89/1988/arch-1/arch88v17.pdf) to calculate successive months by hand rather than any theoretical basis.
 
 ```@docs; canonical=false
 MortalityTables.DeathDistribution
 MortalityTables.Balducci
-MortalityTables.Uniform
-MortalityTables.Constant
+MortalityTables.UniformDeaths
+MortalityTables.ConstantForce
 ```
 ## Select-period deterioration (Dukes-MacDonald)
 

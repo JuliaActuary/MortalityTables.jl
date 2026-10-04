@@ -9,7 +9,7 @@
         @test life_expectancy(m,50) ≈ 26.691 atol=0.001
 
         # a DeathDistribution is accepted and ignored by continuous models
-        @test life_expectancy(m, 50, MortalityTables.Uniform()) == life_expectancy(m, 50)
+        @test life_expectancy(m, 50, MortalityTables.UniformDeaths()) == life_expectancy(m, 50)
 
         # a law defined at every age (omega = Inf) gives the same bits as integrating the
         # remaining lifetime from zero, as before omega bounded the integral
@@ -66,17 +66,17 @@
         @test_throws BoundsError life_expectancy(t.ultimate,101)
         @test_throws BoundsError life_expectancy(t.ultimate,-1)
         # past omega, the integral runs back through ages the table does not have
-        @test_throws BoundsError life_expectancy(t.ultimate,102,MortalityTables.Uniform())
+        @test_throws BoundsError life_expectancy(t.ultimate,102,MortalityTables.UniformDeaths())
         # values at several ages match the quadratic formulation this replaced
         for age in (0, 35, 55, 99)
             @test life_expectancy(t.ultimate, age) ≈ sum(survival(t.ultimate, age, age + dur) for dur in 1:omega(t.ultimate)-age)
         end
 
         @test_throws MethodError life_expectancy(t,100)
-        @test_throws MethodError life_expectancy(t,100,MortalityTables.Uniform())
+        @test_throws MethodError life_expectancy(t,100,MortalityTables.UniformDeaths())
 
         # relation of curtate to complete, ALMC 2.6.1
-        @test life_expectancy(t.ultimate,55,MortalityTables.Uniform()) ≈ 22.16469212 + 0.5 atol=1e-3
+        @test life_expectancy(t.ultimate,55,MortalityTables.UniformDeaths()) ≈ 22.16469212 + 0.5 atol=1e-3
     end
 
 end

@@ -121,12 +121,12 @@ MortalityTables.survival(::SurvivalOnly, from, to) = exp(-0.1 * (to - from))
         @test decrement(q, 0, 3) ≈ 1 - survival(q, 0, 3)
         # against a high-precision table, whole and fractional ages
         qbig = UltimateMortality(big.([1e-18, 1e-6, 0.3, 0.0, 1.0]))
-        for dd in (Uniform(), Balducci(), Constant()), (a, b) in ((0.25, 0.75), (0.5, 1.5), (0.0, 1.25), (1.1, 1.9), (0.3, 2.6))
+        for dd in (UniformDeaths(), Balducci(), ConstantForce()), (a, b) in ((0.25, 0.75), (0.5, 1.5), (0.0, 1.25), (1.1, 1.9), (0.3, 2.6))
             @test decrement(q, a, b, dd) ≈ Float64(decrement(qbig, big(a), big(b), dd)) rtol = 1e-13
             @test decrement(q, a, b, dd) ≈ 1 - survival(q, a, b, dd) atol = 1e-15
         end
-        @test decrement(q, 0.25, 0.75, Constant()) > 0   # not rounded away
-        @test decrement(q, 1, 2, Uniform()) == 1e-6
+        @test decrement(q, 0.25, 0.75, ConstantForce()) > 0   # not rounded away
+        @test decrement(q, 1, 2, UniformDeaths()) == 1e-6
 
         # terminal rates: q = 0 contributes nothing, q = 1 exhausts survival
         @test decrement(q, 3, 4) == 0.0
@@ -134,7 +134,7 @@ MortalityTables.survival(::SurvivalOnly, from, to) = exp(-0.1 * (to - from))
         @test decrement(q, 4, 5) == 1.0
         @test survival(q, 4, 5) == 0.0
         @test decrement(q, 2, 5) == 1.0
-        for dd in (Uniform(), Balducci(), Constant())
+        for dd in (UniformDeaths(), Balducci(), ConstantForce())
             # equal endpoints are exactly the identity, even at a rate of one
             for a in (2.0, 3.5, 4.0, 4.5)
                 @test survival(q, a, a, dd) == 1.0
@@ -143,19 +143,19 @@ MortalityTables.survival(::SurvivalOnly, from, to) = exp(-0.1 * (to - from))
             # a piece starting at a birthday, and one ending at the next birthday
             @test decrement(q, 2, 2.5, dd) ≈ 1 - survival(q, 2, 2.5, dd)
             @test decrement(q, 2.5, 3, dd) ≈ 1 - survival(q, 2.5, 3, dd)
-            @test decrement(q, 4.0, 4.5, dd) == (dd isa Uniform ? 0.5 : 1.0)
+            @test decrement(q, 4.0, 4.5, dd) == (dd isa UniformDeaths ? 0.5 : 1.0)
             @test decrement(q, 3.25, 3.75, dd) == 0.0
         end
-        # Uniform and Balducci agree with q at s = 0, t = 1 of the year
-        for dd in (Uniform(), Balducci())
+        # UniformDeaths and Balducci agree with q at s = 0, t = 1 of the year
+        for dd in (UniformDeaths(), Balducci())
             @test MortalityTables.decrement_partial_year(q, 2, 3, dd) == 0.3
             @test decrement(q, 2.0, 3.0, dd) == 0.3
         end
-        # under Uniform, a rate of one leaves positive survival inside the year
-        @test survival(q, 4.0, 4.5, Uniform()) == 0.5
-        # beyond a rate of one under Constant or Balducci there is no survival to condition on:
+        # under UniformDeaths, a rate of one leaves positive survival inside the year
+        @test survival(q, 4.0, 4.5, UniformDeaths()) == 0.5
+        # beyond a rate of one under ConstantForce or Balducci there is no survival to condition on:
         # the formulas are evaluated as written and stay finite
-        for dd in (Balducci(), Constant())
+        for dd in (Balducci(), ConstantForce())
             @test survival(q, 4.0, 4.3, dd) == 0.0
             @test isfinite(survival(q, 4.3, 4.6, dd))
             @test isfinite(decrement(q, 4.3, 4.6, dd))
@@ -183,19 +183,19 @@ MortalityTables.survival(::SurvivalOnly, from, to) = exp(-0.1 * (to - from))
             @test life_expectancy(q, 0) ≈ 0.9 + 0.9 * 0.7
             # fractional ages promote with the ages' type
             S = promote_type(T, Float64)
-            for dd in (Uniform(), Balducci(), Constant())
+            for dd in (UniformDeaths(), Balducci(), ConstantForce())
                 @test survival(q, 0.5, 0.5, dd) isa S
                 @test survival(q, 0.5, 1.5, dd) isa S
                 @test decrement(q, 0.5, 0.5, dd) isa S
                 @test decrement(q, 0.5, 1.5, dd) isa S
             end
-            @test life_expectancy(q, 2, Uniform()) isa S
-            @test life_expectancy(q, 2, Uniform()) == 0
-            @test life_expectancy(q, 0, Uniform()) isa S
+            @test life_expectancy(q, 2, UniformDeaths()) isa S
+            @test life_expectancy(q, 2, UniformDeaths()) == 0
+            @test life_expectancy(q, 0, UniformDeaths()) isa S
         end
         # Float32 rates and Float32 ages stay Float32
-        @test survival(q32, 0.5f0, 1.5f0, Uniform()) isa Float32
-        @test decrement(q32, 0.5f0, 1.5f0, Constant()) isa Float32
+        @test survival(q32, 0.5f0, 1.5f0, UniformDeaths()) isa Float32
+        @test decrement(q32, 0.5f0, 1.5f0, ConstantForce()) isa Float32
         # rates that admit `missing` (a select row with a gap) are typed by their numbers
         row = MortalityTables._select_row(0, [missing, 0.2], q64)
         @test survival(row, 1, 1) isa Float64
@@ -218,7 +218,7 @@ MortalityTables.survival(::SurvivalOnly, from, to) = exp(-0.1 * (to - from))
             @test decrement(qa, 0, 2) ≈ 1 - 0.9 * 0.8
             @test survival(qa, 1, 1) === 1.0
             @test decrement(qa, 1, 1) === 0.0
-            @test survival(qa, 0.5, 1.5, Uniform()) ≈ (1 - 0.05 / 0.95) * 0.9 rtol = 1e-15
+            @test survival(qa, 0.5, 1.5, UniformDeaths()) ≈ (1 - 0.05 / 0.95) * 0.9 rtol = 1e-15
             @test life_expectancy(qa, 0) ≈ 0.9
             @test life_expectancy(qa, 1) === 0.0
         end
@@ -250,7 +250,7 @@ MortalityTables.survival(::SurvivalOnly, from, to) = exp(-0.1 * (to - from))
         @test survival(q4, 1, 0) * survival(q4, 0, 1) ≈ 1
         # a zero forward survival has no finite inverse
         @test survival(q4, 4, 0) == Inf
-        for dd in (Uniform(), Balducci(), Constant())
+        for dd in (UniformDeaths(), Balducci(), ConstantForce())
             @test survival(q4, 2.5, 0.25, dd) ≈ 1 / survival(q4, 0.25, 2.5, dd)
             @test survival(q4, 1.75, 1.25, dd) ≈ 1 / survival(q4, 1.25, 1.75, dd)   # within one year
             @test decrement(q4, 2.5, 0.25, dd) ≈ 1 - 1 / survival(q4, 0.25, 2.5, dd)
@@ -259,7 +259,7 @@ MortalityTables.survival(::SurvivalOnly, from, to) = exp(-0.1 * (to - from))
         # survival composes over any three ages, whatever their order
         ult = UltimateMortality([0.01 * k for k in 1:20], start_age = 40)
         row = MortalityTables._select_row(40, [0.005, 0.02, 0.07], ult)
-        for v in (ult, row), dd in (Uniform(), Balducci(), Constant())
+        for v in (ult, row), dd in (UniformDeaths(), Balducci(), ConstantForce())
             ages = (40.0, 40.3, 41.0, 42.5, 43.75, 45.0)
             for a in ages, b in ages, c in ages
                 @test survival(v, a, c, dd) ≈ survival(v, a, b, dd) * survival(v, b, c, dd)
@@ -276,7 +276,7 @@ MortalityTables.survival(::SurvivalOnly, from, to) = exp(-0.1 * (to - from))
         @test survival(half, 0, 60) == 2.0^-60
         @test decrement(half, 60, 0) == Float64(1 - big(2)^60)
         halfbig = UltimateMortality(fill(big"0.5", 60))
-        for dd in (Uniform(), Balducci(), Constant()), (a, b) in ((59.5, 0.25), (60.0, 0.5), (59.75, 0.0))
+        for dd in (UniformDeaths(), Balducci(), ConstantForce()), (a, b) in ((59.5, 0.25), (60.0, 0.5), (59.75, 0.0))
             expected = Float64(decrement(halfbig, big(a), big(b), dd))
             @test decrement(half, a, b, dd) ≈ expected rtol = 1.0e-13
             @test isfinite(decrement(half, a, b, dd))
@@ -284,7 +284,7 @@ MortalityTables.survival(::SurvivalOnly, from, to) = exp(-0.1 * (to - from))
         tiny = UltimateMortality([1.0e-18, 1.0e-18, 0.1])
         tinybig = UltimateMortality(big.([1.0e-18, 1.0e-18, 0.1]))
         @test decrement(tiny, 2, 0) ≈ Float64(decrement(tinybig, 2, 0)) rtol = 1.0e-15
-        @test decrement(tiny, 1.5, 0.25, Constant()) ≈ Float64(decrement(tinybig, big"1.5", big"0.25", Constant())) rtol = 1.0e-13
+        @test decrement(tiny, 1.5, 0.25, ConstantForce()) ≈ Float64(decrement(tinybig, big"1.5", big"0.25", ConstantForce())) rtol = 1.0e-13
         # after a rate of one there is no forward survival, and no finite reverse factor
         @test decrement(q4, 4, 0) == -Inf
 
