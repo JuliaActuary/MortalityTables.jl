@@ -323,6 +323,7 @@ survival(m,20,25) # the five year survival rate
 - Because of the large number of models and the likelihood for overlap with other things (e.g. `Quadratic` or `Weibull` would be expected to be found in other contexts as well), these models Are not exported from the package, so you need to call them by prefixing with `MortalityTables`. 
   - e.g. : `MortalityTables.Kostaki()`
 - Because of the large number of parameters for the models, the arguments are keyword rather than positional: `MortalityTables.Gompertz(a=0.01,b=0.2)`
+- Keywords with Unicode names also accept ASCII spellings: `sigma` for `σ`, `gamma` for `γ`, `v0` for `v₀`, and `a0` to `a3` for `a₀` to `a₃`. Passing both spellings of one keyword is an `ArgumentError`.
 - The models have default values, so they can be called without args like this: `MortalityTables.Gompertz()`.
   - See the help text for what the default values are: `?Gompertz`
 

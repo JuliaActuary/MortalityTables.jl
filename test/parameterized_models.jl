@@ -368,6 +368,43 @@ using ForwardDiff
         end
     end
 
+    @testset "ASCII keyword aliases" begin
+        K = MortalityTables
+        aliases = [
+            (K.InverseGompertz, :σ, :sigma),
+            (K.Weibull, :σ, :sigma),
+            (K.InverseWeibull, :σ, :sigma),
+            (K.GammaGompertz, :γ, :gamma),
+            (K.StrehlerMildvan, :v₀, :v0),
+            (K.RogersPlanck, :a₀, :a0),
+            (K.RogersPlanck, :a₁, :a1),
+            (K.RogersPlanck, :a₂, :a2),
+            (K.RogersPlanck, :a₃, :a3),
+        ]
+        for (L, unicode, ascii) in aliases
+            # either spelling sets the same field, and the default applies when neither is passed
+            @test getfield(L(; unicode => 0.25), unicode) === 0.25
+            @test L(; ascii => 0.25) === L(; unicode => 0.25)
+            @test L(; ascii => 0.25f0) === L(; unicode => 0.25f0)
+            @test getfield(L(), unicode) === getfield(L(; unicode => getfield(L(), unicode)), unicode)
+            # both spellings, even with equal values, are an ArgumentError
+            @test_throws ArgumentError L(; unicode => 0.25, ascii => 0.25)
+            @test (@inferred L(; ascii => 0.25)) isa L{Float64}
+        end
+        # aliases mix with the other keywords
+        @test K.RogersPlanck(a0 = 0.1, a₁ = 0.2, a2 = 0.3, a₃ = 0.4, u = 0.5) ===
+            K.RogersPlanck(a₀ = 0.1, a₁ = 0.2, a₂ = 0.3, a₃ = 0.4, u = 0.5)
+        @test K.Weibull(m = 2.0f0, sigma = 3.0f0) === K.Weibull(m = 2.0f0, σ = 3.0f0)
+        @test K.Weibull(m = 2.0f0, sigma = 3.0f0) isa K.Weibull{Float32}
+        # the defaults are unchanged
+        @test K.Weibull() === K.Weibull(m = 1.0, σ = 2.0)
+        @test K.InverseGompertz() === K.InverseGompertz(m = 49.0, σ = 7.7)
+        @test K.InverseWeibull() === K.InverseWeibull(m = 5.0, σ = 10.0)
+        @test K.GammaGompertz() === K.GammaGompertz(a = 0.002, b = 0.13, γ = 1.0)
+        @test K.StrehlerMildvan() === K.StrehlerMildvan(k = 0.01, v₀ = 2.5, b = 0.2, d = 6.0)
+        @test K.RogersPlanck() === K.RogersPlanck(a₀ = 0.0001, a₁ = 0.02, a₂ = 0.001, a₃ = 0.0001)
+    end
+
     @testset "Gompertz and Makeham equality" begin
 
         # Gompertz is Makeham's where c = 0

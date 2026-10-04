@@ -56,5 +56,16 @@ omega(::ParametricMortality) = Inf
 # decrement and life expectancy go through `cumhazard`.
 _check_age(m, age) = age > omega(m) ? throw(DomainError(age, "the law is defined up to omega = $(omega(m))")) : nothing
 
+# A law's keyword with a Unicode name and an ASCII alias, such as `σ` and `sigma`. `primary` and
+# `alias` pair each name with the value passed under it, `_Unset()` when it was not passed. Returns
+# the value that was passed, or `default` when neither was. Passing both is an `ArgumentError`.
+struct _Unset end
+function _keyword(primary::Pair{Symbol}, alias::Pair{Symbol}, default)
+    p, a = last(primary), last(alias)
+    p isa _Unset && return a isa _Unset ? default : a
+    a isa _Unset || throw(ArgumentError("pass `$(first(primary))` or its alias `$(first(alias))`, not both"))
+    return p
+end
+
 (m::ParametricMortality)(x) = hazard(m, x)
 Base.broadcastable(pm::ParametricMortality) = Ref(pm)

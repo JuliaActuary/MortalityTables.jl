@@ -70,6 +70,8 @@ Construct a mortality model following GammaGompertz law of mortality.
 \\mathrm{hazard} \\left( {\\rm age} \\right) = \\frac{a \\cdot e^{b \\cdot {\\rm age}}}{1 + \\frac{a \\cdot \\gamma}{b} \\cdot \\left( e^{b \\cdot {\\rm age}} - 1 \\right)}
 ``
 
+`gamma` is an ASCII alias for `γ`.
+
 Default args:
 
     a = 0.002
@@ -81,7 +83,8 @@ struct GammaGompertz{T<:Real} <: ParametricMortality
     b::T
     γ::T
 end
-GammaGompertz(; a=0.002, b=0.13, γ=1) = GammaGompertz(promote(a, b, γ)...)
+GammaGompertz(; a = 0.002, b = 0.13, γ = _Unset(), gamma = _Unset()) =
+    GammaGompertz(promote(a, b, _keyword(:γ => γ, :gamma => gamma, 1))...)
 
 function hazard(m::GammaGompertz,age)
     (; a, b, γ) = m

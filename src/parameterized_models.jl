@@ -76,6 +76,8 @@ Construct a mortality model following InverseGompertz's law.
 \\end{aligned}
 ```
 
+`sigma` is an ASCII alias for `σ`.
+
 Default args:
     
     m = 49
@@ -86,7 +88,8 @@ struct InverseGompertz{T<:Real} <: ParametricMortality
     m::T
     σ::T
 end
-InverseGompertz(; m=49, σ=7.7) = InverseGompertz(promote(m, σ)...)
+InverseGompertz(; m = 49, σ = _Unset(), sigma = _Unset()) =
+    InverseGompertz(promote(m, _keyword(:σ => σ, :sigma => sigma, 7.7))...)
 
 
 function hazard(model::InverseGompertz,age)
@@ -233,6 +236,8 @@ Note that if σ > m, then the mode of the density is 0 and hx is a non-increasin
 \\end{aligned}
 ```
 
+`sigma` is an ASCII alias for `σ`.
+
  Default args:
 
     m = 1
@@ -242,7 +247,8 @@ struct Weibull{T<:Real} <: ParametricMortality
     m::T
     σ::T
 end
-Weibull(; m=1.0, σ=2.0) = Weibull(promote(m, σ)...)
+Weibull(; m = 1.0, σ = _Unset(), sigma = _Unset()) =
+    Weibull(promote(m, _keyword(:σ => σ, :sigma => sigma, 2.0))...)
 
 function hazard(model::Weibull,age)
     (; m, σ) = model
@@ -273,6 +279,8 @@ The Inverse-Weibull proves useful for modelling the childhood and teenage years,
 \\end{aligned}
 ```
 
+`sigma` is an ASCII alias for `σ`.
+
  Default args:
 
     m = 5
@@ -283,7 +291,8 @@ struct InverseWeibull{T<:Real} <: ParametricMortality
     m::T
     σ::T
 end
-InverseWeibull(; m=5.0, σ=10.0) = InverseWeibull(promote(m, σ)...)
+InverseWeibull(; m = 5.0, σ = _Unset(), sigma = _Unset()) =
+    InverseWeibull(promote(m, _keyword(:σ => σ, :sigma => sigma, 10.0))...)
 
 function hazard(model::InverseWeibull,age)
     (; m, σ) = model
@@ -405,6 +414,8 @@ Construct a mortality model following StrehlerMildvan's law of mortality.
 \\mathrm{hazard} \\left( {\\rm age} \\right) = k \\cdot e^{\\frac{\\left(  - v_0 \\right) \\cdot \\left( 1 - b \\cdot {\\rm age} \\right)}{d}}
 ``
 
+`v0` is an ASCII alias for `v₀`.
+
 Default args:
 
     k   = 0.01
@@ -419,7 +430,8 @@ struct StrehlerMildvan{T<:Real} <: ParametricMortality
     b::T
     d::T
 end
-StrehlerMildvan(; k=0.01, v₀=2.5, b=0.2, d=6.0) = StrehlerMildvan(promote(k, v₀, b, d)...)
+StrehlerMildvan(; k = 0.01, v₀ = _Unset(), v0 = _Unset(), b = 0.2, d = 6.0) =
+    StrehlerMildvan(promote(k, _keyword(:v₀ => v₀, :v0 => v0, 2.5), b, d)...)
 
 function hazard(m::StrehlerMildvan,age)
     (; k, v₀, b, d) = m
@@ -693,6 +705,8 @@ Construct a mortality model following RogersPlanck law of mortality.
 \\mathrm{hazard}\\left( {\\rm age} \\right) = a_0 + a_1 \\cdot e^{\\left(  - a \\right) \\cdot {\\rm age}} + a_2 \\cdot e^{b \\cdot \\left( {\\rm age} - u \\right) - e^{\\left(  - c \\right) \\cdot \\left( {\\rm age} - u \\right)}} + a_3 \\cdot e^{d \\cdot {\\rm age}}
 ``
 
+`a0`, `a1`, `a2` and `a3` are ASCII aliases for `a₀`, `a₁`, `a₂` and `a₃`.
+
 Default args:
 
     a₀ = 0.0001
@@ -717,7 +731,16 @@ struct RogersPlanck{T<:Real} <: ParametricMortality
     d::T
     u::T
 end
-RogersPlanck(; a₀=0.0001, a₁=0.02, a₂=0.001, a₃=0.0001, a=2., b=0.001, c=100., d=0.1, u=0.33) = RogersPlanck(promote(a₀, a₁, a₂, a₃, a, b, c, d, u)...)
+function RogersPlanck(;
+        a₀ = _Unset(), a0 = _Unset(), a₁ = _Unset(), a1 = _Unset(), a₂ = _Unset(), a2 = _Unset(), a₃ = _Unset(), a3 = _Unset(),
+        a = 2.0, b = 0.001, c = 100.0, d = 0.1, u = 0.33,
+    )
+    a₀ = _keyword(:a₀ => a₀, :a0 => a0, 0.0001)
+    a₁ = _keyword(:a₁ => a₁, :a1 => a1, 0.02)
+    a₂ = _keyword(:a₂ => a₂, :a2 => a2, 0.001)
+    a₃ = _keyword(:a₃ => a₃, :a3 => a3, 0.0001)
+    return RogersPlanck(promote(a₀, a₁, a₂, a₃, a, b, c, d, u)...)
+end
 
 function hazard(m::RogersPlanck,age) 
     (; a₀, a₁, a₂, a₃, a, b, c, d, u) = m
