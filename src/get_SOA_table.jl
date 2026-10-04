@@ -4,7 +4,8 @@
 
 Given the id or name of a `mort.SOA.org` table, grab it and return it as a `MortalityTable`.
 
-!!! Remember that not all tables have been tested to work.
+!!! note
+    Not all tables have been tested to work.
 """
 function get_SOA_table(id::Int)
     readXTbML(joinpath(artifact"mort.soa.org", "t$id.xml"))
@@ -27,6 +28,7 @@ end
 
 Given the id or name of a `mort.SOA.org` table, grab it and return it as a `MortalityTable`.
 
-!!! Remember that not all tables have been tested to work.
+!!! note
+    Not all tables have been tested to work.
 """
 const table = get_SOA_table

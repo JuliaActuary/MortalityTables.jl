@@ -9,7 +9,7 @@ _point_in_scale_and_select(table, issue_age, attained_age) =
   dukes_macdonald1(selectultimate, issue_age, attained_age, base_lapses, total_lapses, effectiveness)
 
 Two methods are available, one takes the point_in_scale and select_rate directly. See https://www.soa.org/globalassets/assets/library/newsletters/product-development-news/2003/july/pdn-2003-iss56-doll-a.pdf for information on terminology. 
-The other method takes a SelectUltimateTable from MortalityTable.jl and calculates the point_in_scale and select_rate from the table.
+The other method takes a SelectUltimateTable from MortalityTables.jl and calculates the point_in_scale and select_rate from the table.
 """
 function dukes_macdonald1(point_in_scale, select_rate, base_lapses, total_lapses, effectiveness)
   excess_lapses = total_lapses - base_lapses
@@ -28,7 +28,7 @@ dukes_macdonald1(table, issue_age, attained_age, base_lapses, total_lapses, effe
   dukes_macdonald2(selectultimate, issue_age, attained_age, base_lapses, total_lapses, effectiveness)
 
 Two methods are available, one takes the point_in_scale and select_rate directly. See https://www.soa.org/globalassets/assets/library/newsletters/product-development-news/2003/july/pdn-2003-iss56-doll-a.pdf for information on terminology. 
-The other method takes a SelectUltimateTable from MortalityTable.jl and calculates the point_in_scale and select_rate from the table.
+The other method takes a SelectUltimateTable from MortalityTables.jl and calculates the point_in_scale and select_rate from the table.
 """
 function dukes_macdonald2(point_in_scale, select_rate, base_lapses, total_lapses, effectiveness)
   excess_lapses = total_lapses - base_lapses
@@ -48,7 +48,7 @@ dukes_macdonald2(table, issue_age, attained_age, base_lapses, total_lapses, effe
   dukes_macdonald3(selectultimate, issue_age, attained_age, base_lapses, total_lapses, effectiveness)
 
 Two methods are available, one takes the point_in_scale and select_rate directly. See https://www.soa.org/globalassets/assets/library/newsletters/product-development-news/2003/july/pdn-2003-iss56-doll-a.pdf for information on terminology. 
-The other method takes a SelectUltimateTable from MortalityTable.jl and calculates the point_in_scale and select_rate from the table.
+The other method takes a SelectUltimateTable from MortalityTables.jl and calculates the point_in_scale and select_rate from the table.
 """
 function dukes_macdonald3(point_in_scale, select_rate, base_lapses, total_lapses, effectiveness)
   excess_lapses = total_lapses - base_lapses

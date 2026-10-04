@@ -17,7 +17,7 @@ MortalityTables.survival(::SurvivalOnly, from, to) = exp(-0.1 * (to - from))
         @test_throws BoundsError q2[4]
         @test q2[5] == 0
 
-        # select strucutre
+        # select structure
         s = [ia + d for ia = 0:5, d = 0:4]
 
         q3 = SelectMortality(s, q1, start_age = 0)
@@ -86,7 +86,7 @@ MortalityTables.survival(::SurvivalOnly, from, to) = exp(-0.1 * (to - from))
         end
     end
 
-    # test time zero accumlated force
+    # test time zero accumulated force
     @testset "accumulated force" begin
         q4 = UltimateMortality([0.1, 0.3, 0.6, 1])
 

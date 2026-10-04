@@ -446,7 +446,7 @@ using ForwardDiff
                         (rmodel = "kostaki", juliamodel = MortalityTables.Kostaki()),
                         (rmodel = "kannisto", juliamodel = MortalityTables.Kannisto()),
                         (rmodel = "kannisto_makeham", juliamodel = MortalityTables.KannistoMakeham())
-                        # the next two requre adding an autodiff dependency:
+                        # the next two require adding an autodiff dependency:
                         # (rmodel="carriere1",juliamodel=MortalityTables.Carriere()),
                         # (rmodel="carriere2",juliamodel=MortalityTables.Carriere2()),
                     ]

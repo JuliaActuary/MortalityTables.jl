@@ -79,14 +79,14 @@ julia> vbt2001.ultimate[95]        # ultimate vectors only need to be called wit
  0.24298
 ```
 
-Calculate the force of mortality or survival over a range of time:
+Calculate survival or decrement over a range of ages:
 
 ```julia
 julia> survival(vbt2001.ultimate,30,40) # the survival between ages 30 and 40
 0.9894404665434904
 
 julia> decrement(vbt2001.ultimate,30,40) # the decrement between ages 30 and 40
-0.010559533456509618
+0.010559533456509524
 ```
 
 Non-whole periods of time are supported when you specify the assumption (`ConstantForce()`, `UniformDeaths()`, or `Balducci()`) for fractional periods:
@@ -115,7 +115,7 @@ mort = [
 plot(
 	   mort,
 	   label = ["2001 CSO" "2017 CSO"],
-	   title = "Comparison of 2107 and 2001 CSO \n for SuperPref NS 80-year-old male",
+	   title = "Comparison of 2017 and 2001 CSO \n for SuperPref NS 80-year-old male",
 	   xlabel="duration")
 ```
 
@@ -128,7 +128,7 @@ Easily extend the analysis to move up the [ladder of abstraction](http://worrydr
 issue_ages = 18:80
 durations = 1:40
 
-# compute the relative rates with the element-wise division ("brodcasting" in Julia)
+# compute the relative rates with the element-wise division ("broadcasting" in Julia)
 function rel_diff(a, b, issue_age,duration)
         att_age = issue_age + duration - 1
         return a[issue_age][att_age] / b[issue_age][att_age]
@@ -149,7 +149,7 @@ contour(durations,
 
 ### Scaling and capping rates
 
-Say that you want to take a given mortality table, scale it by `130%`, and cap it at `1.0`. You can do this easliy by [broadcasting](https://docs.julialang.org/en/v1/manual/arrays/index.html#Broadcasting-1) over the underlying rates (which is really just a vector of numbers at the end of the day):
+Say that you want to take a given mortality table, scale it by `130%`, and cap it at `1.0`. You can do this easily by [broadcasting](https://docs.julialang.org/en/v1/manual/arrays/index.html#Broadcasting-1) over the underlying rates (which is really just a vector of numbers at the end of the day):
 
 ```julia
 issue_age = 30
@@ -158,7 +158,7 @@ m = cso_2001.select[issue_age]
 scaled_m = min.(cso_2001.select[issue_age] .* 1.3, 1.0) # 130% and capped at 1.0 version of `m`
 ```
 
-Note that `min.(cso_2001.select .* 1.3, 1.0)` won't work because `cso_2001.select` is still a vector-of-vectors (a vector for each issue age). You need to drill down to a given issue age or use an `ulitmate` table to manipulate the rates in this way.
+Note that `min.(cso_2001.select .* 1.3, 1.0)` won't work because `cso_2001.select` is still a vector-of-vectors (a vector for each issue age). You need to drill down to a given issue age or use an `ultimate` table to manipulate the rates in this way.
 
 ## Fractional Years
 
@@ -184,7 +184,7 @@ Not all tables have been tested that they work by default, though no issues have
 
 #### Load custom set of tables
 
-Download the `.xml` [aka the (`XTbML` format)](https://mort.soa.org/About.aspx) version of the table from [mort.SOA.org](https://mort.soa.org) and place it in a directory of your choosing. Then call `MortaliyTables.read_tables(path_to_your_dir)`.
+Download the `.xml` [aka the (`XTbML` format)](https://mort.soa.org/About.aspx) version of the table from [mort.SOA.org](https://mort.soa.org) and place it in a directory of your choosing. Then call `MortalityTables.read_tables(path_to_your_dir)`, which returns a `Dict` of the tables by name.
 
 ### [mort.SOA.org](https://mort.soa.org) Tables
 
@@ -192,7 +192,7 @@ Given a table id ([for example](https://mort.soa.org/ViewTable.aspx?&TableIdenti
 
 ```julia
 aus_life_table_female = MortalityTables.table(60029)
-aus_life_table_female[0]  # returns the attained age 0 rate of 0.10139
+aus_life_table_female.ultimate[0]  # returns the attained age 0 rate of 0.10139
 ```
 
 ### From CSV
@@ -222,7 +222,7 @@ table = MortalityTables.readXTbML(path)
 
 Say you have an ultimate vector and select matrix, and you want to leverage the MortalityTables package.
 
-Here's an example, where we first construct the `UlitmateMortality` and then combine
+Here's an example, where we first construct the `UltimateMortality` and then combine
 it with the select rates to get a `SelectMortality` table.
 
 ```julia
@@ -233,16 +233,17 @@ ult_vec = [0.005, 0.008, ...,0.805,1.00]
 ult = UltimateMortality(ult_vec,start_age = 15)
 ```
 
-We can now use this the ultimate rates all by itself:
+We can now use the ultimate rates by themselves:
 
 ```julia
-q(ult,15,1) # 0.005
+ult[15]               # 0.005, the rate at age 15
+survival(ult, 15, 16) # 0.995
 ```
 
 And join with the select rates, which for our example will start at age 0:
 
 ```julia
-# attained age going down the column, duration across
+# issue age going down the rows, duration across
 select_matrix = [ 0.001 0.002 ... 0.010;
                   0.002 0.003 ... 0.012;
                   ...
@@ -250,8 +251,8 @@ select_matrix = [ 0.001 0.002 ... 0.010;
 sel_start_age = 0
 sel = SelectMortality(select_matrix,ult,start_age = 0)
 
-sel[0][0] #issue age 0, attained age 0 rate of  0.001
-sel[0][100] #issue age 0, attained age 100 rate of  1.0
+sel[0][0]   # issue age 0, attained age 0 rate of 0.001
+sel[0][100] # issue age 0, attained age 100 rate of 1.0
 ```
 
 Lastly, to take the `SelectMortality` and `UltimateMortality` we just created,
@@ -259,8 +260,8 @@ we can combine them into one stored object, along with a `TableMetaData`:
 
 ```julia
 my_table = MortalityTable(
-              s1,
-              u1,
+              sel,
+              ult,
               metadata=TableMetaData(name="My Table", comments="Rates for Product XYZ")
               )
 ```
@@ -317,7 +318,7 @@ survival(m,20,25) # the five year survival rate
 
 ### Other notes
 
-- Because of the large number of models and the likelihood for overlap with other things (e.g. `Quadratic` or `Weibull` would be expected to be found in other contexts as well), these models Are not exported from the package, so you need to call them by prefixing with `MortalityTables`. 
+- Because of the large number of models and the likelihood for overlap with other things (e.g. `Quadratic` or `Weibull` would be expected to be found in other contexts as well), these models are not exported from the package (except `Makeham` and `Gompertz`), so you need to call them by prefixing with `MortalityTables`.
   - e.g. : `MortalityTables.Kostaki()`
 - Because of the large number of parameters for the models, the arguments are keyword rather than positional: `MortalityTables.Gompertz(a=0.01,b=0.2)`
 - Keywords with Unicode names also accept ASCII spellings: `sigma` for `σ`, `gamma` for `γ`, `v0` for `v₀`, and `a0` to `a3` for `a₀` to `a₃`. Passing both spellings of one keyword is an `ArgumentError`.

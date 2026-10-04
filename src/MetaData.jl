@@ -11,7 +11,7 @@ Has the following fields, which default to `nothing` if not specified with a key
 - `comments`
 - `source_path`
 
-When you call a `MortalityTable` interactively, it will nicely print this summary infomration.
+When you call a `MortalityTable` interactively, it will nicely print this summary information.
 
 # Example content from mort.SOA.org:
 

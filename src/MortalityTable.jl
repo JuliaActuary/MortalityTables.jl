@@ -30,7 +30,7 @@ end
 """
     SelectMortality(select, ultimate; start_age=0)
 
-Given a matrix rates, where the first row represents the select rates for a risk, will create a an `OffsetArray` that is indexed by issue age, containing a vector of rate indexed by attained age. The ultimate mortality vector is used for rates in the post-select period.
+Given a matrix of rates, where each row holds the select rates for one issue age, creates an `OffsetArray` that is indexed by issue age, containing a vector of rates indexed by attained age. The ultimate mortality vector is used for rates in the post-select period.
 
 Give the optional keyword argument to start the indexing at an age other than zero.
 
@@ -78,19 +78,19 @@ end
 """
     MortalityTable(ultimate)
     MortalityTable(select, ultimate)
-    MortalityTable(select, ultimate; metadata::MetaData)
+    MortalityTable(select, ultimate; metadata::TableMetaData)
 
 Constructs a container object which can hold either:
-    - ultimate-only rates (an `UltimateTable`)
-    - select and ultimate rates (a `SelectUltimateTable`)
+- ultimate-only rates (an `UltimateTable`)
+- select and ultimate rates (a `SelectUltimateTable`)
 
-Also pass a keyword argument `metadata=MetaData(...)` to store relevant information (source, notes, etc) about the table itself.
+Also pass a keyword argument `metadata=TableMetaData(...)` to store relevant information (source, notes, etc) about the table itself.
 
 # Examples
 ```julia
 # first construct the underlying data
-ult = UltimateMortality([x / 100 for x in 0:100]); # first ma
-matrix = rand(10,50); # represents random mortality rates with a select period of 10 years
+ult = UltimateMortality([x / 100 for x in 0:100]);
+matrix = rand(50,10); # random(!) rates for issue ages 0 to 49, with a select period of 10 years
 sel = SelectMortality(matrix,ult,start_age=0);
 
 table = MortalityTable(sel,ult)

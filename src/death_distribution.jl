@@ -18,15 +18,14 @@ struct Balducci <: DeathDistribution end
 """
     UniformDeaths()
 
-A `DeathDistribution` type that assumes an increasing force of mortality
-over the year.
+A `DeathDistribution` type that assumes deaths are spread uniformly over the year of age
+(UDD), which gives an increasing force of mortality over the year.
 """
 struct UniformDeaths <: DeathDistribution end
 
 """
     ConstantForce()
 
-A `DeathDistribution` type that assumes a constant force of mortality
-over the year.
+A `DeathDistribution` type that assumes a constant force of mortality over the year of age.
 """
 struct ConstantForce <: DeathDistribution end
