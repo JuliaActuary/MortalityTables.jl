@@ -22,7 +22,8 @@ For a parametric law, `age` is any real age up to `omega(law)`. An age past `ome
   `ArgumentError`.
 
 `rtol` defaults to `sqrt(eps(T))`, where `T` is the type of the survival values, and `atol` to
-`0`. They apply only to a law with `omega = Inf`.
+`0`. They apply only to a law with `omega = Inf`, and must be finite and nonnegative (either may be
+zero), or an `ArgumentError` names the one that is not.
 
 See also [`complete_life_expectancy`](@ref).
 
@@ -54,6 +55,15 @@ end
 # the type of a law's survival values from `age`
 _expectancy_type(m::ParametricMortality, age) = typeof(survival(m, age, age))
 
+# An infinite, NaN or negative tolerance would accept any error estimate, or none.
+function _check_expectancy_tolerances(rtol, atol)
+    for (name, value) in ((:rtol, rtol), (:atol, atol))
+        value isa Real && isfinite(value) && value >= 0 ||
+            throw(ArgumentError("$name must be finite and nonnegative; got $(repr(value))"))
+    end
+    return nothing
+end
+
 # the most terms the sum for a law with omega = Inf adds before it gives up
 const _CURTATE_MAX_TERMS = 100_000
 
@@ -61,6 +71,7 @@ function curtate_life_expectancy(
         m::ParametricMortality, age::Real;
         rtol = sqrt(eps(_expectancy_type(m, age))), atol = 0,
     )
+    _check_expectancy_tolerances(rtol, atol)
     # past a finite omega the sum below would be empty and give zero, so the age is checked
     _check_age(m, age)
     T = _expectancy_type(m, age)
@@ -103,10 +114,12 @@ and ignored, since a law is continuous. With a finite `omega`, survival left at 
 death there, so the expectancy at `omega` is zero. An age past `omega` is a `DomainError`.
 `rtol`, `atol` and `maxevals` go to QuadGK, with its defaults: `atol = 0`, `rtol` the square root
 of the machine epsilon of the integration interval's type when `atol` is zero, and
-`maxevals = 10^7`. The integral is returned only if it and QuadGK's error estimate are finite and
-the estimate is at most `max(atol, rtol * abs(integral))`. Otherwise the integration did not
-converge, and an `ArgumentError` is thrown: the expectancy may be infinite, as for a law whose
-survival falls too slowly, or the integral may need a larger `maxevals`.
+`maxevals = 10^7`. The tolerances must be finite and nonnegative and `maxevals` a positive integer,
+or an `ArgumentError` names the one that is not. The integral is returned only if it and QuadGK's
+error estimate are finite and the estimate is at most `max(atol, rtol * abs(integral))`; the
+estimate is QuadGK's, not a proof of accuracy. Otherwise an `ArgumentError` reports that the
+integration did not converge: the expectancy may be infinite, as for a law whose survival falls too
+slowly, or the integral may need a larger `maxevals`.
 
 See also [`curtate_life_expectancy`](@ref).
 
@@ -141,6 +154,8 @@ function complete_life_expectancy(
         m::ParametricMortality, age::Real, ::DeathDistribution = UniformDeaths();
         atol = 0, rtol = iszero(atol) ? sqrt(eps(float(typeof(omega(m) - age)))) : 0, maxevals = 10^7,
     )
+    _check_expectancy_tolerances(rtol, atol)
+    maxevals isa Integer && maxevals > 0 || throw(ArgumentError("maxevals must be a positive integer; got $(repr(maxevals))"))
     # Integrate over the remaining lifetime t. Integrating over ages [age, omega] gives the same bits
     # but is about 10% slower. The default tolerances are QuadGK's, for the interval's type.
     I, E = quadgk(t -> survival(m, age, age + t), 0, omega(m) - age; atol, rtol, maxevals)

@@ -75,6 +75,35 @@ MortalityTables.cumhazard(m::InversePower, age) = m.p * log1p(age)
         @test_throws ArgumentError curtate_life_expectancy(InversePower(1.0), 0.0)
     end
 
+    @testset "parametric expectancy controls are checked" begin
+        m = InversePower(3.0)
+        # an infinite, NaN or negative tolerance would accept any error estimate: an infinite rtol
+        # gave 294.3 years for InverseWeibull, whose expectancy is infinite, and a wrong curtate sum
+        for f in (curtate_life_expectancy, complete_life_expectancy), bad in (Inf, -Inf, NaN, -1.0e-8)
+            @test_throws "rtol must be finite and nonnegative" f(m, 0.0; rtol = bad)
+            @test_throws "atol must be finite and nonnegative" f(m, 0.0; atol = bad)
+        end
+        # checked before the finite-omega sum and the past-omega age check
+        @test_throws "rtol must be finite and nonnegative" curtate_life_expectancy(MortalityTables.Wittstein(), 40; rtol = Inf)
+        @test_throws "rtol must be finite and nonnegative" complete_life_expectancy(MortalityTables.Wittstein(), 200; rtol = -1)
+        for bad in (0, -1, 1.5)
+            @test_throws "maxevals must be a positive integer" complete_life_expectancy(m, 0.0; maxevals = bad)
+        end
+        @test_throws "rtol must be finite and nonnegative" complete_life_expectancy(MortalityTables.InverseWeibull(), 30; rtol = Inf)
+        @test_throws "did not converge" complete_life_expectancy(MortalityTables.InverseWeibull(), 30)
+        # valid explicit controls, zero tolerances included, keep the results
+        g = MortalityTables.Gompertz(a = 0.0003, b = log(1.07))
+        @test complete_life_expectancy(g, 50; rtol = sqrt(eps()), atol = 0, maxevals = 10^7) === complete_life_expectancy(g, 50)
+        @test curtate_life_expectancy(g, 50; rtol = sqrt(eps()), atol = 0) === curtate_life_expectancy(g, 50)
+        @test abs(complete_life_expectancy(m, 0.0; rtol = 0, atol = 1.0e-10) - 0.5) <= 1.0e-10
+        @test abs(curtate_life_expectancy(InversePower(2.0), 0.0; rtol = 0, atol = 1.0e-3) - (π^2 / 6 - 1)) <= 1.0e-3
+        # Float32 and BigFloat laws
+        @test complete_life_expectancy(InversePower(3.0f0), 0.0f0) ≈ 0.5
+        @test complete_life_expectancy(InversePower(big"3.0"), big"0.0") ≈ big"0.5" rtol = 1.0e-30
+        gbig = MortalityTables.Gompertz(a = big"0.0003", b = log(big"1.07"))
+        @test complete_life_expectancy(gbig, big(50)) ≈ complete_life_expectancy(g, 50) rtol = 1.0e-8
+    end
+
     @testset "parametric, to a finite omega" begin
         # Wittstein's formula ends at m = 100, where survival from 40 is still about 4.7e-6.
         # Reference: 256-bit quadrature of the hazard written out independently.
