@@ -56,6 +56,25 @@ MortalityTables.cumhazard(m::InversePower, age) = m.p * log1p(age)
         @test curtate_life_expectancy(m, 1.0) ≈ 4 * (π^2 / 6 - 1 - 1 / 4) rtol = sqrt(eps())
     end
 
+    @testset "parametric complete expectancy converges or throws" begin
+        # S(t) = (1 + t)^-p integrates to 1 / (p - 1) for p > 1; from age 1, (2 / (2 + t))^3 gives 1
+        @test complete_life_expectancy(InversePower(3.0), 0.0) ≈ 0.5 rtol = sqrt(eps())
+        @test complete_life_expectancy(InversePower(3.0), 1.0) ≈ 1.0 rtol = sqrt(eps())
+        @test abs(complete_life_expectancy(InversePower(3.0), 0.0; rtol = 1.0e-10) - 0.5) <= 1.0e-10
+        # for p ≤ 1 the integral is infinite, and QuadGK's estimate does not converge
+        @test_throws ArgumentError complete_life_expectancy(InversePower(1.0), 0.0)
+        @test_throws ArgumentError complete_life_expectancy(InversePower(0.5), 0.0)
+        # InverseWeibull's survival also falls too slowly: QuadGK returned about 6.5e8 years with an
+        # error estimate of 1.7e8
+        @test_throws ArgumentError complete_life_expectancy(MortalityTables.InverseWeibull(), 30)
+        # a finite integral with too few evaluations does not converge either
+        m = MortalityTables.Gompertz(a = 0.0003, b = log(1.07))
+        @test_throws ArgumentError complete_life_expectancy(m, 50; maxevals = 1)
+        @test complete_life_expectancy(m, 50; maxevals = 10^7) === complete_life_expectancy(m, 50)
+        # the curtate sum needs finite estimates too
+        @test_throws ArgumentError curtate_life_expectancy(InversePower(1.0), 0.0)
+    end
+
     @testset "parametric, to a finite omega" begin
         # Wittstein's formula ends at m = 100, where survival from 40 is still about 4.7e-6.
         # Reference: 256-bit quadrature of the hazard written out independently.

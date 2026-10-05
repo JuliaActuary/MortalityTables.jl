@@ -80,14 +80,14 @@ function curtate_life_expectancy(
         # the rest lies between ∫_{K+1}^∞ S and ∫_K^∞ S; their midpoint in one integral
         Q, E = quadgk(t -> (S(t) + S(t + 1)) / 2, T(K), T(Inf); rtol = rtol / 2, atol = atol / 2)
         estimate = s + Q
-        SK / 2 + E <= max(atol, rtol * abs(estimate)) && return estimate
+        isfinite(estimate) && isfinite(E) && SK / 2 + E <= max(atol, rtol * abs(estimate)) && return estimate
     end
     throw(ArgumentError("the curtate life expectancy did not converge within $(_CURTATE_MAX_TERMS) terms"))
 end
 
 """
     complete_life_expectancy(rates, age, dist = UniformDeaths())
-    complete_life_expectancy(law, age, dist = UniformDeaths())
+    complete_life_expectancy(law, age, dist = UniformDeaths(); rtol, atol, maxevals)
 
 The complete expectation of life at `age`: the expected remaining lifetime,
 ``\\mathring{e}_x = \\int_0^{\\omega - x} {}_tp_x \\, dt``, where ``{}_tp_x`` is
@@ -101,6 +101,12 @@ zero. An age outside the table is a `BoundsError`.
 For a parametric law, survival is integrated with QuadGK up to `omega(law)`. `dist` is accepted
 and ignored, since a law is continuous. With a finite `omega`, survival left at `omega` counts as
 death there, so the expectancy at `omega` is zero. An age past `omega` is a `DomainError`.
+`rtol`, `atol` and `maxevals` go to QuadGK, with its defaults: `atol = 0`, `rtol` the square root
+of the machine epsilon of the integration interval's type when `atol` is zero, and
+`maxevals = 10^7`. The integral is returned only if it and QuadGK's error estimate are finite and
+the estimate is at most `max(atol, rtol * abs(integral))`. Otherwise the integration did not
+converge, and an `ArgumentError` is thrown: the expectancy may be infinite, as for a law whose
+survival falls too slowly, or the integral may need a larger `maxevals`.
 
 See also [`curtate_life_expectancy`](@ref).
 
@@ -131,8 +137,14 @@ function complete_life_expectancy(table::AbstractArray, age::Real, dist::DeathDi
     return e
 end
 
-function complete_life_expectancy(m::ParametricMortality, age::Real, ::DeathDistribution = UniformDeaths())
+function complete_life_expectancy(
+        m::ParametricMortality, age::Real, ::DeathDistribution = UniformDeaths();
+        atol = 0, rtol = iszero(atol) ? sqrt(eps(float(typeof(omega(m) - age)))) : 0, maxevals = 10^7,
+    )
     # Integrate over the remaining lifetime t. Integrating over ages [age, omega] gives the same bits
-    # but is about 10% slower.
-    return quadgk(t -> survival(m, age, age + t), 0, omega(m) - age)[1]
+    # but is about 10% slower. The default tolerances are QuadGK's, for the interval's type.
+    I, E = quadgk(t -> survival(m, age, age + t), 0, omega(m) - age; atol, rtol, maxevals)
+    tol = max(atol, rtol * abs(I))
+    isfinite(I) && isfinite(E) && E <= tol && return I
+    throw(ArgumentError("the complete life expectancy did not converge: integral $I, estimated error $E, tolerance $tol"))
 end
