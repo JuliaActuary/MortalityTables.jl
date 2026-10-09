@@ -124,10 +124,26 @@ function Base.:(==)(tbl1::SelectUltimateTable, tbl2::SelectUltimateTable)
         isequal(tbl1.select, tbl2.select)
     )
 end
-# equal tables (`==`, and so `isequal`) hash alike: the same fields, hashed as `isequal` compares them
-Base.hash(tbl::UltimateTable, h::UInt) = hash(tbl.ultimate, hash(tbl.metadata, hash(UltimateTable, h)))
+# Julia 1.13.0/1.13.1 hash offset arrays of length 8:32767 with one-based indices
+# (JuliaLang/julia#63659, fixed upstream by #63661). Hash table rates locally by
+# iteration, including nested select rows. Encode axes as scalar bounds/lengths:
+# hashing the axes themselves can reach the same bug. Storage and numeric element
+# types are omitted, and empty axes have a canonical start, so arrays that compare
+# `isequal` have the same hash.
+# Track the workaround in JuliaActuary/MortalityTables.jl#156.
+_hash_rates(x, h::UInt) = hash(x, h)
+function _hash_rates(rates::AbstractArray, h::UInt)
+    h = hash(map(axis -> (isempty(axis) ? 0 : first(axis), length(axis)), axes(rates)), h)
+    for rate in rates
+        h = _hash_rates(rate, h)
+    end
+    return h
+end
+
+# Equal tables (`==`, and so `isequal`) hash alike, including across rate storage types.
+Base.hash(tbl::UltimateTable, h::UInt) = _hash_rates(tbl.ultimate, hash(tbl.metadata, hash(UltimateTable, h)))
 function Base.hash(tbl::SelectUltimateTable, h::UInt)
-    return hash(tbl.select, hash(tbl.ultimate, hash(tbl.metadata, hash(SelectUltimateTable, h))))
+    return _hash_rates(tbl.select, _hash_rates(tbl.ultimate, hash(tbl.metadata, hash(SelectUltimateTable, h))))
 end
 
 
