@@ -64,17 +64,19 @@ function Gompertz(;a=0.0002, b=0.13)
 end
 
 """
-    InverseGompertz(;a,b,c)
+    InverseGompertz(;m,σ)
 
 Construct a mortality model following InverseGompertz's law.
 
 ```math
 \\begin{aligned}
-\\mathrm{hazard} \\left( {\\rm age} \\right) &= \\frac{1}{\\sigma}e^\\frac{age-m}{\\sigma}/e^{e^\\frac{-(age-m)}{\\sigma}-1}``
+\\mathrm{hazard} \\left( {\\rm age} \\right) &= \\frac{1}{\\sigma} \\cdot \\frac{e^{\\frac{ - \\left( {\\rm age} - m \\right)}{\\sigma}}}{e^{e^{\\frac{ - \\left( {\\rm age} - m \\right)}{\\sigma}}} - 1}
 \\\\
-\\mathrm{survival} \\left( {\\rm age} \\right) &= \\frac{1 - e^{ - e^{\\frac{ - \\left( {\\rm age} - m \\right)}{\\sigma}}}}{1 - e^{ - e^{\\frac{m}{\\sigma}}}}``
+\\mathrm{survival} \\left( {\\rm age} \\right) &= \\frac{1 - e^{ - e^{\\frac{ - \\left( {\\rm age} - m \\right)}{\\sigma}}}}{1 - e^{ - e^{\\frac{m}{\\sigma}}}}
 \\end{aligned}
 ```
+
+`sigma` is an ASCII alias for `σ`.
 
 Default args:
     
@@ -86,7 +88,8 @@ struct InverseGompertz{T<:Real} <: ParametricMortality
     m::T
     σ::T
 end
-InverseGompertz(; m=49, σ=7.7) = InverseGompertz(promote(m, σ)...)
+InverseGompertz(; m = 49, σ = _Unset(), sigma = _Unset()) =
+    InverseGompertz(promote(m, _keyword(:σ => σ, :sigma => sigma, 7.7))...)
 
 
 function hazard(model::InverseGompertz,age)
@@ -106,7 +109,7 @@ end
 Construct a mortality model following Opperman's law of mortality.
 
 ``
-\\mathrm{hazard} \\left( {\\rm age} \\right) = \\frac{a}{\\sqrt{age}} + b +c\\sqrt[3]{age}
+\\mathrm{hazard} \\left( {\\rm age} \\right) = \\max\\left( \\frac{a}{\\sqrt{{\\rm age} + 1}} - b + c \\cdot \\sqrt{{\\rm age} + 1}, 0 \\right)
 ``
 
 Default args:
@@ -131,15 +134,15 @@ end
 """
     Thiele(;a,b,c,d,e,f,g)
 
-Construct a mortality model following Opperman's law of mortality.
+Construct a mortality model following Thiele's law of mortality.
 
 ```math
 \\begin{aligned}
-\\mu_1 &= a \\cdot e^{\\left(  - b \\right) \\cdot {\\rm age}}
+\\mu_1 &= a \\cdot \\exp\\left( -b \\cdot {\\rm age} \\right)
 \\\\
-\\mu_2 &= c \\cdot e^{-0.5 \\cdot d \\cdot \\left( {\\rm age} - e \\right)^{2}}
+\\mu_2 &= c \\cdot \\exp\\left( -\\frac{d}{2} \\left( {\\rm age} - e \\right)^{2} \\right)
 \\\\
-\\mu_3 &= f \\cdot e^{g \\cdot {\\rm age}}
+\\mu_3 &= f \\cdot \\exp\\left( g \\cdot {\\rm age} \\right)
 \\\\
 \\mathrm{hazard} \\left( {\\rm age} \\right) &= \\begin{cases}
 \\mu_1 + \\mu_3 & \\text{if } \\left( {\\rm age} = 0 \\right)\\\\
@@ -195,7 +198,7 @@ Default args:
     n = 0.5
     m = 100
 
-The law is defined up to age `m`, which `omega` returns.
+The law is defined up to age `m`, which `omega` returns. An age past `m` is a `DomainError`.
 """
 struct Wittstein{T<:Real} <: ParametricMortality
     a::T
@@ -206,11 +209,12 @@ end
 Wittstein(; a=1.5, b=1., n=0.5, m=100) = Wittstein(promote(a, b, n, m)...)
 
 function hazard(model::Wittstein,age)
+    _check_age(model, age)
     (; a, b, m, n) = model
     return (1/b) * a ^ -((b * age) ^ n) + a^ -((m -  age) ^ n) 
 end
 
-# `(m - age)^n` is not real beyond age `m`
+# the law ends at age `m`
 omega(model::Wittstein) = model.m
 
 """
@@ -228,9 +232,11 @@ Note that if σ > m, then the mode of the density is 0 and hx is a non-increasin
 \\\\
 \\mathrm{cumhazard} \\left( {\\rm age} \\right) = \\left( \\frac{{\\rm age}}{m} \\right)^{\\frac{m}{\\sigma}}
 \\\\
-\\mathrm{survival} \\left( {\\rm age} \\right) =  e^{ - \\mathrm{cumhazard} \\left( m, {\\rm age} \\right)}
+\\mathrm{survival} \\left( {\\rm age} \\right) =  e^{ - \\mathrm{cumhazard} \\left( {\\rm age} \\right)}
 \\end{aligned}
 ```
+
+`sigma` is an ASCII alias for `σ`.
 
  Default args:
 
@@ -241,15 +247,12 @@ struct Weibull{T<:Real} <: ParametricMortality
     m::T
     σ::T
 end
-Weibull(; m=1.0, σ=2.0) = Weibull(promote(m, σ)...)
+Weibull(; m = 1.0, σ = _Unset(), sigma = _Unset()) =
+    Weibull(promote(m, _keyword(:σ => σ, :sigma => sigma, 2.0))...)
 
 function hazard(model::Weibull,age)
     (; m, σ) = model
-    if age == 0
-        return one(age / m)
-    else 
-        return 1 / σ * (age / m)^(m / σ - 1)
-    end
+    return 1 / σ * (age / m)^(m / σ - 1)
 end
 
 function cumhazard(model::Weibull,age)
@@ -260,7 +263,7 @@ end
 """
     InverseWeibull(;m,σ)
 
-Construct a mortality model following Weibull's law of mortality.
+Construct a mortality model following the Inverse-Weibull law of mortality.
 
 The Inverse-Weibull proves useful for modelling the childhood and teenage years, because the logarithm of h(x) is a concave function.
  - `m >0` is a measure of location
@@ -272,9 +275,11 @@ The Inverse-Weibull proves useful for modelling the childhood and teenage years,
 \\\\
 \\mathrm{cumhazard}\\left( {\\rm age} \\right) &=  - \\log\\left( 1 - e^{ - \\left( \\frac{{\\rm age}}{m} \\right)^{\\frac{ - m}{\\sigma}}} \\right)
 \\\\
-\\mathrm{survival}\\left( {\\rm age} \\right) &=  e^{ - \\mathrm{cumhazard}\\left( m, {\\rm age} \\right)}
+\\mathrm{survival}\\left( {\\rm age} \\right) &=  e^{ - \\mathrm{cumhazard}\\left( {\\rm age} \\right)}
 \\end{aligned}
 ```
+
+`sigma` is an ASCII alias for `σ`.
 
  Default args:
 
@@ -286,7 +291,8 @@ struct InverseWeibull{T<:Real} <: ParametricMortality
     m::T
     σ::T
 end
-InverseWeibull(; m=5.0, σ=10.0) = InverseWeibull(promote(m, σ)...)
+InverseWeibull(; m = 5.0, σ = _Unset(), sigma = _Unset()) =
+    InverseWeibull(promote(m, _keyword(:σ => σ, :sigma => sigma, 10.0))...)
 
 function hazard(model::InverseWeibull,age)
     (; m, σ) = model
@@ -344,7 +350,7 @@ Default args:
     i = 100
     n = 200
 
-The law is defined up to age `n`, where the hazard has a pole; `omega` returns `n`.
+The law is defined up to age `n`, where the hazard has a pole; `omega` returns `n`. An age past `n` is a `DomainError`.
 """
 struct VanderMaen{T<:Real} <: ParametricMortality
     a::T
@@ -356,6 +362,7 @@ end
 VanderMaen(; a=0.01, b=1., c=0.01, i=100., n=200.) = VanderMaen(promote(a, b, c, i, n)...)
 
 function hazard(m::VanderMaen,age)
+    _check_age(m, age)
     (; a, b, c, i, n) = m
     return a + b*age + c*(age^2) + i/(n - age)
 end
@@ -379,7 +386,7 @@ Default args:
     i = 100
     n = 200
 
-The law is defined up to age `n`, where the hazard has a pole; `omega` returns `n`.
+The law is defined up to age `n`, where the hazard has a pole; `omega` returns `n`. An age past `n` is a `DomainError`.
 """
 struct VanderMaen2{T<:Real} <: ParametricMortality
     a::T
@@ -390,6 +397,7 @@ end
 VanderMaen2(; a=0.01, b=1., i=100., n=200.) = VanderMaen2(promote(a, b, i, n)...)
 
 function hazard(m::VanderMaen2,age)
+    _check_age(m, age)
     (; a, b, i, n) = m
     return a + b * age + i/(n - age)
 end
@@ -406,6 +414,8 @@ Construct a mortality model following StrehlerMildvan's law of mortality.
 \\mathrm{hazard} \\left( {\\rm age} \\right) = k \\cdot e^{\\frac{\\left(  - v_0 \\right) \\cdot \\left( 1 - b \\cdot {\\rm age} \\right)}{d}}
 ``
 
+`v0` is an ASCII alias for `v₀`.
+
 Default args:
 
     k   = 0.01
@@ -420,7 +430,8 @@ struct StrehlerMildvan{T<:Real} <: ParametricMortality
     b::T
     d::T
 end
-StrehlerMildvan(; k=0.01, v₀=2.5, b=0.2, d=6.0) = StrehlerMildvan(promote(k, v₀, b, d)...)
+StrehlerMildvan(; k = 0.01, v₀ = _Unset(), v0 = _Unset(), b = 0.2, d = 6.0) =
+    StrehlerMildvan(promote(k, _keyword(:v₀ => v₀, :v0 => v0, 2.5), b, d)...)
 
 function hazard(m::StrehlerMildvan,age)
     (; k, v₀, b, d) = m
@@ -460,7 +471,7 @@ end
 Construct a mortality model following Siler law of mortality.
 
 ``
-\\mathrm{hazard} \\left( {\\rm age} \\right) = a \\cdot e^{\\left(  - b \\right) \\cdot {\\rm age}} + c + d \\cdot e^{e \\cdot {\\rm age}}
+\\mathrm{hazard} \\left( {\\rm age} \\right) = a \\cdot \\exp\\left( -b \\cdot {\\rm age} \\right) + c + d \\cdot \\exp\\left( e \\cdot {\\rm age} \\right)
 ``
 
 Default args:
@@ -490,18 +501,31 @@ end
 
 Construct a mortality model following HeligmanPollard law of mortality with 8 parameters.
 
-``
-\\mathrm{hazard} \\left( {\\rm age} \\right) = a \\cdot e^{\\left(  - b \\right) \\cdot {\\rm age}} + c + d \\cdot e^{e \\cdot {\\rm age}}
-``
-
+```math
+\\begin{aligned}
+\\mu_1 &= a^{\\left( {\\rm age} + b \\right)^{c}} + g \\cdot h^{{\\rm age}}
+\\\\
+\\mu_2 &= d \\cdot \\exp\\left( -e \\cdot \\left( \\log\\left( \\frac{{\\rm age}}{f} \\right) \\right)^{2} \\right)
+\\\\
+\\eta &= \\begin{cases}
+\\mu_1 & \\text{if } \\left( {\\rm age} = 0 \\right)\\\\
+\\mu_1 + \\mu_2 & \\text{otherwise}
+\\end{cases}
+\\\\
+\\mathrm{hazard}\\left( {\\rm age} \\right) &= \\frac{\\eta}{1 + \\eta}
+\\end{aligned}
+```
 
 Default args:
 
-    a = 0.0002
-    b = 0.13
-    c = 0.001
-    d = 0.001
-    e = 0.013
+    a = .0005
+    b = .004
+    c = .08
+    d = .001
+    e = 10
+    f = 17
+    g = .00005
+    h = 1.1
 """
 struct HeligmanPollard{T<:Real} <: ParametricMortality
     a::T
@@ -533,7 +557,7 @@ Construct a mortality model following HeligmanPollard (alternate) law of mortali
 \\begin{aligned}
 \\mu_1 &= a^{\\left( {\\rm age} + b \\right)^{c}} + \\frac{g \\cdot h^{{\\rm age}}}{1 + g \\cdot h^{{\\rm age}}}
 \\\\
-\\mu_2 &= d \\cdot e^{\\left(  - e \\right) \\cdot \\left( \\log\\left( \\frac{{\\rm age}}{f} \\right) \\right)^{2}}
+\\mu_2 &= d \\cdot \\exp\\left( -e \\cdot \\left( \\log\\left( \\frac{{\\rm age}}{f} \\right) \\right)^{2} \\right)
 \\\\
 \\mathrm{hazard}\\left( {\\rm age} \\right) &= \\begin{cases}
 \\mu_1 & \\text{if } \\left( {\\rm age} = 0 \\right)\\\\
@@ -581,7 +605,7 @@ Construct a mortality model following HeligmanPollard (alternate) law of mortali
 \\begin{aligned}
 \\mu_1 &= a^{\\left( {\\rm age} + b \\right)^{c}} + \\frac{g \\cdot h^{{\\rm age}}}{1 + k \\cdot g \\cdot h^{{\\rm age}}}
 \\\\
-\\mu_2 &= d \\cdot e^{\\left(  - e \\right) \\cdot \\left( \\log\\left( \\frac{{\\rm age}}{f} \\right) \\right)^{2}}
+\\mu_2 &= d \\cdot \\exp\\left( -e \\cdot \\left( \\log\\left( \\frac{{\\rm age}}{f} \\right) \\right)^{2} \\right)
 \\\\
 \\mathrm{hazard}\\left( {\\rm age} \\right) &= \\begin{cases}
 \\mu_1 & \\text{if } \\left( {\\rm age} = 0 \\right)\\\\
@@ -631,7 +655,7 @@ Construct a mortality model following HeligmanPollard (alternate) law of mortali
 \\begin{aligned}
 \\mu_1 &= a^{\\left( {\\rm age} + b \\right)^{c}} + \\frac{g \\cdot h^{{\\rm age}^{k}}}{1 + g \\cdot h^{{\\rm age}^{k}}}
 \\\\
-\\mu_2 &= d \\cdot e^{\\left(  - e \\right) \\cdot \\left( \\log\\left( \\frac{{\\rm age}}{f} \\right) \\right)^{2}}
+\\mu_2 &= d \\cdot \\exp\\left( -e \\cdot \\left( \\log\\left( \\frac{{\\rm age}}{f} \\right) \\right)^{2} \\right)
 \\\\
 \\mathrm{hazard}\\left( {\\rm age} \\right) &= \\begin{cases}
 \\mu_1 & \\text{if } \\left( {\\rm age} = 0 \\right)\\\\
@@ -681,6 +705,8 @@ Construct a mortality model following RogersPlanck law of mortality.
 \\mathrm{hazard}\\left( {\\rm age} \\right) = a_0 + a_1 \\cdot e^{\\left(  - a \\right) \\cdot {\\rm age}} + a_2 \\cdot e^{b \\cdot \\left( {\\rm age} - u \\right) - e^{\\left(  - c \\right) \\cdot \\left( {\\rm age} - u \\right)}} + a_3 \\cdot e^{d \\cdot {\\rm age}}
 ``
 
+`a0`, `a1`, `a2` and `a3` are ASCII aliases for `a₀`, `a₁`, `a₂` and `a₃`.
+
 Default args:
 
     a₀ = 0.0001
@@ -705,7 +731,16 @@ struct RogersPlanck{T<:Real} <: ParametricMortality
     d::T
     u::T
 end
-RogersPlanck(; a₀=0.0001, a₁=0.02, a₂=0.001, a₃=0.0001, a=2., b=0.001, c=100., d=0.1, u=0.33) = RogersPlanck(promote(a₀, a₁, a₂, a₃, a, b, c, d, u)...)
+function RogersPlanck(;
+        a₀ = _Unset(), a0 = _Unset(), a₁ = _Unset(), a1 = _Unset(), a₂ = _Unset(), a2 = _Unset(), a₃ = _Unset(), a3 = _Unset(),
+        a = 2.0, b = 0.001, c = 100.0, d = 0.1, u = 0.33,
+    )
+    a₀ = _keyword(:a₀ => a₀, :a0 => a0, 0.0001)
+    a₁ = _keyword(:a₁ => a₁, :a1 => a1, 0.02)
+    a₂ = _keyword(:a₂ => a₂, :a2 => a2, 0.001)
+    a₃ = _keyword(:a₃ => a₃, :a3 => a3, 0.0001)
+    return RogersPlanck(promote(a₀, a₁, a₂, a₃, a, b, c, d, u)...)
+end
 
 function hazard(m::RogersPlanck,age) 
     (; a₀, a₁, a₂, a₃, a, b, c, d, u) = m

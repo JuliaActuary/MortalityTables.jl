@@ -12,8 +12,8 @@ using ForwardDiff
             @test isbits(m)
             @test m isa L{Float64}
             @test (@inferred hazard(m, 50.0)) isa Float64
-            # a Float32 law keeps its type at Float32 ages, including the laws' special cases at
-            # age zero (Weibull, Thiele) and Opperman's floor at zero
+            # a Float32 law keeps its type at Float32 ages, including Thiele's special case at age
+            # zero and Opperman's floor at zero
             m32 = L(map(f -> Float32(getfield(m, f)), fieldnames(typeof(m)))...)
             @test m32 isa L{Float32}
             for age in (0.0f0, 1.0f0, 50.0f0)
@@ -309,11 +309,11 @@ using ForwardDiff
     @testset "table stand-in semantics" begin
         m = Makeham()
         # a DeathDistribution is accepted and ignored by continuous models
-        @test survival(m, 65, Uniform()) == survival(m, 65)
-        @test survival(m, 60, 65, Uniform()) == survival(m, 60, 65)
+        @test survival(m, 65, UniformDeaths()) == survival(m, 65)
+        @test survival(m, 60, 65, UniformDeaths()) == survival(m, 60, 65)
         @test decrement(m, 60, 65) ≈ 1 - survival(m, 60, 65)
-        @test decrement(m, 65, Uniform()) == decrement(m, 65)
-        @test decrement(m, 60, 65, Uniform()) == decrement(m, 60, 65)
+        @test decrement(m, 65, UniformDeaths()) == decrement(m, 65)
+        @test decrement(m, 60, 65, UniformDeaths()) == decrement(m, 60, 65)
         # a small decrement is not rounded to zero by 1 - survival
         tiny = Makeham(a = 1e-12, b = 0.1, c = 0.0)
         @test decrement(tiny, 1e-6) ≈ cumhazard(tiny, 1e-6) rtol = 1e-12
@@ -327,6 +327,82 @@ using ForwardDiff
         @test omega(MortalityTables.VanderMaen()) == 200
         @test omega(MortalityTables.VanderMaen2(n = 150)) == 150
         @test omega(MortalityTables.Wittstein(m = 90.0)) === 90.0
+    end
+
+    @testset "Weibull's hazard at age zero is the formula's limit" begin
+        # Inf for m < σ, 1/σ for m = σ and 0 for m > σ, in the law's type
+        for T in (Float64, Float32)
+            @test hazard(MortalityTables.Weibull(m = T(1), σ = T(2)), zero(T)) === T(Inf)
+            @test hazard(MortalityTables.Weibull(m = T(3), σ = T(3)), zero(T)) === 1 / T(3)
+            @test hazard(MortalityTables.Weibull(m = T(2), σ = T(1)), zero(T)) === zero(T)
+        end
+        @test hazard(MortalityTables.Weibull(), 0) === Inf
+    end
+
+    @testset "an age past omega is a DomainError" begin
+        # Wittstein's formula still evaluates past m for a whole-number n, and VanderMaen's past
+        # its pole. Ages just past omega throw too, although quadrature never evaluates its end age.
+        laws = (
+            MortalityTables.Wittstein(), MortalityTables.Wittstein(n = 1.0), MortalityTables.Wittstein(n = 2.0),
+            MortalityTables.VanderMaen(), MortalityTables.VanderMaen2(a = 0.001, b = 0.0001, i = 0.5, n = 90.0),
+        )
+        for law in laws, past in omega(law) .+ (1, 0.01, 1.0e-9)
+            @test_throws DomainError hazard(law, past)
+            @test_throws DomainError cumhazard(law, past)
+            @test_throws DomainError survival(law, past)
+            @test_throws DomainError survival(law, omega(law) - 10, past)
+            @test_throws DomainError decrement(law, omega(law) - 10, past)
+        end
+        # at and below omega, the values are those of Wittstein's formula
+        for n in (1.0, 2.0)
+            w = MortalityTables.Wittstein(n = n)
+            (; a, b, m) = w
+            h(x) = (1 / b) * a^-((b * x)^n) + a^-((m - x)^n)
+            H(x) = quadgk(h, 0, x)[1]
+            for age in (0.5, 50, 99.5, 100)
+                @test hazard(w, age) === h(age)
+                @test cumhazard(w, age) === H(age)
+            end
+            @test survival(w, 90, 100) === exp(-(H(100) - H(90)))
+            @test decrement(w, 90, 100) === -expm1(-(H(100) - H(90)))
+        end
+    end
+
+    @testset "ASCII keyword aliases" begin
+        K = MortalityTables
+        aliases = [
+            (K.InverseGompertz, :σ, :sigma),
+            (K.Weibull, :σ, :sigma),
+            (K.InverseWeibull, :σ, :sigma),
+            (K.GammaGompertz, :γ, :gamma),
+            (K.StrehlerMildvan, :v₀, :v0),
+            (K.RogersPlanck, :a₀, :a0),
+            (K.RogersPlanck, :a₁, :a1),
+            (K.RogersPlanck, :a₂, :a2),
+            (K.RogersPlanck, :a₃, :a3),
+        ]
+        for (L, unicode, ascii) in aliases
+            # either spelling sets the same field, and the default applies when neither is passed
+            @test getfield(L(; unicode => 0.25), unicode) === 0.25
+            @test L(; ascii => 0.25) === L(; unicode => 0.25)
+            @test L(; ascii => 0.25f0) === L(; unicode => 0.25f0)
+            @test getfield(L(), unicode) === getfield(L(; unicode => getfield(L(), unicode)), unicode)
+            # both spellings, even with equal values, are an ArgumentError
+            @test_throws ArgumentError L(; unicode => 0.25, ascii => 0.25)
+            @test (@inferred L(; ascii => 0.25)) isa L{Float64}
+        end
+        # aliases mix with the other keywords
+        @test K.RogersPlanck(a0 = 0.1, a₁ = 0.2, a2 = 0.3, a₃ = 0.4, u = 0.5) ===
+            K.RogersPlanck(a₀ = 0.1, a₁ = 0.2, a₂ = 0.3, a₃ = 0.4, u = 0.5)
+        @test K.Weibull(m = 2.0f0, sigma = 3.0f0) === K.Weibull(m = 2.0f0, σ = 3.0f0)
+        @test K.Weibull(m = 2.0f0, sigma = 3.0f0) isa K.Weibull{Float32}
+        # the defaults are unchanged
+        @test K.Weibull() === K.Weibull(m = 1.0, σ = 2.0)
+        @test K.InverseGompertz() === K.InverseGompertz(m = 49.0, σ = 7.7)
+        @test K.InverseWeibull() === K.InverseWeibull(m = 5.0, σ = 10.0)
+        @test K.GammaGompertz() === K.GammaGompertz(a = 0.002, b = 0.13, γ = 1.0)
+        @test K.StrehlerMildvan() === K.StrehlerMildvan(k = 0.01, v₀ = 2.5, b = 0.2, d = 6.0)
+        @test K.RogersPlanck() === K.RogersPlanck(a₀ = 0.0001, a₁ = 0.02, a₂ = 0.001, a₃ = 0.0001)
     end
 
     @testset "Gompertz and Makeham equality" begin
@@ -370,7 +446,7 @@ using ForwardDiff
                         (rmodel = "kostaki", juliamodel = MortalityTables.Kostaki()),
                         (rmodel = "kannisto", juliamodel = MortalityTables.Kannisto()),
                         (rmodel = "kannisto_makeham", juliamodel = MortalityTables.KannistoMakeham())
-                        # the next two requre adding an autodiff dependency:
+                        # the next two require adding an autodiff dependency:
                         # (rmodel="carriere1",juliamodel=MortalityTables.Carriere()),
                         # (rmodel="carriere2",juliamodel=MortalityTables.Carriere2()),
                     ]

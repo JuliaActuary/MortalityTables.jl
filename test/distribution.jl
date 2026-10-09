@@ -5,7 +5,7 @@
     @testset "SOA Experience Study Calcuations distribution examples" begin
         soa_mort = UltimateMortality([0.12])
 
-        methods = [Balducci(), Uniform(), Constant()]
+        methods = [Balducci(), UniformDeaths(), ConstantForce()]
         time_targets = Dict(
             1 / 12 => [0.9888, 0.9900, 0.9894],
             6 / 12 => [0.9362, 0.9400, 0.9381],
@@ -47,7 +47,7 @@
     end
     @testset "Multi-year examples" begin
         mort = UltimateMortality([0.20, 0.50])
-        methods = [Balducci(), Uniform(), Constant()]
+        methods = [Balducci(), UniformDeaths(), ConstantForce()]
 
         # these sample values calculated manually
         time_targets = Dict(
@@ -85,22 +85,22 @@
         m = UltimateMortality([0.5 for i in 1:8])
         
         @test survival(m, 1, 2) ≈ 0.5
-        @test survival(m, 1.5, 2.5, Constant()) ≈ 0.5
-        @test survival(m, 1.5, 3.5, Constant()) ≈ 0.25
-        @test survival(m, 1.5, 1.5 + eps(), Constant()) ≈ 1.0
-        @test survival(m, 1, 1 + eps(), Constant()) ≈ 1.0
+        @test survival(m, 1.5, 2.5, ConstantForce()) ≈ 0.5
+        @test survival(m, 1.5, 3.5, ConstantForce()) ≈ 0.25
+        @test survival(m, 1.5, 1.5 + eps(), ConstantForce()) ≈ 1.0
+        @test survival(m, 1, 1 + eps(), ConstantForce()) ≈ 1.0
 
     end
 
     @testset "Issue #88 - Stackoverflow" begin
-        @test survival(MortalityTables.mortality_vector([0.5,0.5],start_age=50),50,50.5,MortalityTables.Uniform()) ≈ 1 - 0.5 * 0.5
+        @test survival(MortalityTables.mortality_vector([0.5,0.5],start_age=50),50,50.5,MortalityTables.UniformDeaths()) ≈ 1 - 0.5 * 0.5
     end
 
     @testset "fractional starting ages condition on survival to the start" begin
         # survival from age 0 to y, built from whole-year products and the
         # within-year fraction starting at a birthday (independent of `survival`)
-        within(::Uniform, q, u) = 1 - u * q
-        within(::Constant, q, u) = (1 - q)^u
+        within(::UniformDeaths, q, u) = 1 - u * q
+        within(::ConstantForce, q, u) = (1 - q)^u
         within(::Balducci, q, u) = (1 - q) / (1 - (1 - u) * q)
         function S0(v, y, dd)
             x = floor(Int, y)
@@ -108,10 +108,10 @@
         end
 
         q = UltimateMortality([0.2, 0.3, 1.0])
-        @test survival(q, 0.5, 1, Uniform()) ≈ 0.8 / 0.9
+        @test survival(q, 0.5, 1, UniformDeaths()) ≈ 0.8 / 0.9
         @test survival(q, 0.5, 1, Balducci()) ≈ 0.9
-        @test survival(q, 0.5, 1, Constant()) ≈ sqrt(0.8)
-        for dd in (Uniform(), Balducci(), Constant())
+        @test survival(q, 0.5, 1, ConstantForce()) ≈ sqrt(0.8)
+        for dd in (UniformDeaths(), Balducci(), ConstantForce())
             @test survival(q, 0, 0.5, dd) * survival(q, 0.5, 1, dd) ≈ 0.8
         end
 
@@ -119,7 +119,7 @@
         ult = UltimateMortality([0.01 * k for k in 1:20], start_age = 40)
         row = MortalityTables._select_row(40, [0.005, 0.02, 0.07], ult)
         ages = [0.0, 0.25, 0.5, 1.0, 1.4, 2.75]
-        for (v, offset) in ((q, 0), (row, 40)), dd in (Uniform(), Balducci(), Constant())
+        for (v, offset) in ((q, 0), (row, 40)), dd in (UniformDeaths(), Balducci(), ConstantForce())
             points = offset .+ ages
             for (i, a) in enumerate(points), c in points[(i + 1):end]
                 @test survival(v, a, c, dd) ≈ S0(v, c, dd) / S0(v, a, dd)
@@ -131,7 +131,7 @@
             end
         end
         # crossing from the select period (age 42.5) into the ultimate rates (age 43.5)
-        @test survival(row, 42.5, 43.5, Uniform()) ≈ (1 - 0.07) / (1 - 0.5 * 0.07) * (1 - 0.5 * ult[43])
+        @test survival(row, 42.5, 43.5, UniformDeaths()) ≈ (1 - 0.07) / (1 - 0.5 * 0.07) * (1 - 0.5 * ult[43])
     end
  
 end

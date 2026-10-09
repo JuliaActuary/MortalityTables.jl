@@ -55,20 +55,20 @@ julia> vbt2001.ultimate[95]        # ultimate vectors only need to be called wit
  0.24298
 ```
 
-Calculate the force of mortality or survival over a range of time:
+Calculate survival or decrement over a range of ages:
 
 ```julia
 julia> survival(vbt2001.ultimate,30,40) # the survival between ages 30 and 40
 0.9894404665434904
 
 julia> decrement(vbt2001.ultimate,30,40) # the decrement between ages 30 and 40
-0.010559533456509618
+0.010559533456509524
 ```
 
-Non-whole periods of time are supported when you specify the assumption (`Constant()`, `Uniform()`, or `Balducci()`) for fractional periods:
+Non-whole periods of time are supported when you specify the assumption (`ConstantForce()`, `UniformDeaths()`, or `Balducci()`) for fractional periods:
 
 ```julia
-julia> survival(vbt2001.ultimate,30,40.5,Uniform()) # the survival between ages 30 and 40.5
+julia> survival(vbt2001.ultimate,30,40.5,UniformDeaths()) # the survival between ages 30 and 40.5
 0.9887676470262408
 ```
 
@@ -91,7 +91,7 @@ mort = [
 plot(
 	   mort,
 	   label = ["2001 CSO" "2017 CSO"],
-	   title = "Comparison of 2107 and 2001 CSO \n for SuperPref NS 80-year-old male",
+	   title = "Comparison of 2017 and 2001 CSO \n for SuperPref NS 80-year-old male",
 	   xlabel="duration")
 ```
 

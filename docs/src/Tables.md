@@ -31,36 +31,25 @@ Sample of some of the included table sets:
 1980 CET
 ```
 
-[Click here to see the full list of tables included.](https://github.com/JuliaActuary/MortalityTables.jl/blob/master/BundledTables.md)
+The names of the bundled tables are the keys of `MortalityTables.table_source_map`, which maps each name to its mort.SOA.org id.
 
 If you would like more tables added by default, please open a GitHub issue with the request.
 
 ### Other [mort.SOA.org](https://mort.soa.org) Tables
 
 Given a table id ([for example](https://mort.soa.org/ViewTable.aspx?&TableIdentity=60029) `60029`)
-you can request the table directly from the SOA's mortality table service. Remember
-that not all tables have been tested, though the standard source format should mean
-compatibility with `MortalityTables.jl`.
+or name, `get_SOA_table` (also called `MortalityTables.table`) loads the bundled copy of the
+table. Remember that not all tables have been tested, though the standard source format should
+mean compatibility with `MortalityTables.jl`.
 
 ```julia
 aus_life_table_female = get_SOA_table(60029)
-aus_life_table_female[0]  # returns the attained age 0 rate of 0.10139
-```
-
-You can combine it with the bundled tables too:
-
-```julia
-tables = MortalityTables.tables()
-
-get_SOA_table!(tables,60029) # this modifies `tables` by adding the new table
-
-t = tables["Australian Life Tables 1891-1900 Female"]
-t[0]  # returns the attained age 0 rate of 0.10139
+aus_life_table_female.ultimate[0]  # returns the attained age 0 rate of 0.10139
 ```
 
 ### Load custom set of tables
 
-Download the `.xml` [aka the (`XTbML` format)](https://mort.soa.org/About.aspx) version of the table from [mort.SOA.org](https://mort.soa.org) and place it in a directory of your choosing. Then call `MortalityTables.tables(path_to_your_dir)`.
+Download the `.xml` [aka the (`XTbML` format)](https://mort.soa.org/About.aspx) version of the table from [mort.SOA.org](https://mort.soa.org) and place it in a directory of your choosing. Then call `MortalityTables.read_tables(path_to_your_dir)`, which returns a `Dict` of the tables by name.
 
 
 ### From CSV
@@ -101,16 +90,17 @@ ult_vec = [0.005, 0.008, ...,0.805,1.00]
 ult = UltimateMortality(ult_vec,start_age = 15)
 ```
 
-We can now use this the ultimate rates all by itself:
+We can now use the ultimate rates by themselves:
 
 ```julia
-q(ult,15,1) # 0.005
+ult[15]               # 0.005, the rate at age 15
+survival(ult, 15, 16) # 0.995
 ```
 
 And join with the select rates, which for our example will start at age 0:
 
 ```julia
-# attained age going down the column, duration across
+# issue age going down the rows, duration across
 select_matrix = [ 0.001 0.002 ... 0.010;
                   0.002 0.003 ... 0.012;
                   ...
@@ -118,8 +108,8 @@ select_matrix = [ 0.001 0.002 ... 0.010;
 sel_start_age = 0
 sel = SelectMortality(select_matrix,ult,start_age = 0)
 
-sel[0][0] #issue age 0, attained age 0 rate of  0.001
-sel[0][100] #issue age 0, attained age 100 rate of  1.0
+sel[0][0]   # issue age 0, attained age 0 rate of 0.001
+sel[0][100] # issue age 0, attained age 100 rate of 1.0
 ```
 
 Lastly, to take the `SelectMortality` and `UltimateMortality` we just created,
@@ -127,8 +117,8 @@ we can combine them into one stored object, along with a `TableMetaData`:
 
 ```julia
 my_table = MortalityTable(
-              s1,
-              u1,
+              sel,
+              ult,
               metadata=TableMetaData(name="My Table", comments="Rates for Product XYZ")
               )
 ```
@@ -166,10 +156,10 @@ MortalityTables.omega
 
 ## Rates, Survival and Decrement
 
-To access the rates, simply index by the attained age. Example:
+To access the rates, index a table's rate vectors by attained age. Example:
 
 ```julia
-julia> vbt2001 = tables["2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB"]
+julia> vbt2001 = MortalityTables.table("2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB")
 MortalityTable (Insured Lives Mortality):
    Name:
        2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB
@@ -225,12 +215,15 @@ MortalityTables.decrement
 ```
 ## Life Expectancy
 
-Calculate curtate or complete life expectancy.
+`curtate_life_expectancy` gives the expected number of whole years lived after an age;
+`complete_life_expectancy` gives the expected remaining lifetime, with survival within each year
+of age following a fractional year assumption (see below).
 
 ### Docstrings
 
 ```@docs; canonical=false
-MortalityTables.life_expectancy
+MortalityTables.curtate_life_expectancy
+MortalityTables.complete_life_expectancy
 ```
 
 ## Fractional Year Assumptions
@@ -242,16 +235,16 @@ from the [2016 Experience Study Calculations paper from the SOA](https://www.soa
 
 The three assumptions are:
 
-- `Uniform()` which assumes an increasing force of mortality throughout the year.
-- `Constant()` which assumes a level force of mortality throughout the year.
+- `UniformDeaths()` which assumes an increasing force of mortality throughout the year.
+- `ConstantForce()` which assumes a level force of mortality throughout the year.
 - `Balducci()` which assumes a decreasing force of mortality over the year. It seems [to
 be for making it easier](https://www.soa.org/globalassets/assets/library/research/actuarial-research-clearing-house/1978-89/1988/arch-1/arch88v17.pdf) to calculate successive months by hand rather than any theoretical basis.
 
 ```@docs; canonical=false
 MortalityTables.DeathDistribution
 MortalityTables.Balducci
-MortalityTables.Uniform
-MortalityTables.Constant
+MortalityTables.UniformDeaths
+MortalityTables.ConstantForce
 ```
 ## Select-period deterioration (Dukes-MacDonald)
 

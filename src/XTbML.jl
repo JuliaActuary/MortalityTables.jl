@@ -95,7 +95,7 @@ const _CACHE_LOCK = ReentrantLock()
 """
     readXTbML(path)
 
-Loads the [XtbML](https://mort.soa.org/About.aspx) (the SOA XML data format for mortality tables) stored at the given path and returns a `MortalityTable`.
+Loads the [XTbML](https://mort.soa.org/About.aspx) (the SOA XML data format for mortality tables) stored at the given path and returns a `MortalityTable`.
 
 The result is cached by `path`, so calling this twice with the same path returns the identical object.
 """
@@ -115,7 +115,7 @@ _xtbml_paths(dir) =
 """
     read_tables(dir=nothing)
 
-Loads the [XtbML](https://mort.soa.org/About.aspx) (the SOA XML data format for mortality tables) stored in the given path. If no path is specified, will load the packages in the MortalityTables package directory. To see where your system keeps packages, run `DEPOT_PATH` from a Julia REPL.
+Loads the [XTbML](https://mort.soa.org/About.aspx) files (the SOA XML data format for mortality tables) stored in the given directory and returns a `Dict` of the tables by name. If no directory is given, it loads the tables bundled with the package.
 """
 function read_tables(dir=nothing)
     table_dir = isnothing(dir) ? artifact"mort.soa.org" : dir
