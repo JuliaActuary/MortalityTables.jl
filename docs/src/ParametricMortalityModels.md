@@ -44,6 +44,7 @@ survival(m,20,25) # the five year survival rate
   - e.g. : `MortalityTables.Kostaki()`
 - Because of the large number of parameters for the models, the arguments are keyword rather than positional: `MortalityTables.Gompertz(a=0.01,b=0.2)`
 - Keywords with Unicode names also accept ASCII spellings: `sigma` for `σ`, `gamma` for `γ`, `v0` for `v₀`, and `a0` to `a3` for `a₀` to `a₃`. Passing both spellings of one keyword is an `ArgumentError`.
+- The alternative Makeham/Gompertz models also accept `mu` for `μ`; the Carrière models accept `p1`, `p2`, `mu1` to `mu3`, and `sigma1` to `sigma3`.
 - The models have default values, so they can be called without args like this: `MortalityTables.Gompertz()`.
   - See the help text for what the default values are: `?Gompertz`
 
@@ -59,6 +60,30 @@ MortalityTables.μ
 
 Also see [`survival`](@ref) and [`decrement`](@ref).
 
+## Alternative parameterizations and survival mixtures
+
+[`Makeham2`](@ref) and [`Gompertz2`](@ref) describe the Gompertz component using a location `μ` and a scale `σ`. They are equivalent to the existing laws with `a = exp(-μ/σ)/σ` and `b = 1/σ`. They retain the location and scale directly so that an underflowed coefficient `a` does not erase mortality near age `μ`.
+
+```@example carriere
+using MortalityTables
+g = MortalityTables.Gompertz2(mu = 88, sigma = 9.5)
+(hazard(g, 80), decrement(g, 80, 81))
+```
+
+[`Carriere1`](@ref) mixes Weibull, inverse-Weibull, and Gompertz survival functions. [`Carriere2`](@ref) substitutes inverse Gompertz for the middle component. The initial weights are `p₁`, `p₂`, and `1-p₁-p₂`; each component's survival at age zero is one. These are mixtures of populations with different lifetimes: the hazard at an attained age weights the component hazards by the population still surviving at that age.
+
+```@example carriere
+m = MortalityTables.Carriere1(p1 = 0.003, p2 = 0.007, sigma2 = 6)
+ages = [20.0, 40.0, 60.0, 80.0]
+(hazards = hazard.(m, ages), annual_decrements = decrement.(m, ages, ages .+ 1))
+```
+
+The force of mortality `hazard(m, age)` is instantaneous; `decrement(m, age, age + 1)` is the one-year probability of death conditional on survival to `age`. `cumhazard`, interval survival, and interval decrements use the same continuous law, including at fractional ages.
+
+Carrière weights must be nonnegative and sum to at most one for the first two components. Zero weights are supported. Locations and scales must be finite and positive; invalid inputs raise an `ArgumentError`. A negative age raises a `DomainError`. There is no clipping of weights or survival probabilities.
+
+At age zero, an active Weibull component with `μ₁ < σ₁` gives an infinite hazard, while survival is exactly one and cumulative hazard is zero. This singularity is integrable. The default `Carriere1` also has an infinite mean lifetime because its inverse-Weibull component has `μ₂/σ₂ ≤ 1`; use parameters with `μ₂/σ₂ > 1` or set `p₂ = 0` when a finite mean is needed. `Carriere2` has a finite mean for all allowed parameters.
+
 ## Available Models
 
 These models are subtypes of `ParametricMortality`:
@@ -72,6 +97,10 @@ Order   = [:type]
 ```@docs; canonical=false
 MortalityTables.Makeham
 MortalityTables.Gompertz
+MortalityTables.Makeham2
+MortalityTables.Gompertz2
+MortalityTables.Carriere1
+MortalityTables.Carriere2
 MortalityTables.InverseGompertz
 MortalityTables.Opperman
 MortalityTables.Thiele

@@ -35,3 +35,17 @@ end
 
 # log(1 + exp(y)), without overflow for large y
 _log1pexp(y) = y > 0 ? y + log1p(exp(-y)) : log1p(exp(y))
+
+# log(expm1(z)/z), for z ≥ 0. The inverse laws use its negative in their log hazard.
+# Factoring out exp(z) avoids overflow; the series keeps the limit at z = 0.
+function _logexprel(z)
+    isinf(z) && return z
+    return z > 1 ? z + log1p(-exp(-z)) - log(z) : log(_exprel(z))
+end
+
+# log(1 - exp(-exp(y))). Keep y outside the exponential in the small-exp(y) tail,
+# and use log1p in the other tail so a very small cumulative hazard is not rounded away.
+function _log1mexp_exp(y)
+    z = exp(y)
+    return y <= 0 ? y + log(_exprel(-z)) : log1p(-exp(-z))
+end

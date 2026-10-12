@@ -1,5 +1,10 @@
 # MortalityTables.jl release notes
 
+## Unreleased
+
+- Added `Makeham2` and `Gompertz2` location/scale parameterizations and the `Carriere1` and `Carriere2` survival mixtures. The mixtures validate their weights, locations, and scales, compute an instantaneous hazard, and support the standard cumulative hazard, survival, and decrement interface. All new Unicode keywords have ASCII aliases.
+- Inverse-Weibull and inverse-Gompertz laws now evaluate their cumulative hazards and hazards stably near age zero and in distant tails. Inverse-Weibull's hazard at zero is its limit, zero, rather than `NaN`.
+
 ## v3.0.0
 
 ### Breaking changes

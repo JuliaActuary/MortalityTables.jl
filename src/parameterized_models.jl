@@ -94,13 +94,22 @@ InverseGompertz(; m = 49, σ = _Unset(), sigma = _Unset()) =
 
 function hazard(model::InverseGompertz,age)
     (; m, σ) = model
-    return 1 / σ * exp(-(age - m)/σ) / (exp(exp(-(age - m)/σ)) - 1)
+    return exp(-log(σ) - _logexprel(exp((m - age) / σ)))
 end
 
 function cumhazard(model::InverseGompertz,age)
     (; m, σ) = model
-    # negative log of the closed-form survival function
-    return -log((1 - exp(-exp(-(age - m)/σ))) / (1 - exp(-exp(m/σ))))
+    y0 = m / σ
+    t = age / σ
+    z0 = exp(y0)
+    if abs(t) < 1 && isfinite(z0)
+        # S(0) - S(age), factored to retain tiny ages before taking the logarithm.
+        z = z0 * exp(-t)
+        # Cancel z0 analytically so a tiny (or underflowed) z0 does not give 0/0.
+        loss = exp(-z) * -expm1(-t) * _exprel(z0 * expm1(-t)) / _exprel(-z0)
+        loss < 1 / 2 && return -log1p(-loss)
+    end
+    return _log1mexp_exp(y0) - _log1mexp_exp((m - age) / σ)
 end
 
 """
@@ -296,12 +305,15 @@ InverseWeibull(; m = 5.0, σ = _Unset(), sigma = _Unset()) =
 
 function hazard(model::InverseWeibull,age)
     (; m, σ) = model
-    return (1/σ) * (age/m)^(-m/σ - 1) / (exp((age/m)^(-m/σ)) - 1)
+    iszero(age) && return zero(age / σ)
+    logz = -(m / σ) * log(age / m)
+    return exp(log(m / σ) - log(age) - _logexprel(exp(logz)))
 end
 
 function cumhazard(model::InverseWeibull,age)
     (; m, σ) = model
-    return -log(1 - exp(-(age/m)^(-m/σ)))
+    iszero(age) && return zero(age / σ)
+    return -_log1mexp_exp(-(m / σ) * log(age / m))
 end
 
 """
