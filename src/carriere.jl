@@ -20,9 +20,9 @@ struct Makeham2{T<:Real} <: ParametricMortality
     c::T
     function Makeham2(μ::Real, σ::Real, c::Real)
         μ, σ, c = promote(μ, σ, c)
-        isfinite(μ) || throw(ArgumentError("μ must be finite"))
-        isfinite(σ) && σ > 0 || throw(ArgumentError("σ must be finite and positive"))
-        isfinite(c) && c >= 0 || throw(ArgumentError("c must be finite and nonnegative"))
+        isfinite(_primal(μ)) || throw(ArgumentError("μ must be finite"))
+        isfinite(_primal(σ)) && _primal(σ) > 0 || throw(ArgumentError("σ must be finite and positive"))
+        isfinite(_primal(c)) && _primal(c) >= 0 || throw(ArgumentError("c must be finite and nonnegative"))
         return new{typeof(μ)}(μ, σ, c)
     end
 end
@@ -42,7 +42,7 @@ function Gompertz2(; μ = _Unset(), mu = _Unset(), σ = _Unset(), sigma = _Unset
     return Makeham2(location, scale, zero(scale))
 end
 
-_check_nonnegative_age(age) = age >= 0 ? nothing : throw(DomainError(age, "age must be nonnegative"))
+_check_nonnegative_age(age) = _primal(age) >= 0 ? nothing : throw(DomainError(age, "age must be nonnegative"))
 
 function hazard(m::Makeham2, age)
     _check_nonnegative_age(age)
@@ -52,27 +52,39 @@ end
 function cumhazard(m::Makeham2, from, to)
     _check_nonnegative_age(from)
     _check_nonnegative_age(to)
+    from == to == Inf && return zero(float(from + to + m.c))
     to < from && return -cumhazard(m, to, from)
-    t = (to - from) / m.σ
-    y = (from - m.μ) / m.σ
-    # The local form is smooth through an empty interval (including under AD). For
-    # large growth use the end age and log(expm1) to avoid an underflow × overflow.
-    growth = if abs(t) < 1 && y < 1
-        exp(y) * t * _exprel(t)
-    elseif from == to
+    Δ = to - from
+    t = Δ / m.σ
+    y = (to - m.μ) / m.σ
+    rate = exp(y - log(m.σ))
+    # Integrate the endpoint force over an effective interval width. This is
+    # smooth at Δ = 0, even when exp(y) overflows but exp(y)/σ is finite.
+    # For long intervals the width tends to σ; forming Δ/t could give Inf/Inf.
+    growth = if isfinite(rate) &&
+                (floatmin(typeof(_primal(rate))) <= _primal(rate) || iszero(_primal(Δ)))
+        width = t < 1 ? Δ * _exprel(-t) : m.σ * -expm1(-t)
+        rate * width
+    elseif abs(t) < 1 && (from - m.μ) / m.σ < 1
+        # Keep a subnormal force from losing digits before a large width rescales
+        # it, while preserving the local derivatives in the small-growth tail.
+        exp((from - m.μ) / m.σ) * t * _exprel(t)
+    elseif _isconstantzero(Δ)
         zero(t)
     else
-        exp((to - m.μ) / m.σ + log(-expm1(-t)))
+        # The force itself can under/overflow while its integral is representable.
+        exp(y + log(-expm1(-t)))
     end
-    return growth + _times_age(m.c, to - from)
+    return growth + _times_age(m.c, Δ)
 end
 cumhazard(m::Makeham2, age) = cumhazard(m, zero(age), age)
 
 # Validate positional and keyword construction alike; never clip a probability or a scale.
 function _check_carriere_parameters(p₁, p₂, μ₁, μ₂, μ₃, σ₁, σ₂, σ₃)
+    p₁, p₂ = _primal(p₁), _primal(p₂)
     isfinite(p₁) && isfinite(p₂) && p₁ >= 0 && p₂ >= 0 && p₁ + p₂ <= 1 ||
         throw(ArgumentError("weights must satisfy p₁ ≥ 0, p₂ ≥ 0, and p₁ + p₂ ≤ 1"))
-    all(x -> isfinite(x) && x > 0, (μ₁, μ₂, μ₃, σ₁, σ₂, σ₃)) ||
+    all(x -> isfinite(_primal(x)) && _primal(x) > 0, (μ₁, μ₂, μ₃, σ₁, σ₂, σ₃)) ||
         throw(ArgumentError("locations and scales must be finite and positive"))
     return nothing
 end
@@ -99,6 +111,20 @@ All locations and scales must be finite and positive. Ages must be nonnegative.
 The hazard at zero is infinite when `p₁ > 0` and `μ₁ < σ₁` (an integrable
 Weibull singularity); survival there is one. The inverse-Weibull tail gives an
 infinite mean lifetime when `p₂ > 0` and `μ₂/σ₂ ≤ 1`, as with the defaults.
+The defaults are inherited from MortalityLaws, not a calibrated mortality table:
+their hazard declines sharply at old ages as inverse-Weibull survivors dominate.
+
+This implementation uses `σ₂` for the inverse-Weibull component, following
+Carrière's paper. Older MortalityLaws implementations used `σ₁` there and ignored
+`σ₂`; that wiring was corrected in MortalityLaws' v2.3.0 development commit
+[`8f13abb`](https://github.com/mpascariu/MortalityLaws/commit/8f13abb1417cc22aec01b82848eea689bf01f048).
+Parameters fitted with the older formula generally need refitting before use here.
+MortalityLaws also reports finite differences of cumulative hazard, whereas
+`hazard` here is the instantaneous force.
+
+The zero-age limits above apply to ordinary numeric ages. ForwardDiff age
+derivatives at exactly zero remain unsupported for `InverseWeibull` and mixtures
+containing it; they can return `NaN` even when the right-hand limit is finite.
 
 ASCII aliases are `p1`, `p2`, `mu1` to `mu3`, and `sigma1` to `sigma3`.
 Passing both spellings of a keyword is an `ArgumentError`.
@@ -175,12 +201,12 @@ _carriere_weights(m) = (m.p₁, m.p₂, 1 - (m.p₁ + m.p₂))
 
 # Testing for a weight equal to one alone is insufficient: 1 - a tiny positive
 # weight can round to one while that tiny component still contributes mortality.
-_sole_component(weights) = count(!iszero, weights) == 1 ? findfirst(!iszero, weights) : nothing
+_sole_component(weights) = count(!_isconstantzero, weights) == 1 ? findfirst(!_isconstantzero, weights) : nothing
 
 function _mixture_cumhazards(components, weights, age)
     # Ignore inactive components, including singularities and exhausted survival.
     return map(components, weights) do component, weight
-        iszero(weight) ? oftype(float(age + weight), Inf) : cumhazard(component, age)
+        _isconstantzero(weight) ? oftype(float(age + weight), Inf) : cumhazard(component, age)
     end
 end
 
@@ -213,7 +239,7 @@ function _mixture_masses(components, weights, age)
     H = _mixture_cumhazards(components, weights, age)
     h0 = minimum(H)
     if isinf(h0)
-        logH = map((m, w) -> iszero(w) ? h0 : _overflow_logH(m, age), components, weights)
+        logH = map((m, w) -> _isconstantzero(w) ? h0 : _overflow_logH(m, age), components, weights)
         smallest = minimum(logH)
         return map((w, h) -> h == smallest ? w : zero(w), weights, logH)
     end
@@ -236,7 +262,7 @@ _overflow_interval(m::Makeham2, from, to) = cumhazard(m, from, to)
 function cumhazard(m::Union{Carriere1,Carriere2}, from, to)
     _check_nonnegative_age(from)
     _check_nonnegative_age(to)
-    from == to && return zero(float(from + to + m.p₁))
+    (_isconstantzero(to - from) || from == to == Inf) && return zero(float(from + to + m.p₁))
     to < from && return -cumhazard(m, to, from)
     weights = _carriere_weights(m)
     components = _carriere_components(m)
@@ -244,7 +270,7 @@ function cumhazard(m::Union{Carriere1,Carriere2}, from, to)
         masses = _mixture_masses(components, weights, from)
         posterior = map(w -> w / sum(masses), masses)
         H = map(components, posterior) do component, weight
-            iszero(weight) ? oftype(float(from + weight), Inf) : _overflow_interval(component, from, to)
+            _isconstantzero(weight) ? oftype(float(from + weight), Inf) : _overflow_interval(component, from, to)
         end
         return _mixture_cumhazard(H, posterior)
     end
@@ -265,12 +291,12 @@ function hazard(m::Union{Carriere1,Carriere2}, age)
         # Among these components the slowest-decaying survival also has the
         # smallest limiting hazard (0, an exponential rate, or Inf).
         return minimum(map(components, weights) do component, weight
-            iszero(weight) ? oftype(float(age + weight), Inf) : hazard(component, age)
+            _isconstantzero(weight) ? oftype(float(age + weight), Inf) : hazard(component, age)
         end)
     end
     masses = _mixture_masses(components, weights, age)
     total = sum(masses)
     return sum(map(components, masses) do component, mass
-        iszero(mass) ? zero(total) : (mass / total) * hazard(component, age)
+        _isconstantzero(mass) ? zero(total) : (mass / total) * hazard(component, age)
     end)
 end

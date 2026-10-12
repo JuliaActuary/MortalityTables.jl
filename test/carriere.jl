@@ -50,10 +50,43 @@ using ForwardDiff
         end
     end
 
+    @testset "empty-interval derivatives" begin
+        for m in (K.Makeham2(), K.Gompertz2(), K.Carriere1(p1 = 0, p2 = 0), K.Carriere2(p1 = 0, p2 = 0)),
+            age in (10.0, 60.0, 100.0, 1000.0), direction in (-1, 1)
+            @test ForwardDiff.derivative(t -> cumhazard(m, age, age + direction * t), 0.0) ≈
+                  direction * hazard(m, age) rtol = 2e-13
+            @test ForwardDiff.derivative(t -> cumhazard(m, age + direction * t, age), 0.0) ≈
+                  -direction * hazard(m, age) rtol = 2e-13
+        end
+        # The exponential overflows, but dividing by σ leaves a finite force.
+        m = K.Makeham2(μ = 0.0, σ = 10.0)
+        age = 7100.0
+        ref = setprecision(() -> exp(big(710)) / 10, BigFloat, 1024)
+        @test isfinite(hazard(m, age))
+        @test ForwardDiff.derivative(t -> cumhazard(m, age, age + t), 0.0) ≈ ref rtol = 2e-13
+        @test cumhazard(m, age, age) == 0
+        for m in (K.Gompertz2(μ = 1000.0, σ = 1.0), K.Gompertz2(μ = 710.0, σ = 1.0))
+            @test ForwardDiff.derivative(t -> cumhazard(m, 0.0, t), 0.0) == hazard(m, 0.0)
+        end
+        for m in (K.Makeham2(), K.Gompertz2(), K.Carriere1(), K.Carriere2())
+            @test cumhazard(m, Inf, Inf) == 0
+        end
+        # An infinite force or an underflowed force can still give a finite integral.
+        for (m, a, b) in ((K.Gompertz2(μ = 0.0, σ = 1e-308), 0.0, 1e-308),
+                          (K.Gompertz2(μ = 8e102, σ = 1e100), 0.0, 1e102),
+                          (K.Gompertz2(μ = 5.5e301, σ = 1e300), 0.0, 5e299),
+                          (K.Gompertz2(μ = 1.0, σ = 1e-308), 0.0, 1.0))
+            ref = setprecision(BigFloat, 1024) do
+                exp((big(b) - m.μ) / m.σ) * -expm1(-(big(b) - a) / m.σ)
+            end
+            @test cumhazard(m, a, b) ≈ ref rtol = 2e-13
+        end
+    end
+
     @testset "independent MortalityLaws component fixtures" begin
         # These stored R fixtures predate this implementation. Combine the independently
         # computed component S and h values, not carriere*.json: those contain finite
-        # differences, and carriere1 also uses sigma1 for its inverse-Weibull component.
+        # differences, and the old carriere1 fixture uses sigma1 for its inverse-Weibull component.
         # The explicit parameters below match each fixture's par/param_names metadata.
         fixture(name) = JSON.parsefile(joinpath(@__DIR__, "data", "parametric", name * ".json"))
         wei, iw, ig, gom = map(fixture, ("weibull", "invweibull", "invgompertz", "gompertz0"))
@@ -66,6 +99,42 @@ using ForwardDiff
             @test survival(m, age) ≈ S rtol = 2e-13
             @test cumhazard(m, age) ≈ -log(S) rtol = 2e-13
             @test hazard(m, age) ≈ h rtol = 2e-13
+        end
+    end
+
+    @testset "parameter derivatives on simplex boundaries" begin
+        for L in (K.Carriere1, K.Carriere2), weights in ([1.0, 0.0], [0.0, 1.0], [0.5, 0.5], [0.0, 0.0])
+            m = L()
+            components = K._carriere_components(m)
+            S = [survival(component, 40.0) for component in components]
+            h = [hazard(component, 40.0) for component in components]
+            w = [weights; 1 - sum(weights)]
+            total = sum(w .* S)
+            numerator = sum(w .* S .* h)
+            dS = S[1:2] .- S[3]
+            dN = (S .* h)[1:2] .- S[3] * h[3]
+            H(p) = cumhazard(L(p1 = p[1], p2 = p[2]), 40.0)
+            f(p) = hazard(L(p1 = p[1], p2 = p[2]), 40.0)
+            @test ForwardDiff.gradient(H, weights) ≈ -dS / total rtol = 1e-12
+            @test ForwardDiff.gradient(f, weights) ≈ (dN * total - numerator * dS) / total^2 rtol = 1e-12
+            @test ForwardDiff.hessian(H, weights) ≈ dS * dS' / total^2 rtol = 1e-12
+            @test ForwardDiff.derivative(t -> H(weights .- t), 0.0) ≈ sum(dS) / total rtol = 1e-12
+        end
+        # Strictly positive parameters still reject a zero value with a positive seed;
+        # nonnegative ones accept a zero value with either seed sign.
+        D = ForwardDiff.Dual{Nothing}
+        @test ForwardDiff.derivative(c -> cumhazard(K.Makeham2(c = c), 10.0, 12.0), 0.0) ≈ 2
+        for seed in (-1.0, 1.0)
+            @test ForwardDiff.partials(K.Makeham2(c = D(0.0, seed)).c)[1] == seed
+            @test ForwardDiff.derivative(t -> hazard(K.Gompertz2(), -t), 0.0) ≈
+                  -hazard(K.Gompertz2(), 0.0) / K.Gompertz2().σ
+            @test_throws ArgumentError K.Makeham2(σ = D(0.0, seed))
+            @test_throws ArgumentError K.Makeham2(c = D(-0.01, seed))
+            for L in (K.Carriere1, K.Carriere2)
+                @test_throws ArgumentError L(p1 = D(-0.01, seed))
+                @test_throws ArgumentError L(p1 = D(0.6, seed), p2 = 0.5)
+                @test_throws ArgumentError L(σ₁ = D(0.0, seed))
+            end
         end
     end
 

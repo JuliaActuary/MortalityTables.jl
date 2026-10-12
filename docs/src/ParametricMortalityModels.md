@@ -84,6 +84,12 @@ Carrière weights must be nonnegative and sum to at most one for the first two c
 
 At age zero, an active Weibull component with `μ₁ < σ₁` gives an infinite hazard, while survival is exactly one and cumulative hazard is zero. This singularity is integrable. The default `Carriere1` also has an infinite mean lifetime because its inverse-Weibull component has `μ₂/σ₂ ≤ 1`; use parameters with `μ₂/σ₂ > 1` or set `p₂ = 0` when a finite mean is needed. `Carriere2` has a finite mean for all allowed parameters.
 
+The defaults are inherited from MortalityLaws and are examples rather than a calibrated mortality table. In particular, the default `Carriere1` hazard declines sharply at old ages as inverse-Weibull survivors dominate.
+
+`Carriere1` uses `σ₂` for the inverse-Weibull component. Older MortalityLaws implementations used `σ₁` and ignored `σ₂`, before the [v2.3.0 development correction](https://github.com/mpascariu/MortalityLaws/commit/8f13abb1417cc22aec01b82848eea689bf01f048). Parameters fitted with that older formula generally need refitting. MortalityLaws' reported hazards are finite differences of cumulative hazard; `hazard` here is the instantaneous force.
+
+The zero-age limits above apply to ordinary numeric ages. ForwardDiff age derivatives at exactly zero remain unsupported for `InverseWeibull` and mixtures containing it: they can return `NaN` even when the right-hand limit is finite.
+
 ## Available Models
 
 These models are subtypes of `ParametricMortality`:

@@ -3,7 +3,10 @@
 ## Unreleased
 
 - Added `Makeham2` and `Gompertz2` location/scale parameterizations and the `Carriere1` and `Carriere2` survival mixtures. The mixtures validate their weights, locations, and scales, compute an instantaneous hazard, and support the standard cumulative hazard, survival, and decrement interface. All new Unicode keywords have ASCII aliases.
+- `Carriere1` uses `σ₂` in its inverse-Weibull component. Older MortalityLaws implementations used `σ₁` and ignored `σ₂` (corrected upstream in the [v2.3.0 development commit](https://github.com/mpascariu/MortalityLaws/commit/8f13abb1417cc22aec01b82848eea689bf01f048)); fitted parameters from that older formula generally need refitting. MortalityLaws' reported hazards are finite differences, while this package returns the instantaneous force. The inherited defaults are examples, not a calibrated table: their hazard declines sharply at old ages and their mean lifetime is infinite.
+- Empty-interval cumulative hazards of `Makeham2`/`Gompertz2` retain their age derivatives, including where the unscaled exponential overflows but the force is finite. ForwardDiff parameter validation uses values rather than derivative seeds, allowing gradients at the Carrière weight-simplex boundaries.
 - Inverse-Weibull and inverse-Gompertz laws now evaluate their cumulative hazards and hazards stably near age zero and in distant tails. Inverse-Weibull's hazard at zero is its limit, zero, rather than `NaN`.
+- Inverse-Weibull's zero-age values above are for ordinary numeric ages. ForwardDiff age derivatives at exactly zero, including in Carrière mixtures, can still return `NaN` despite a finite right-hand limit; this pre-existing limitation is tracked in [#157](https://github.com/JuliaActuary/MortalityTables.jl/issues/157).
 
 ## v3.0.0
 
