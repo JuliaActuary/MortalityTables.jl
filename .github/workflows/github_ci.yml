@@ -1,7 +1,9 @@
 name: CI
 on:
-  - push
-  - pull_request
+  pull_request:
+  push:
+    branches: [master]
+    tags: ['*']
 jobs:
   test: # from https://github.com/simeonschaub/OptionalArgChecks.jl/blob/457488ef04ed68a37aff10af1cb3909f47a8230c/.github/workflows/ci.yml#L23-L37
     name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }}
@@ -9,8 +11,8 @@ jobs:
     strategy:
       matrix:
         version:
-          - '^1.6.0-0'
-          - 'nightly'
+          - '1.10'
+          - '1'
         os:
           - ubuntu-latest
           - macOS-latest
@@ -39,7 +41,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
         with:
-          version: '1.5'
+          version: '1'
       - run: |
           julia --project=docs -e '
             using Pkg

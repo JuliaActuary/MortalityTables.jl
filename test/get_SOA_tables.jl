@@ -3,14 +3,14 @@
     tbl = get_SOA_table(60029)
 
     @test tbl isa MortalityTable
-    @test tbl[0] == 0.10139
+    @test tbl.ultimate[0] == 0.10139
 
 
     get_SOA_table(60029)
 
     @test MortalityTables.table("Australian Life Tables 1891-1900 Female") isa MortalityTable
     @test MortalityTables.table(60029) isa MortalityTable
-    @test MortalityTables.table("Australian Life Tables 1891-1900 Female")[0] == 0.10139
+    @test MortalityTables.table("Australian Life Tables 1891-1900 Female").ultimate[0] == 0.10139
     
     # issue #69
     tbl = get_SOA_table(887)
@@ -19,4 +19,14 @@
     @test tbl isa MortalityTable 
 
     @test_throws ArgumentError get_SOA_table("hello")
+
+    # the error message should name the table that was not found
+    err = try
+        get_SOA_table("no such table")
+        nothing
+    catch e
+        e
+    end
+    @test err isa ArgumentError
+    @test occursin("no such table", err.msg)
 end

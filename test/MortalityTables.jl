@@ -3,7 +3,7 @@
     @testset "TableMetaData" begin
         @testset "whitespace management" begin
             # "2017 Loaded CSO Smoker Distinct Nonsmoker Female ALB" comes with a trailing whitespace
-            @test ~isnothing(findfirst(x -> x.name == "2017 Loaded CSO Smoker Distinct Nonsmoker Female ALB",MortalityTables.table_source_map))
+            @test ~isnothing(MortalityTables.table_source_map["2017 Loaded CSO Smoker Distinct Nonsmoker Female ALB"])
         end
     end
 
@@ -12,15 +12,20 @@
         @testset "Ultimate Only SOA table" begin
             cso1980 = MortalityTables.table("1980 CSO Basic Table – Male, ANB")
             @test cso1980.ultimate[35] ≈ 0.00118
-            @test cso1980[35] ≈ 0.00118
-            @test cso1980[35:36] ≈ [0.00118, 0.00128]
-            @test cso1980[35 + 60] ≈ 0.27302
-            @test cso1980[95] ≈ 0.27302
-            @test_throws BoundsError cso1980[125]
-            @test_throws ArgumentError survival(cso1980,10,15)
-            @test_throws ArgumentError decrement(cso1980,10,15)
+            @test cso1980.ultimate[35:36] ≈ [0.00118, 0.00128]
+            @test cso1980.ultimate[35 + 60] ≈ 0.27302
+            @test cso1980.ultimate[95] ≈ 0.27302
+            @test_throws BoundsError cso1980.ultimate[125]
+            @test_throws MethodError cso1980[35]  # tables are opaque containers
+            # rates come from `table.ultimate` or `table.select[age]`, not the table itself
+            @test_throws MethodError survival(cso1980,10,15)
+            @test_throws MethodError decrement(cso1980,10,15)
+            @test_throws MethodError survival(cso1980, 10, UniformDeaths())
+            @test_throws MethodError survival(cso1980, 10, 15, UniformDeaths())
+            @test_throws MethodError decrement(cso1980, 10, UniformDeaths())
+            @test_throws MethodError decrement(cso1980, 10, 15, UniformDeaths())
             @test omega(cso1980.ultimate) == 100
-            @test MortalityTables.ω(cso1980) == 100
+            @test MortalityTables.ω(cso1980.ultimate) == 100
         end
 
         @testset "2001 VBT" begin
@@ -37,6 +42,8 @@
             @test_throws BoundsError vbt2001.select[150]
             @test omega(vbt2001.select[20]) == 120
             @test omega(vbt2001.ultimate) == 120
+            # a select row with no leading missing keeps a Float64 element type
+            @test eltype(vbt2001.select[35]) == Float64
 
             # this tests when there are ultimate rates available
             # but no select rates for the issue age
@@ -55,6 +62,9 @@
             @test cso2001.ultimate[120] ≈ 1.0
             @test cso2001.select[85][120] ≈ 1.0
             @test ismissing(cso2001.select[15][15]) # age before table defines rates
+            # only rows with leading missing values are widened
+            @test eltype(cso2001.select[15]) == Union{Missing,Float64}
+            @test eltype(cso2001.select[35]) == Float64
             @test_throws BoundsError cso2001.select[150]
             @test_throws BoundsError cso2001.select[70][150]
             @test omega(cso2001.select[16]) == 120
@@ -141,9 +151,69 @@
 
         end
 
+        @testset "value equality" begin
+            ult_table_name = "1980 CSO Basic Table – Male, ANB"
+            cso1980_a = MortalityTables.table(ult_table_name)
+            cso1980_b = MortalityTables.table(ult_table_name)
+            @test cso1980_a == cso1980_b
 
+            select_table_name = "2001 CSO Super Preferred Select and Ultimate - Male Nonsmoker, ANB"
+            cso2001_a = MortalityTables.table(select_table_name)
+            cso2001_b = MortalityTables.table(select_table_name)
+            @test cso2001_a == cso2001_b
+        end
 
-
+        @testset "isequal and hash agree for independently built tables" begin
+            # equal tables are equal under isequal and hash alike, so they work as Dict keys
+            function check_contract(a, b)
+                @test a !== b
+                @test a == b
+                @test isequal(a, b)
+                @test hash(a) == hash(b)
+                @test length(Set([a, b])) == 1
+                @test Dict(a => 1)[b] == 1
+            end
+            # parsed twice from the same file, without the cache
+            for id in (17, 1076)
+                path = joinpath(soa_tbl_dir, "t$id.xml")
+                check_contract(MortalityTables._read_xtbml(path), MortalityTables._read_xtbml(path))
+            end
+            # built from separate, equal vectors (one a range, one a Vector, with missing rates)
+            # and separately built metadata
+            md() = TableMetaData(name = string("My ", "Table"), comments = string("Rates"))
+            ult_a = UltimateMortality(0.1:0.1:1.0, start_age = 5)
+            ult_b = UltimateMortality(collect(0.1:0.1:1.0), start_age = 5)
+            check_contract(MortalityTable(ult_a, metadata = md()), MortalityTable(ult_b, metadata = md()))
+            sel(ult) = SelectMortality([missing 0.02 0.03; 0.04 0.05 0.06], ult, start_age = 5)
+            check_contract(MortalityTable(sel(ult_a), ult_a, metadata = md()), MortalityTable(sel(ult_b), ult_b, metadata = md()))
+            # Julia 1.13's array hash assumes one-based indices for lengths 8:32767.
+            # Table hashing must work on either side of both boundaries, at any starting age.
+            for n in (0, 1, 7, 8, 9, 32767, 32768), age in (-3, 0, 1, 5)
+                rates = fill(0.01, n)
+                a = MortalityTable(UltimateMortality(rates, start_age = age))
+                b = MortalityTable(UltimateMortality(copy(rates), start_age = age))
+                check_contract(a, b)
+            end
+            # Empty axes compare equal even when their starting ages differ.
+            check_contract(
+                MortalityTable(UltimateMortality(Float64[], start_age = 0)),
+                MortalityTable(UltimateMortality(Float64[], start_age = 5))
+            )
+            # A select table has offset arrays at both levels, with missing issue ages allowed.
+            # Equal contents can have different storage and numeric element types.
+            rates = Union{Missing, Float64}[0.0, 0.125, missing, NaN, -0.0, 0.5, 1.0, 0.75]
+            ult_c = UltimateMortality(view(rates, :), start_age = 5)
+            ult_d = UltimateMortality(map(x -> ismissing(x) ? missing : Float32(x), rates), start_age = 5)
+            check_contract(MortalityTable(ult_c), MortalityTable(ult_d))
+            select_rows(ult) = MortalityTables.OffsetArray(
+                [age == 7 ? missing : UltimateMortality(ult[age:end], start_age = age) for age in 5:12], 5:12
+            )
+            check_contract(MortalityTable(select_rows(ult_c), ult_c), MortalityTable(select_rows(ult_d), ult_d))
+            # different rates, ages or metadata are different tables
+            @test MortalityTable(ult_a) != MortalityTable(UltimateMortality(0.1:0.1:1.0, start_age = 6))
+            @test MortalityTable(ult_a) != MortalityTable(ult_a, metadata = md())
+            @test MortalityTable(ult_a) != MortalityTable(sel(ult_a), ult_a)
+        end
 
     end
 end

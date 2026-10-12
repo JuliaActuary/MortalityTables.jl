@@ -1,46 +1,43 @@
 module MortalityTables
 using OffsetArrays
-using Parsers
 using QuadGK
-using Requires
 import StringDistances
-using UnPack
-using XMLDict
-using Pkg.Artifacts
+using XML
+using Artifacts
 
 include("table_source_map.jl")
 include("MetaData.jl")
 include("death_distribution.jl")
 include("MortalityTable.jl")
+include("age_basis.jl")
+include("dukes_macdonald.jl")
+include("labeled_tables.jl")
 include("XTbML.jl")
 include("get_SOA_table.jl")
+include("parametric_interface.jl")
+include("parametric_kernels.jl")
 include("parameterized_models.jl")
+include("ratio_laws.jl")
 include("life_expectancy.jl")
-
-table_dirs = Dict(
-    "mort.soa.org" => artifact"mort.soa.org",
-) 
 
 export MortalityTable,
     survival,
     decrement,
-    life_expectancy,
+    curtate_life_expectancy,
+    complete_life_expectancy,
     omega,
     TableMetaData,
     SelectMortality,
     UltimateMortality,
     Balducci,
-    Uniform,
-    Constant,
+    UniformDeaths,
+    ConstantForce,
     DeathDistribution,
     get_SOA_table,
-    Makeham, Gompertz, MakehamGompertz,
-    hazard,cumhazard,
-    mortality_vector
-
-# lazy load part of the package
-function __init__()
-    @require CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b" include("CSV.jl")
-end
+    Makeham, Gompertz,
+    hazard, cumhazard,
+    mortality_vector,
+    age_nearest_to_age_last,
+    age_last_to_age_nearest
 
 end # module

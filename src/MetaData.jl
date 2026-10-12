@@ -11,7 +11,7 @@ Has the following fields, which default to `nothing` if not specified with a key
 - `comments`
 - `source_path`
 
-When you call a `MortalityTable` interactively, it will nicely print this summary infomration.
+When you call a `MortalityTable` interactively, it will nicely print this summary information.
 
 # Example content from mort.SOA.org:
 
@@ -43,3 +43,9 @@ Base.@kwdef struct TableMetaData
     comments::Union{Nothing,String} = nothing
     source_path::Union{Nothing,String} = nothing
 end
+
+# A metadata value as a table file gives it (XTbML and CSV alike): `nothing` when the file has no
+# such field, otherwise its text without surrounding whitespace, "" when the field is blank (an
+# empty XTbML element, or a `missing` CSV cell).
+_metadata_text(::Nothing) = nothing
+_metadata_text(value) = String(strip(coalesce(value, "")))

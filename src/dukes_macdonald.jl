@@ -1,0 +1,61 @@
+# The point-in-scale rate (issue age `issue_age`, now `attained_age`) and the
+# select rate for a life newly selected at `attained_age`, read from a table.
+_point_in_scale_and_select(table, issue_age, attained_age) =
+    (table.select[issue_age][attained_age], table.select[attained_age][attained_age])
+
+"""
+  dukes_macdonald1(point_in_scale, select_rate, base_lapses, total_lapses, effectiveness)
+
+  dukes_macdonald1(selectultimate, issue_age, attained_age, base_lapses, total_lapses, effectiveness)
+
+Two methods are available, one takes the point_in_scale and select_rate directly. See https://www.soa.org/globalassets/assets/library/newsletters/product-development-news/2003/july/pdn-2003-iss56-doll-a.pdf for information on terminology. 
+The other method takes a SelectUltimateTable from MortalityTables.jl and calculates the point_in_scale and select_rate from the table.
+"""
+function dukes_macdonald1(point_in_scale, select_rate, base_lapses, total_lapses, effectiveness)
+  excess_lapses = total_lapses - base_lapses
+  select_excess_lapses = effectiveness * excess_lapses
+  not_lapses = 1 - total_lapses
+  deteriorated_rate = (point_in_scale * (select_excess_lapses + not_lapses) - select_excess_lapses * select_rate) / not_lapses
+  return deteriorated_rate
+end
+
+dukes_macdonald1(table, issue_age, attained_age, base_lapses, total_lapses, effectiveness) =
+  dukes_macdonald1(_point_in_scale_and_select(table, issue_age, attained_age)..., base_lapses, total_lapses, effectiveness)
+
+"""
+  dukes_macdonald2(point_in_scale, select_rate, base_lapses, total_lapses, effectiveness)
+  
+  dukes_macdonald2(selectultimate, issue_age, attained_age, base_lapses, total_lapses, effectiveness)
+
+Two methods are available, one takes the point_in_scale and select_rate directly. See https://www.soa.org/globalassets/assets/library/newsletters/product-development-news/2003/july/pdn-2003-iss56-doll-a.pdf for information on terminology. 
+The other method takes a SelectUltimateTable from MortalityTables.jl and calculates the point_in_scale and select_rate from the table.
+"""
+function dukes_macdonald2(point_in_scale, select_rate, base_lapses, total_lapses, effectiveness)
+  excess_lapses = total_lapses - base_lapses
+  select_excess_lapses = effectiveness * excess_lapses
+  nonselect_excess_lapses = excess_lapses - select_excess_lapses
+  not_lapses = 1 - total_lapses
+  deteriorated_rate = (point_in_scale * (not_lapses + excess_lapses) - select_excess_lapses * select_rate) / (nonselect_excess_lapses + not_lapses)
+  return deteriorated_rate
+end
+
+dukes_macdonald2(table, issue_age, attained_age, base_lapses, total_lapses, effectiveness) =
+  dukes_macdonald2(_point_in_scale_and_select(table, issue_age, attained_age)..., base_lapses, total_lapses, effectiveness)
+
+"""
+  dukes_macdonald3(point_in_scale, select_rate, base_lapses, total_lapses, effectiveness)
+  
+  dukes_macdonald3(selectultimate, issue_age, attained_age, base_lapses, total_lapses, effectiveness)
+
+Two methods are available, one takes the point_in_scale and select_rate directly. See https://www.soa.org/globalassets/assets/library/newsletters/product-development-news/2003/july/pdn-2003-iss56-doll-a.pdf for information on terminology. 
+The other method takes a SelectUltimateTable from MortalityTables.jl and calculates the point_in_scale and select_rate from the table.
+"""
+function dukes_macdonald3(point_in_scale, select_rate, base_lapses, total_lapses, effectiveness)
+  excess_lapses = total_lapses - base_lapses
+  select_excess_lapses = effectiveness * excess_lapses
+  deteriorated_rate = (point_in_scale - select_excess_lapses * select_rate) / (1 - select_excess_lapses)
+  return deteriorated_rate
+end
+
+dukes_macdonald3(table, issue_age, attained_age, base_lapses, total_lapses, effectiveness) =
+  dukes_macdonald3(_point_in_scale_and_select(table, issue_age, attained_age)..., base_lapses, total_lapses, effectiveness)

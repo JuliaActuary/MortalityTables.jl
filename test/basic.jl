@@ -1,3 +1,7 @@
+# a type that extends only `survival` (as a downstream life model may)
+struct SurvivalOnly end
+MortalityTables.survival(::SurvivalOnly, from, to) = exp(-0.1 * (to - from))
+
 
 @testset "basic MortalityTable" begin
     @testset "basic structure" begin
@@ -13,7 +17,7 @@
         @test_throws BoundsError q2[4]
         @test q2[5] == 0
 
-        # select strucutre
+        # select structure
         s = [ia + d for ia = 0:5, d = 0:4]
 
         q3 = SelectMortality(s, q1, start_age = 0)
@@ -34,8 +38,39 @@
         mt2 = MortalityTable(q1)
 
         @test mt2.ultimate[0] == 0
-        @test mt2[0] == 0
+        @test_throws MethodError mt2[0]  # tables are opaque containers
 
+    end
+
+    @testset "_select_row" begin
+        ult = UltimateMortality([i / 100 for i = 0:100])
+
+        # (a) leading missing: the row is still indexed from the issue age
+        row = MortalityTables._select_row(15, [missing, 0.2, 0.3], ult)
+        @test firstindex(row) == 15
+        @test row[15] === missing
+        @test row[16] == 0.2
+        @test row[17] == 0.3
+        @test row[18] == ult[18]
+        @test omega(row) == 100
+        @test eltype(row) == Union{Missing,Float64}
+
+        # a row without missing keeps a Float64 element type
+        row = MortalityTables._select_row(15, [0.1, 0.2, 0.3], ult)
+        @test eltype(row) == Float64
+        @test row[15:17] == [0.1, 0.2, 0.3]
+        @test row[18:100] == ult[18:100]
+
+        # (b) select period ending exactly at omega: no ultimate tail
+        row = MortalityTables._select_row(95, fill(0.5, 6), ult)
+        @test omega(row) == 100
+        @test all(row .== 0.5)
+
+        # (c) select period extending past omega: the select rates alone
+        row = MortalityTables._select_row(95, fill(0.5, 10), ult)
+        @test omega(row) == 104
+        @test length(row) == 10
+        @test all(row .== 0.5)
     end
 
     @testset "off-aligned select and ult" begin
@@ -51,7 +86,7 @@
         end
     end
 
-    # test time zero accumlated force
+    # test time zero accumulated force
     @testset "accumulated force" begin
         q4 = UltimateMortality([0.1, 0.3, 0.6, 1])
 
@@ -70,10 +105,194 @@
         @test decrement(q4, 1, 4) ≈ 1.0
 
 
-        @test survival(q4, -1) ≈ 1.0
-        @test survival(q4, 4, -1) ≈ 1.0
-        @test decrement(q4, -1) ≈ 0.0
-        @test decrement(q4, 4, -1) ≈ 0.0
+        # the table has no rates before age 0
+        @test_throws BoundsError survival(q4, -1)
+        @test_throws BoundsError survival(q4, 4, -1)
+        @test_throws BoundsError decrement(q4, -1)
+        @test_throws BoundsError decrement(q4, 4, -1)
+    end
+
+    @testset "small decrements keep their precision" begin
+        q = UltimateMortality([1e-18, 1e-6, 0.3, 0.0, 1.0])
+        # 1 - (1 - q) rounds 1e-18 to zero and 1e-6 to about 11 correct digits
+        @test decrement(q, 0, 1) == 1e-18
+        @test decrement(q, 1, 2) == 1e-6
+        @test decrement(q, 0, 2) == 1.0000000000009999e-6   # 1e-18 + 1e-6 - 1e-24
+        @test decrement(q, 0, 3) ≈ 1 - survival(q, 0, 3)
+        # against a high-precision table, whole and fractional ages
+        qbig = UltimateMortality(big.([1e-18, 1e-6, 0.3, 0.0, 1.0]))
+        for dd in (UniformDeaths(), Balducci(), ConstantForce()), (a, b) in ((0.25, 0.75), (0.5, 1.5), (0.0, 1.25), (1.1, 1.9), (0.3, 2.6))
+            @test decrement(q, a, b, dd) ≈ Float64(decrement(qbig, big(a), big(b), dd)) rtol = 1e-13
+            @test decrement(q, a, b, dd) ≈ 1 - survival(q, a, b, dd) atol = 1e-15
+        end
+        @test decrement(q, 0.25, 0.75, ConstantForce()) > 0   # not rounded away
+        @test decrement(q, 1, 2, UniformDeaths()) == 1e-6
+
+        # terminal rates: q = 0 contributes nothing, q = 1 exhausts survival
+        @test decrement(q, 3, 4) == 0.0
+        @test survival(q, 3, 4) == 1.0
+        @test decrement(q, 4, 5) == 1.0
+        @test survival(q, 4, 5) == 0.0
+        @test decrement(q, 2, 5) == 1.0
+        for dd in (UniformDeaths(), Balducci(), ConstantForce())
+            # equal endpoints are exactly the identity, even at a rate of one
+            for a in (2.0, 3.5, 4.0, 4.5)
+                @test survival(q, a, a, dd) == 1.0
+                @test decrement(q, a, a, dd) == 0.0
+            end
+            # a piece starting at a birthday, and one ending at the next birthday
+            @test decrement(q, 2, 2.5, dd) ≈ 1 - survival(q, 2, 2.5, dd)
+            @test decrement(q, 2.5, 3, dd) ≈ 1 - survival(q, 2.5, 3, dd)
+            @test decrement(q, 4.0, 4.5, dd) == (dd isa UniformDeaths ? 0.5 : 1.0)
+            @test decrement(q, 3.25, 3.75, dd) == 0.0
+        end
+        # UniformDeaths and Balducci agree with q at s = 0, t = 1 of the year
+        for dd in (UniformDeaths(), Balducci())
+            @test MortalityTables.decrement_partial_year(q, 2, 3, dd) == 0.3
+            @test decrement(q, 2.0, 3.0, dd) == 0.3
+        end
+        # under UniformDeaths, a rate of one leaves positive survival inside the year
+        @test survival(q, 4.0, 4.5, UniformDeaths()) == 0.5
+        # beyond a rate of one under ConstantForce or Balducci there is no survival to condition on:
+        # the formulas are evaluated as written and stay finite
+        for dd in (Balducci(), ConstantForce())
+            @test survival(q, 4.0, 4.3, dd) == 0.0
+            @test isfinite(survival(q, 4.3, 4.6, dd))
+            @test isfinite(decrement(q, 4.3, 4.6, dd))
+        end
+        @test survival(q, 4.3, 4.6, Balducci()) ≈ 0.5   # (1 - (1 - s)q) / (1 - (1 - t)q) at q = 1
+    end
+
+    @testset "results take the rates' numeric type, empty intervals included" begin
+        q64 = UltimateMortality([0.1, 0.3, 1.0])
+        q32 = UltimateMortality(Float32[0.1, 0.3, 1.0])
+        qbig = UltimateMortality(big.([0.1, 0.3, 1.0]))
+        for (q, T) in ((q64, Float64), (q32, Float32), (qbig, BigFloat))
+            # whole ages: the rates' type
+            @test survival(q, 1, 1) isa T
+            @test survival(q, 1, 1) == 1
+            @test survival(q, 0, 2) isa T
+            @test survival(q, 2, 0) isa T
+            @test decrement(q, 1, 1) isa T
+            @test decrement(q, 1, 1) == 0
+            @test decrement(q, 0, 2) isa T
+            @test decrement(q, 2, 0) isa T
+            @test curtate_life_expectancy(q, 2) isa T
+            @test curtate_life_expectancy(q, 2) == 0
+            @test curtate_life_expectancy(q, 0) isa T
+            @test curtate_life_expectancy(q, 0) ≈ 0.9 + 0.9 * 0.7
+            # fractional ages promote with the ages' type
+            S = promote_type(T, Float64)
+            for dd in (UniformDeaths(), Balducci(), ConstantForce())
+                @test survival(q, 0.5, 0.5, dd) isa S
+                @test survival(q, 0.5, 1.5, dd) isa S
+                @test decrement(q, 0.5, 0.5, dd) isa S
+                @test decrement(q, 0.5, 1.5, dd) isa S
+            end
+            @test complete_life_expectancy(q, 2, UniformDeaths()) isa S
+            @test complete_life_expectancy(q, 2, UniformDeaths()) == 0
+            @test complete_life_expectancy(q, 0, UniformDeaths()) isa S
+        end
+        # Float32 rates and Float32 ages stay Float32
+        @test survival(q32, 0.5f0, 1.5f0, UniformDeaths()) isa Float32
+        @test decrement(q32, 0.5f0, 1.5f0, ConstantForce()) isa Float32
+        # rates that admit `missing` (a select row with a gap) are typed by their numbers
+        row = MortalityTables._select_row(0, [missing, 0.2], q64)
+        @test survival(row, 1, 1) isa Float64
+        @test survival(row, 1, 1) == 1
+        @test survival(row, 1, 2) ≈ 0.8
+        @test decrement(row, 1, 1) === 0.0
+        # a missing rate at the last age is never used: the expectancy there is zero, and one
+        # year earlier it is the survival to the last age
+        gap = UltimateMortality([0.1, missing])
+        @test curtate_life_expectancy(gap, 1) === 0.0
+        @test curtate_life_expectancy(gap, 0) ≈ 0.9
+        # a missing rate that is used propagates
+        @test ismissing(curtate_life_expectancy(UltimateMortality([missing, 0.2, 0.3]), 0))
+        # an element type that doesn't name the rates' numbers gives Float64 identities, as
+        # before v3, and nonempty results take the type of the rates' arithmetic
+        for v in (Any[0.1, 0.2], Real[0.1, 0.2])
+            qa = UltimateMortality(v)
+            @test survival(qa, 0, 1) ≈ 0.9
+            @test survival(qa, 0, 2) ≈ 0.9 * 0.8
+            @test decrement(qa, 0, 2) ≈ 1 - 0.9 * 0.8
+            @test survival(qa, 1, 1) === 1.0
+            @test decrement(qa, 1, 1) === 0.0
+            @test survival(qa, 0.5, 1.5, UniformDeaths()) ≈ (1 - 0.05 / 0.95) * 0.9 rtol = 1e-15
+            @test curtate_life_expectancy(qa, 0) ≈ 0.9
+            @test curtate_life_expectancy(qa, 1) === 0.0
+        end
+        @test survival(UltimateMortality(Any[big"0.1", big"0.2"]), 0, 2) isa BigFloat
+        # a column with no rates propagates `missing`; an empty interval is the identity
+        qm = UltimateMortality([missing])
+        @test ismissing(survival(qm, 0, 1))
+        @test ismissing(decrement(qm, 0, 1))
+        @test survival(qm, 0, 0) === 1.0
+        @test decrement(qm, 0, 0) === 0.0
+        # concretely typed tables keep their own type
+        @test survival(UltimateMortality(Float32[0.1, 0.2]), 1, 1) === 1.0f0
+        @test survival(UltimateMortality(BigFloat[0.1, 0.2]), 1, 1) isa BigFloat
+    end
+
+    @testset "a type that defines only survival has the complementary decrement" begin
+        @test decrement(SurvivalOnly(), 0, 2) == 1 - exp(-0.2)
+        @test decrement(SurvivalOnly(), 2, 0) == 1 - exp(0.2)
+        # without a survival method the natural error remains
+        @test_throws MethodError decrement(:not_a_table, 0, 1)
+    end
+
+    @testset "reversed intervals are reverse factors" begin
+        q4 = UltimateMortality([0.1, 0.3, 0.6, 1])
+        # the inverse of the forward survival, and its decrement 1 - 1/S is negative
+        @test survival(q4, 2, 0) ≈ 1 / (0.9 * 0.7)
+        @test decrement(q4, 2, 0) ≈ 1 - 1 / (0.9 * 0.7)
+        @test decrement(q4, 2, 0) < 0
+        @test survival(q4, 1, 0) * survival(q4, 0, 1) ≈ 1
+        # a zero forward survival has no finite inverse
+        @test survival(q4, 4, 0) == Inf
+        for dd in (UniformDeaths(), Balducci(), ConstantForce())
+            @test survival(q4, 2.5, 0.25, dd) ≈ 1 / survival(q4, 0.25, 2.5, dd)
+            @test survival(q4, 1.75, 1.25, dd) ≈ 1 / survival(q4, 1.25, 1.75, dd)   # within one year
+            @test decrement(q4, 2.5, 0.25, dd) ≈ 1 - 1 / survival(q4, 0.25, 2.5, dd)
+        end
+
+        # survival composes over any three ages, whatever their order
+        ult = UltimateMortality([0.01 * k for k in 1:20], start_age = 40)
+        row = MortalityTables._select_row(40, [0.005, 0.02, 0.07], ult)
+        for v in (ult, row), dd in (UniformDeaths(), Balducci(), ConstantForce())
+            ages = (40.0, 40.3, 41.0, 42.5, 43.75, 45.0)
+            for a in ages, b in ages, c in ages
+                @test survival(v, a, c, dd) ≈ survival(v, a, b, dd) * survival(v, b, c, dd)
+            end
+            for a in 40:45, b in 40:45
+                @test survival(v, a, b) * survival(v, b, a) ≈ 1
+            end
+        end
+
+        # The reverse decrement -d/S keeps its precision both where the forward decrement is tiny
+        # and where the forward survival is tiny but representable (d rounds to one there, so
+        # rebuilding S as 1 - d would give -Inf). The exact value here is 1 - 2^60.
+        half = UltimateMortality(fill(0.5, 60))
+        @test survival(half, 0, 60) == 2.0^-60
+        @test decrement(half, 60, 0) == Float64(1 - big(2)^60)
+        halfbig = UltimateMortality(fill(big"0.5", 60))
+        for dd in (UniformDeaths(), Balducci(), ConstantForce()), (a, b) in ((59.5, 0.25), (60.0, 0.5), (59.75, 0.0))
+            expected = Float64(decrement(halfbig, big(a), big(b), dd))
+            @test decrement(half, a, b, dd) ≈ expected rtol = 1.0e-13
+            @test isfinite(decrement(half, a, b, dd))
+        end
+        tiny = UltimateMortality([1.0e-18, 1.0e-18, 0.1])
+        tinybig = UltimateMortality(big.([1.0e-18, 1.0e-18, 0.1]))
+        @test decrement(tiny, 2, 0) ≈ Float64(decrement(tinybig, 2, 0)) rtol = 1.0e-15
+        @test decrement(tiny, 1.5, 0.25, ConstantForce()) ≈ Float64(decrement(tinybig, big"1.5", big"0.25", ConstantForce())) rtol = 1.0e-13
+        # after a rate of one there is no forward survival, and no finite reverse factor
+        @test decrement(q4, 4, 0) == -Inf
+
+        # projecting a population backward: 1,000 lives at 45 imply the number expected at 40
+        l45 = 1000.0
+        l40 = l45 * survival(ult, 45, 40)
+        @test l40 ≈ l45 / prod(1 - ult[x] for x in 40:44)
+        @test l40 * survival(ult, 40, 45) ≈ l45
     end
 
     @testset "Metadata" begin
@@ -85,6 +304,17 @@
         @test d.name == "test"
     end
 
+    @testset "show" begin
+        # a custom table has no mort.SOA.org id, so no link should be printed
+        s = sprint(show, MIME"text/plain"(), MortalityTable(UltimateMortality([0.1, 0.2])))
+        @test !occursin("TableIdentity=nothing", s)
+        @test !occursin("mort.SOA.org ID", s)
+        @test occursin("Description", s)
+
+        s = sprint(show, MIME"text/plain"(), MortalityTable(UltimateMortality([0.1, 0.2]), metadata = TableMetaData(id = "42")))
+        @test occursin("TableIdentity=42", s)
+    end
+
     @testset "mortality_vector" begin
         v = [i for i = 3:10]
         q = mortality_vector(v, start_age = 3)
@@ -94,6 +324,41 @@
         q = mortality_vector(collect(0:5))
         @test q[0] == 0
         @test q[5] == 5
+
+        # mortality_vector is another name for UltimateMortality
+        @test mortality_vector === UltimateMortality
+    end
+
+    @testset "UltimateMortality accepts any AbstractVector" begin
+        # a range
+        r = UltimateMortality(0:0.1:1)
+        @test r[0] == 0.0
+        @test r[10] == 1.0
+
+        # a view
+        base = [0.1, 0.2, 0.3, 0.4]
+        vw = UltimateMortality(view(base, 2:4), start_age = 1)
+        @test vw[1] == 0.2
+        @test vw[3] == 0.4
+
+        # a vector containing missing (as the XTbML and CSV loaders produce)
+        mv = UltimateMortality([0.1, missing])
+        @test mv[0] == 0.1
+        @test mv[1] === missing
+
+        # no copy is made
+        q = UltimateMortality(base)
+        base[1] = 0.5
+        @test q[0] == 0.5
+
+        # start_age sets the first age whatever the input's own axes: a vector already indexed
+        # by age is re-anchored, not shifted relative to its old first age
+        for v in ([0.1, 0.2], view([0.0, 0.1, 0.2], 2:3), UltimateMortality([0.1, 0.2]; start_age = 40),
+                  UltimateMortality([0.1, 0.2]; start_age = -5))
+            m = UltimateMortality(v; start_age = 7)
+            @test axes(m, 1) == 7:8
+            @test m[7] == 0.1 && m[8] == 0.2
+        end
     end
 
     @testset "utility functions" begin

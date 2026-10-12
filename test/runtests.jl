@@ -2,21 +2,34 @@ using MortalityTables
 using Test
 using JSON
 using CSV
-using Pkg.Artifacts
+using QuadGK
+using Artifacts
 
 # This is the path to the Artifacts.toml we will manipulate
 MT_artifact_toml = joinpath(pkgdir(MortalityTables), "Artifacts.toml")
 soa_tbl_dir = artifact_hash("mort.soa.org", MT_artifact_toml) |> artifact_path
 
+@testset "method ambiguities" begin
+    @test isempty(Test.detect_ambiguities(MortalityTables; recursive=true))
+end
+
+@testset "every export is defined" begin
+    for n in names(MortalityTables)
+        @test isdefined(MortalityTables, n)
+    end
+end
+
 include("CSV.jl")
 include("basic.jl")
+include("age_basis.jl")
 include("XTbML.jl")
 include("parameterized_models.jl")
 include("distribution.jl")
 include("life_expectancy.jl")
+include("dukes_macdonald.jl")
 
 # load tables to be used in subsequent tests
-@test isa(MortalityTables.table(1),MortalityTables.MortalityTable)
+@test isa(MortalityTables.table(1), MortalityTables.MortalityTable)
 
 include("projection_scale.jl")
 include("MortalityTables.jl")

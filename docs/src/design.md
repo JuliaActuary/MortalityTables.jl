@@ -7,16 +7,19 @@ There are two types of MortalityTable subtypes for SOA data: `SelectUltimateTabl
 A table with both select and ultimate rates:
 
 ```@example
+using MortalityTables
 MortalityTables.table("2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB")
 ```
 
 A table with just ultimate rates:
+
 ```@example
+using MortalityTables
 MortalityTables.table("1941 CSO Basic Table, ANB")
 ```
 
 ## Motivation for the current design
-x
+
 ### Encourage data-driven design
 
 Probably best explained with an example. In the following example, we calculate the ultimate survivorship for every age in the `cso` table from above. The table itself gives us the right range of ages to do this with. No need to assume a 100 or 121 omega age and handle edge cases when working with tables that don't line up to the usual expectations.
@@ -41,17 +44,20 @@ With MortalityTables.jl, virtually transparent to the user of the package, you c
 survival(MortalityTables.Makeham(),25,50) # 25 to 50 year old survival
 ```
 
+The functions that accept either a vector of rates or a parametric model are `survival`, `decrement`, `curtate_life_expectancy`, `complete_life_expectancy`, and `omega`. A parametric model also accepts (and ignores) a `DeathDistribution` argument, since it is continuous. Its `omega` is the last age at which its law is defined: `Inf` for most laws, but finite for a law whose formula ends, such as `Wittstein` (see the `omega` docstring). Survival need not be zero there, so a projection over a parametric law needs a horizon of its own rather than a fixed age cap. Indexing is *not* interchangeable: `rates[65]` is the annual rate ``q_{65}``, whereas a model is queried with `hazard(m, 65)` (or `m(65)`) for the instantaneous force of mortality; a model cannot be indexed.
+
 ### Table metadata
 
 When you display a table, you get to see related metadata, which can be lost if simply parsing into a matrix or dataframe:
 
 ```@example
+using MortalityTables
 MortalityTables.table("2001 VBT Residual Standard Select and Ultimate - Male Nonsmoker, ANB")
 ```
 
 ### Partial Year assumptions
 
-Built in are partial year assumptions, making it easy to use more realistic assumptions like Uniform death distribution. The types `Balducci()`, `Uniform()`, and `Constant()` are used to dispatch to the appropriate function without any runtime overhead.
+Built in are partial year assumptions, making it easy to use more realistic assumptions like a uniform distribution of deaths. The types `Balducci()`, `UniformDeaths()`, and `ConstantForce()` are used to dispatch to the appropriate function without any runtime overhead.
 
 ## Where MortalityTables.jl falls short
 

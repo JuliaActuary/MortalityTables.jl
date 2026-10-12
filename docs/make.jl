@@ -14,11 +14,11 @@ makedocs(;
         ],
         "Reference" => "Reference.md",
     ],
-    repo="https://github.com/JuliaActuary/MortalityTables.jl/blob/{commit}{path}#L{line}",
+    repo=Remotes.GitHub("JuliaActuary", "MortalityTables.jl"),
     sitename="MortalityTables.jl",
-    authors="Alec Loudenback",
+    authors="Alec Loudenback"
 )
 
 deploydocs(;
-    repo="github.com/JuliaActuary/MortalityTables.jl",
+    repo="github.com/JuliaActuary/MortalityTables.jl"
 )
