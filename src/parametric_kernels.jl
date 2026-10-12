@@ -3,9 +3,6 @@
 # The ForwardDiff extension recursively unwraps dual numbers for domain checks.
 _primal(x::Real) = x
 
-# An algebraic zero, including all derivative coefficients when AD is active.
-_isconstantzero(x::Real) = iszero(x)
-
 # expm1(x)/x and log1p(x)/x, both 1 at x = 0: smooth there, so the closed forms below keep
 # their zero-growth limits (and derivatives) instead of evaluating 0/0. They are used only
 # near b·age = 0: at large |b·age| and infinite ages the factored forms would evaluate
@@ -15,7 +12,7 @@ _log1pdivx(x) = abs(x) < 1e-5 ? 1 - x / 2 + x^2 / 3 - x^3 / 4 : log1p(x) / x
 
 # k·age, which is 0 for k = 0 even at an infinite age: a law's zero coefficient contributes
 # nothing there (b = 0 is a constant hazard, c = 0 the Gompertz law).
-_times_age(k, age) = _isconstantzero(k) ? zero(k * age) : k * age
+_times_age(k, age) = iszero(k) ? zero(k * age) : k * age
 
 # a / (e + a·c) for e > 0 and c ≥ 0, the form the ratio laws take once divided through by their
 # exponential. Where a·c ≤ e it is evaluated as written: smooth in a at a = 0, and its derivative

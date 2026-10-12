@@ -20,7 +20,7 @@ MortalityTablesForwardDiffExt = "ForwardDiff"
 
 [compat]
 CSV = "0.10"
-ForwardDiff = "0.10, 1"
+ForwardDiff = "1"
 OffsetArrays = "1.0"
 QuadGK = "^2.3"
 StringDistances = "^0.11"

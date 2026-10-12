@@ -69,7 +69,7 @@ function cumhazard(m::Makeham2, from, to)
         # Keep a subnormal force from losing digits before a large width rescales
         # it, while preserving the local derivatives in the small-growth tail.
         exp((from - m.μ) / m.σ) * t * _exprel(t)
-    elseif _isconstantzero(Δ)
+    elseif iszero(Δ)
         zero(t)
     else
         # The force itself can under/overflow while its integral is representable.
@@ -123,8 +123,10 @@ MortalityLaws also reports finite differences of cumulative hazard, whereas
 `hazard` here is the instantaneous force.
 
 The zero-age limits above apply to ordinary numeric ages. ForwardDiff age
-derivatives at exactly zero remain unsupported for `InverseWeibull` and mixtures
-containing it; they can return `NaN` even when the right-hand limit is finite.
+derivatives at exactly zero are not reliable for `InverseWeibull` or the Carrière
+mixtures. They can return `NaN` where the right-hand derivative is finite, or
+where it is `+Inf` because of a singular Weibull component (as in both mixtures'
+defaults, including `Carriere2`, which has no inverse-Weibull component).
 
 ASCII aliases are `p1`, `p2`, `mu1` to `mu3`, and `sigma1` to `sigma3`.
 Passing both spellings of a keyword is an `ArgumentError`.
@@ -201,12 +203,12 @@ _carriere_weights(m) = (m.p₁, m.p₂, 1 - (m.p₁ + m.p₂))
 
 # Testing for a weight equal to one alone is insufficient: 1 - a tiny positive
 # weight can round to one while that tiny component still contributes mortality.
-_sole_component(weights) = count(!_isconstantzero, weights) == 1 ? findfirst(!_isconstantzero, weights) : nothing
+_sole_component(weights) = count(!iszero, weights) == 1 ? findfirst(!iszero, weights) : nothing
 
 function _mixture_cumhazards(components, weights, age)
     # Ignore inactive components, including singularities and exhausted survival.
     return map(components, weights) do component, weight
-        _isconstantzero(weight) ? oftype(float(age + weight), Inf) : cumhazard(component, age)
+        iszero(weight) ? oftype(float(age + weight), Inf) : cumhazard(component, age)
     end
 end
 
@@ -239,7 +241,7 @@ function _mixture_masses(components, weights, age)
     H = _mixture_cumhazards(components, weights, age)
     h0 = minimum(H)
     if isinf(h0)
-        logH = map((m, w) -> _isconstantzero(w) ? h0 : _overflow_logH(m, age), components, weights)
+        logH = map((m, w) -> iszero(w) ? h0 : _overflow_logH(m, age), components, weights)
         smallest = minimum(logH)
         return map((w, h) -> h == smallest ? w : zero(w), weights, logH)
     end
@@ -262,7 +264,7 @@ _overflow_interval(m::Makeham2, from, to) = cumhazard(m, from, to)
 function cumhazard(m::Union{Carriere1,Carriere2}, from, to)
     _check_nonnegative_age(from)
     _check_nonnegative_age(to)
-    (_isconstantzero(to - from) || from == to == Inf) && return zero(float(from + to + m.p₁))
+    (iszero(to - from) || from == to == Inf) && return zero(float(from + to + m.p₁))
     to < from && return -cumhazard(m, to, from)
     weights = _carriere_weights(m)
     components = _carriere_components(m)
@@ -270,7 +272,7 @@ function cumhazard(m::Union{Carriere1,Carriere2}, from, to)
         masses = _mixture_masses(components, weights, from)
         posterior = map(w -> w / sum(masses), masses)
         H = map(components, posterior) do component, weight
-            _isconstantzero(weight) ? oftype(float(from + weight), Inf) : _overflow_interval(component, from, to)
+            iszero(weight) ? oftype(float(from + weight), Inf) : _overflow_interval(component, from, to)
         end
         return _mixture_cumhazard(H, posterior)
     end
@@ -291,12 +293,12 @@ function hazard(m::Union{Carriere1,Carriere2}, age)
         # Among these components the slowest-decaying survival also has the
         # smallest limiting hazard (0, an exponential rate, or Inf).
         return minimum(map(components, weights) do component, weight
-            _isconstantzero(weight) ? oftype(float(age + weight), Inf) : hazard(component, age)
+            iszero(weight) ? oftype(float(age + weight), Inf) : hazard(component, age)
         end)
     end
     masses = _mixture_masses(components, weights, age)
     total = sum(masses)
     return sum(map(components, masses) do component, mass
-        _isconstantzero(mass) ? zero(total) : (mass / total) * hazard(component, age)
+        iszero(mass) ? zero(total) : (mass / total) * hazard(component, age)
     end)
 end

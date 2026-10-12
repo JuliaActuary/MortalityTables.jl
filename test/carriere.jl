@@ -126,8 +126,8 @@ using ForwardDiff
         @test ForwardDiff.derivative(c -> cumhazard(K.Makeham2(c = c), 10.0, 12.0), 0.0) ≈ 2
         for seed in (-1.0, 1.0)
             @test ForwardDiff.partials(K.Makeham2(c = D(0.0, seed)).c)[1] == seed
-            @test ForwardDiff.derivative(t -> hazard(K.Gompertz2(), -t), 0.0) ≈
-                  -hazard(K.Gompertz2(), 0.0) / K.Gompertz2().σ
+            @test ForwardDiff.derivative(t -> hazard(K.Gompertz2(), seed * t), 0.0) ≈
+                  seed * hazard(K.Gompertz2(), 0.0) / K.Gompertz2().σ
             @test_throws ArgumentError K.Makeham2(σ = D(0.0, seed))
             @test_throws ArgumentError K.Makeham2(c = D(-0.01, seed))
             for L in (K.Carriere1, K.Carriere2)

@@ -88,7 +88,7 @@ The defaults are inherited from MortalityLaws and are examples rather than a cal
 
 `Carriere1` uses `σ₂` for the inverse-Weibull component. Older MortalityLaws implementations used `σ₁` and ignored `σ₂`, before the [v2.3.0 development correction](https://github.com/mpascariu/MortalityLaws/commit/8f13abb1417cc22aec01b82848eea689bf01f048). Parameters fitted with that older formula generally need refitting. MortalityLaws' reported hazards are finite differences of cumulative hazard; `hazard` here is the instantaneous force.
 
-The zero-age limits above apply to ordinary numeric ages. ForwardDiff age derivatives at exactly zero remain unsupported for `InverseWeibull` and mixtures containing it: they can return `NaN` even when the right-hand limit is finite.
+The zero-age limits above apply to ordinary numeric ages. ForwardDiff age derivatives at exactly zero are not reliable for `InverseWeibull` or the Carrière mixtures. They can return `NaN` where the right-hand derivative is finite, or where it is `+Inf` because of a singular Weibull component. The latter affects both default mixtures, including `Carriere2`, which has no inverse-Weibull component. These cases are tracked in [#157](https://github.com/JuliaActuary/MortalityTables.jl/issues/157).
 
 ## Available Models
 
