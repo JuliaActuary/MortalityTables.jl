@@ -12,12 +12,15 @@ XML = "72c71f33-b9b6-44de-8c94-c961784809e2"
 
 [weakdeps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 
 [extensions]
 MortalityTablesCSVExt = "CSV"
+MortalityTablesForwardDiffExt = "ForwardDiff"
 
 [compat]
 CSV = "0.10"
+ForwardDiff = "1"
 OffsetArrays = "1.0"
 QuadGK = "^2.3"
 StringDistances = "^0.11"

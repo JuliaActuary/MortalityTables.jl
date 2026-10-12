@@ -6,7 +6,7 @@ using ForwardDiff
     @testset "concrete field types" begin
         # the subtypes are UnionAlls (e.g. Makeham{T}), so iterate them directly
         laws = subtypes(MortalityTables.ParametricMortality)
-        @test length(laws) == 25
+        @test length(laws) == 28
         for L in laws
             m = L()
             @test isbits(m)
@@ -419,10 +419,10 @@ using ForwardDiff
 
     @testset "MortalityLaws R package" begin
         model_tests = [(rmodel = "gompertz", juliamodel = MortalityTables.Gompertz()),
-                        # (rmodel="gompertz0",juliamodel=MortalityTables.nothing),
+                        (rmodel = "gompertz0", juliamodel = MortalityTables.Gompertz2()),
                         (rmodel = "invgompertz", juliamodel = MortalityTables.InverseGompertz()),
                         (rmodel = "makeham", juliamodel = MortalityTables.Makeham()),
-                        # (rmodel="makeham0",juliamodel=MortalityTables.nothing),
+                        (rmodel = "makeham0", juliamodel = MortalityTables.Makeham2()),
                         (rmodel = "opperman", juliamodel = MortalityTables.Opperman()),
                         (rmodel = "thiele", juliamodel = MortalityTables.Thiele()),
                         (rmodel = "wittstein", juliamodel = MortalityTables.Wittstein()),
@@ -446,9 +446,8 @@ using ForwardDiff
                         (rmodel = "kostaki", juliamodel = MortalityTables.Kostaki()),
                         (rmodel = "kannisto", juliamodel = MortalityTables.Kannisto()),
                         (rmodel = "kannisto_makeham", juliamodel = MortalityTables.KannistoMakeham())
-                        # the next two require adding an autodiff dependency:
-                        # (rmodel="carriere1",juliamodel=MortalityTables.Carriere()),
-                        # (rmodel="carriere2",juliamodel=MortalityTables.Carriere2()),
+                        # The Carrière fixtures contain finite differences, not instantaneous
+                        # hazards. Independent mixture references are in carriere.jl.
                     ]
 
 
