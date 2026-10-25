@@ -2,7 +2,7 @@ using Documenter, MortalityTables
 
 makedocs(;
     modules=[MortalityTables],
-    format=Documenter.HTML(),
+    format=Documenter.HTML(; canonical="https://docs.juliaactuary.org/MortalityTables/stable/"),
     pages=[
         "Home" => "index.md",
         "Manual" => [
